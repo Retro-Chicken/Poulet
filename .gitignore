@@ -1,0 +1,11 @@
+# build
+.gradle/
+gradle/
+build/
+
+# idea
+.idea/
+out/
+
+# eclipse
+.settings/
