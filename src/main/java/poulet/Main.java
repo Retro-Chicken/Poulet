@@ -1,8 +1,10 @@
 package poulet;
 
+import poulet.parser.ParserWrapper;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("main");
+        ParserWrapper.run();
     }
     public static boolean test() {
         return true;
