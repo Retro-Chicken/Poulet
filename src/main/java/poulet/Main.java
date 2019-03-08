@@ -1,10 +1,9 @@
 package poulet;
 
-import poulet.parser.ParserWrapper;
+import java.io.IOException;
 
 public class Main {
-    public static void main(String[] args) {
-        ParserWrapper.run();
+    public static void main(String[] args) throws IOException {
     }
     public static boolean test() {
         return true;

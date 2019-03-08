@@ -1,9 +1,14 @@
 package poulet.ast;
 
-public class Symbol {
-    String name;
+public class Symbol extends Node {
+    private String symbol;
 
-    public Symbol(String name) {
-        this.name = name;
+    public Symbol(String symbol) {
+        this.symbol = symbol;
+    }
+
+    @Override
+    public String toString() {
+        return symbol;
     }
 }

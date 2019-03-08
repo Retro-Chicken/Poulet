@@ -1,4 +1,4 @@
 package poulet.ast;
 
-public abstract class TopLevel {
+public abstract class TopLevel extends Node {
 }

@@ -10,4 +10,9 @@ public class Abstraction extends Expression {
         this.type = type;
         this.body = body;
     }
+
+    @Override
+    public String toString() {
+        return String.format("\\%s : %s -> %s", variable, type, body);
+    }
 }

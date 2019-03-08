@@ -8,4 +8,9 @@ public class Application extends Expression {
         this.function = function;
         this.argument = argument;
     }
+
+    @Override
+    public String toString() {
+        return String.format("(%s) %s", function, argument);
+    }
 }

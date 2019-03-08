@@ -1,11 +1,19 @@
 package poulet.ast;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class Program {
+public class Program extends Node {
     List<TopLevel> program;
 
     public Program(List<TopLevel> program) {
         this.program = program;
+    }
+
+    @Override
+    public String toString() {
+        return program.stream()
+                .map(Object::toString)
+                .collect(Collectors.joining("\n"));
     }
 }
