@@ -1,23 +1,39 @@
 package poulet.ast;
 
 public class Variable extends Expression {
-    Symbol type;
-    Symbol name;
+    public Symbol type;
+    public Symbol symbol;
 
-    public Variable(Symbol name) {
-        this(null, name);
+    public Variable(Symbol symbol) {
+        this(null, symbol);
     }
 
-    public Variable(Symbol type, Symbol name) {
+    public Variable(Symbol type, Symbol symbol) {
         this.type = type;
-        this.name = name;
+        this.symbol = symbol;
     }
 
     @Override
     public String toString() {
         if (type == null)
-            return name.toString();
+            return symbol.toString();
         else
-            return String.format("%s.%s", type, name);
+            return String.format("%s.%s", type, symbol);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Variable) {
+            Variable other = (Variable) obj;
+            if (type == null && other.type == null) {
+                return symbol.equals(other.symbol);
+            } else if (type != null && other.type != null) {
+                return type.equals(other.type) && symbol.equals(other.symbol);
+            } else {
+                return false;
+            }
+        }
+
+        return false;
     }
 }
