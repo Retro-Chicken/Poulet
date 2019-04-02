@@ -358,8 +358,9 @@
     <option name="LAST_EDITED_TAB_NAME" />
   </component>
   <component name="ProjectFrameBounds">
+    <option name="x" value="536" />
     <option name="y" value="-21" />
-    <option name="width" value="1366" />
+    <option name="width" value="830" />
     <option name="height" value="766" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
@@ -508,7 +509,7 @@
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
-    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.project.gradle" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
