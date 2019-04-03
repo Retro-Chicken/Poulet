@@ -52,4 +52,13 @@ public class Symbol extends Node {
 
         return false;
     }
+
+    public boolean weakEquals(Object obj) {
+        if (obj instanceof Symbol) {
+            Symbol other = (Symbol) obj;
+            return name.equals(other.name);
+        }
+
+        return false;
+    }
 }

@@ -10,6 +10,8 @@ public class Program extends Node {
         this.program = program;
     }
 
+    public Program(Program program) { this.program = List.copyOf(program.program); }
+
     @Override
     public String toString() {
         return program.stream()

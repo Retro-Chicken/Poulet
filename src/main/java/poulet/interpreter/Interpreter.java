@@ -11,6 +11,44 @@ public class Interpreter {
         this.program = program;
     }
 
+    public static Program substituteCalls(Program program) {
+        Program subProgram = new Program(program);
+        List<Definition> definitions = getDefinitions(subProgram);
+        for(int i = 0; i < definitions.size(); i++) {
+            for(int j = i - 1; j >= 0; j--) {
+                definitions.get(i).definition = substituteExpression(definitions.get(i).definition, definitions.get(j).name, definitions.get(j).definition);
+            }
+        }
+        return subProgram;
+    }
+    private static Expression substituteExpression(Expression base, Symbol name, Expression substitute) {
+        if(base instanceof Abstraction) {
+            Abstraction abstraction = (Abstraction) base;
+            return new Abstraction(abstraction.symbol, abstraction.type, substituteExpression(abstraction.body, name, substitute));
+        } else if(base instanceof Application) {
+            Application application = (Application) base;
+            return new Application(substituteExpression(application.function, name, substitute), substituteExpression(application.argument, name, substitute));
+        } else if(base instanceof Variable) {
+            Variable variable = (Variable) base;
+            if(variable.symbol.weakEquals(name))
+                return substitute;
+            else
+                return base;
+        }
+
+        return null;
+    }
+    public static List<Definition> getDefinitions(Program program) {
+        ArrayList<Definition> definitions = new ArrayList<>();
+        for (TopLevel topLevel : program.program) {
+            if (topLevel instanceof Definition) {
+                Definition definition = (Definition) topLevel;
+                definitions.add(definition);
+            }
+        }
+        return definitions;
+    }
+
     public static List<Expression> getExpressions(Program program) {
         ArrayList<Expression> expressions = new ArrayList<>();
         for (TopLevel topLevel : program.program) {

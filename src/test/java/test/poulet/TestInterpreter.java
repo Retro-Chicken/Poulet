@@ -45,4 +45,14 @@ public class TestInterpreter {
         Expression expected = new Variable(new Symbol("z"));
         assertEquals(expected, actualResult);
     }
+
+    @Test
+    void substituteFunctionCalls() {
+        Program actualProgram = ASTParser.parse(CharStreams.fromString("id : _ := \\x : _ -> x\nid2 : _ := \\x : _ -> id\n_ : _ := ((id2) w) z)"));
+        Program actualSubstitutedProgram = Interpreter.substituteCalls(actualProgram);
+        Expression actualExpression = Interpreter.getExpressions(actualSubstitutedProgram).get(2);
+        Expression actualResult = Interpreter.evaluateExpression(actualExpression);
+        Expression expected = new Variable(new Symbol("z"));
+        assertEquals(expected, actualResult);
+    }
 }
