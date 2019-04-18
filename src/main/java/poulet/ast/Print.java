@@ -7,8 +7,8 @@ public class Print extends TopLevel {
         scholiums
     }
 
-    PrintCommand command;
-    Expression expression;
+    public final PrintCommand command;
+    public final Expression expression;
 
     public Print(PrintCommand command, Expression expression) {
         this.command = command;

@@ -1,9 +1,9 @@
 package poulet.ast;
 
 public class Definition extends TopLevel {
-    public Symbol name;
-    public Expression type;
-    public Expression definition;
+    public final Symbol name;
+    public final Expression type;
+    public final Expression definition;
 
     public Definition(Symbol name, Expression type, Expression definition) {
         this.name = name;

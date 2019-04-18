@@ -1,9 +1,9 @@
 package poulet.ast;
 
 public class Abstraction extends Expression {
-    public Symbol symbol;
-    public Expression type;
-    public Expression body;
+    public final Symbol symbol;
+    public final Expression type;
+    public final Expression body;
 
     public Abstraction(Symbol symbol, Expression type, Expression body) {
         this.symbol = symbol;

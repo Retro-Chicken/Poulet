@@ -1,8 +1,8 @@
 package poulet.ast;
 
 public class Application extends Expression {
-    public Expression function;
-    public Expression argument;
+    public final Expression function;
+    public final Expression argument;
 
     public Application(Expression function, Expression argument) {
         this.function = function;

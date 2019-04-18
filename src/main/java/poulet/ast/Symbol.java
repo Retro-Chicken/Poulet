@@ -3,8 +3,8 @@ package poulet.ast;
 public class Symbol extends Node {
     private static int nextId = 0;
 
-    public String name;
-    private Integer id;
+    public final String name;
+    private final Integer id;
 
     public Symbol(String name) {
         this.name = name;
@@ -17,16 +17,13 @@ public class Symbol extends Node {
     }
 
     public Symbol bind() {
-        Symbol bound = new Symbol(name);
-        bound.id = nextId;
+        Symbol bound = new Symbol(name, nextId);
         nextId++;
         return bound;
     }
 
     public Symbol copyID(Symbol symbol) {
-        Symbol bound = new Symbol(symbol.name);
-        bound.id = symbol.id;
-        return bound;
+        return new Symbol(symbol.name, symbol.id);
     }
 
     @Override
@@ -53,12 +50,16 @@ public class Symbol extends Node {
         return false;
     }
 
-    public boolean weakEquals(Object obj) {
+    public boolean isFree() {
+        return id == null;
+    }
+
+    /*public boolean weakEquals(Object obj) {
         if (obj instanceof Symbol) {
             Symbol other = (Symbol) obj;
             return name.equals(other.name);
         }
 
         return false;
-    }
+    }*/
 }

@@ -6,6 +6,11 @@ import poulet.ast.*;
 import poulet.interpreter.Interpreter;
 import poulet.parser.ASTParser;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestInterpreter {
@@ -15,14 +20,14 @@ public class TestInterpreter {
         Expression actualExpression = Interpreter.getExpressions(actualProgram).get(0);
         Expression actualWthIDs = Interpreter.addSymbolIDs(actualExpression);
         Expression expected = new Abstraction(
-                new Symbol("x", 0),
+                new Symbol("x", 17),
                 new Variable(new Symbol("_")),
                 new Application(
-                        new Variable(new Symbol("x", 0)),
+                        new Variable(new Symbol("x", 17)),
                         new Abstraction(
-                                new Symbol("x", 1),
+                                new Symbol("x", 18),
                                 new Variable(new Symbol("_")),
-                                new Variable(new Symbol("x", 1))
+                                new Variable(new Symbol("x", 18))
                         )
                 )
         );
@@ -47,7 +52,7 @@ public class TestInterpreter {
     }
 
     @Test
-    void substituteFunctionCalls() {
+    void substituteFunctionCalls() throws Exception {
         Program actualProgram = ASTParser.parse(CharStreams.fromString("id : _ := \\x : _ -> x\nid2 : _ := \\x : _ -> id\n_ : _ := ((id2) w) z)"));
         Program actualSubstitutedProgram = Interpreter.substituteCalls(actualProgram);
         Expression actualExpression = Interpreter.getExpressions(actualSubstitutedProgram).get(2);

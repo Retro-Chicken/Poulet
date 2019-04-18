@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Program extends Node {
-    public List<TopLevel> program;
+    public final List<TopLevel> program;
 
     public Program(List<TopLevel> program) {
         this.program = program;

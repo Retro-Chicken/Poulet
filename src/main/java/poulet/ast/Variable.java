@@ -1,8 +1,8 @@
 package poulet.ast;
 
 public class Variable extends Expression {
-    public Symbol type;
-    public Symbol symbol;
+    public final Symbol type;
+    public final Symbol symbol;
 
     public Variable(Symbol symbol) {
         this(null, symbol);

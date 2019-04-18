@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class TypeDeclaration extends TopLevel {
-    Symbol name;
-    Expression type;
-    List<Constructor> constructors;
+    public final Symbol name;
+    public final Expression type;
+    public final List<Constructor> constructors;
 
     public TypeDeclaration(Symbol name, Expression type, List<Constructor> constructors) {
         this.name = name;

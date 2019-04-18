@@ -11,17 +11,55 @@ public class Interpreter {
         this.program = program;
     }
 
-    public static Program substituteCalls(Program program) {
-        Program subProgram = new Program(program);
-        List<Definition> definitions = getDefinitions(subProgram);
-        for(int i = 0; i < definitions.size(); i++) {
-            for(int j = i - 1; j >= 0; j--) {
-                definitions.get(i).definition = substituteExpression(definitions.get(i).definition, definitions.get(j).name, definitions.get(j).definition);
+    public static Program substituteCalls(Program program) throws Exception {
+        Set<Symbol> definedSymbols = new HashSet<>();
+
+        for (TopLevel topLevel : program.program) {
+            if (topLevel instanceof Definition) {
+                Definition definition = (Definition) topLevel;
+                if (definedSymbols.contains(definition.name)) {
+                    throw new Exception("symbol " + definition.name + " is defined twice");
+                }
+                definedSymbols.add(definition.name);
             }
         }
-        return subProgram;
+
+        List<TopLevel> substitutedProgram = new ArrayList<>();
+
+        for(TopLevel topLevel : program.program) {
+            if (topLevel instanceof Definition) {
+                Definition definition = (Definition) topLevel;
+                Definition substituted = new Definition(
+                        definition.name,
+                        substituteDefinitions(definition.type, new Program(substitutedProgram)),
+                        substituteDefinitions(definition.definition, new Program(substitutedProgram))
+                );
+                substitutedProgram.add(substituted);
+            } else if (topLevel instanceof Print) {
+                Print print = (Print) topLevel;
+                Print substituted = new Print(print.command, substituteDefinitions(print.expression, new Program(substitutedProgram)));
+                substitutedProgram.add(substituted);
+            } else {
+                // TODO: handle type declaration
+            }
+        }
+
+        return new Program(substitutedProgram);
     }
-    private static Expression substituteExpression(Expression base, Symbol name, Expression substitute) {
+
+    private static Expression substituteDefinitions(Expression expression, Program program) {
+        Expression substituted = expression;
+        List<Definition> definitions = getDefinitions(program);
+        for (int i = definitions.size() - 1; i >= 0; i--) {
+            if (program.program.get(i) instanceof Definition) {
+                Definition definition = definitions.get(i);
+                substituted = substitute(substituted, definition.name, definition.definition);
+            }
+        }
+        return substituted;
+    }
+
+    /*private static Expression substituteExpression(Expression base, Symbol name, Expression substitute) {
         if(base instanceof Abstraction) {
             Abstraction abstraction = (Abstraction) base;
             return new Abstraction(abstraction.symbol, abstraction.type, substituteExpression(abstraction.body, name, substitute));
@@ -37,7 +75,8 @@ public class Interpreter {
         }
 
         return null;
-    }
+    }*/
+
     public static List<Definition> getDefinitions(Program program) {
         ArrayList<Definition> definitions = new ArrayList<>();
         for (TopLevel topLevel : program.program) {
@@ -82,29 +121,35 @@ public class Interpreter {
     }
 
     private static Expression substitute(Expression expression, Symbol symbol, Expression substitution) {
+        Expression result = null;
+
         if (expression instanceof Variable) {
             Variable variable = (Variable) expression;
             if (variable.symbol.equals(symbol)) {
-                return substitution;
+                result = substitution;
             } else {
-                return expression;
+                result = expression;
             }
         } else if (expression instanceof Application) {
             Application application = (Application) expression;
             Expression function = substitute(application.function, symbol, substitution);
             Expression argument = substitute(application.argument, symbol, substitution);
-            return new Application(function, argument);
+            result = new Application(function, argument);
         } else if (expression instanceof Abstraction) {
             Abstraction abstraction = (Abstraction) expression;
             if (abstraction.symbol.equals(symbol)) {
-                return expression;
+                result = expression;
             } else {
                 Expression body = substitute(abstraction.body, symbol, substitution);
-                return new Abstraction(abstraction.symbol, abstraction.type, body);
+                result = new Abstraction(abstraction.symbol, abstraction.type, body);
             }
         }
 
-        return null;
+        // enforce unique symbol IDs
+        if (result != null)
+            addSymbolIDs(result);
+
+        return result;
     }
 
     public static Expression addSymbolIDs(Expression expression) {
