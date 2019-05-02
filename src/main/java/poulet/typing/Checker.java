@@ -2,7 +2,7 @@ package poulet.typing;
 
 import poulet.ast.*;
 
-public class Interpreter {
+public class Checker {
     public static PiType deduceType(Expression expression, Context context) {
         if(expression instanceof Abstraction) {
             Abstraction abstraction = (Abstraction) expression;
@@ -47,11 +47,11 @@ public class Interpreter {
         return null;
     }
 
-    private void checkKind(Context context, Expression type) throws TypeException {
+    public static void checkKind(Context context, Expression type) throws TypeException {
         if (type instanceof Variable) {
             Expression kindOfType = context.lookUp(((Variable) type).symbol);
             if (kindOfType instanceof Variable) {
-                if (((Variable) kindOfType).symbol.name.equals("*")) {
+                if (((Variable) kindOfType).symbol.equals(new Symbol("*"))) {
                     return;
                 }
             }
@@ -63,11 +63,67 @@ public class Interpreter {
         }
     }
 
-    private void checkType(Context context, Expression term, Expression type) {
+    public static void checkType(Context context, Expression term, Expression type) throws TypeException {
         if (term instanceof Abstraction && type instanceof PiType) {
             Abstraction abstraction = (Abstraction) term;
             PiType piType = (PiType) type;
-            context.append()
+            Context newContext = context.increment();
+            newContext = newContext.append(new Symbol(0), abstraction.type);
+            checkType(newContext, abstraction.body, piType.body);
+        } else if (term instanceof Variable) {
+            Variable variable = (Variable) term;
+            Expression variableType = context.lookUp(variable.symbol);
+
+            if (variableType == null) {
+                throw new TypeException("unknown identifier");
+            }
+
+            if (variableType.equals(type)) {
+                return;
+            }
+
+            throw new TypeException("type mismatch");
+        } else if (term instanceof Application) {
+            Application application = (Application) term;
+            Expression functionType = deduceType(context, application.function);
+            Expression argumentType = deduceType(context, application.argument);
+            Expression requiredFunctionType = new PiType(
+                    new Symbol("_"),
+                    argumentType,
+                    type
+            );
+            checkType(context, functionType, requiredFunctionType);
+        } else {
+            throw new TypeException("type mismatch");
         }
+    }
+
+    public static Expression deduceType(Context context,Expression term) throws TypeException {
+        if (term instanceof Abstraction) {
+            Abstraction abstraction = (Abstraction) term;
+            Context newContext = context.increment();
+            newContext = newContext.append(abstraction.symbol, abstraction.type);
+            Expression bodyType = deduceType(newContext, abstraction.body);
+            return new PiType(new Symbol("_"), abstraction.type, bodyType);
+        } else if (term instanceof Variable) {
+            Variable variable = (Variable) term;
+            Expression variableType = context.lookUp(variable.symbol);
+
+            if (variableType == null) {
+                throw new TypeException("unknown identifier");
+            }
+
+            return variableType;
+        } else if (term instanceof Application) {
+            Application application = (Application) term;
+            Expression bodyType = deduceType(context, application.function);
+            if (bodyType instanceof PiType) {
+                PiType piType = (PiType) bodyType;
+                checkType(context, application.argument, piType.type);
+                return piType.body;
+            }
+        }
+
+        return null;
     }
 }

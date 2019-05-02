@@ -36,6 +36,24 @@ public class Symbol extends Node {
         return false;
     }
 
+    @Override
+    public int hashCode() {
+        if (name != null)
+            return 2 * name.hashCode();
+        if (index != null)
+            return 2 * index.hashCode() + 1;
+        return 0;
+    }
+
+    /**
+     * increment index if indexed, otherwise don't change
+     */
+    public Symbol increment() {
+        if (index != null)
+            return new Symbol(index + 1);
+        return this;
+    }
+
     public boolean isFree() {
         return index == null;
     }

@@ -29,8 +29,6 @@ public class Variable extends Expression {
                 return symbol.equals(other.symbol);
             } else if (type != null && other.type != null) {
                 return type.equals(other.type) && symbol.equals(other.symbol);
-            } else {
-                return false;
             }
         }
 

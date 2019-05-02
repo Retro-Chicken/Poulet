@@ -6,11 +6,6 @@ import poulet.ast.*;
 import poulet.interpreter.Interpreter;
 import poulet.parser.ASTParser;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestInterpreter {
@@ -18,16 +13,16 @@ public class TestInterpreter {
     void testSymbolIDs() {
         Program actualProgram = ASTParser.parse(CharStreams.fromString("_ : _ := \\x : _ -> (x) \\x : _ -> x"));
         Expression actualExpression = Interpreter.getExpressions(actualProgram).get(0);
-        Expression actualWthIDs = Interpreter.addIndicies(actualExpression);
+        Expression actualWthIDs = Interpreter.addIndices(actualExpression);
         Expression expected = new Abstraction(
                 null,
                 new Variable(new Symbol("_")),
                 new Application(
-                        new Variable(new Symbol("x", 0)),
+                        new Variable(new Symbol(0)),
                         new Abstraction(
                                 null,
                                 new Variable(new Symbol("_")),
-                                new Variable(new Symbol("x", 0))
+                                new Variable(new Symbol(0))
                         )
                 )
         );
@@ -38,16 +33,16 @@ public class TestInterpreter {
     void testSymbolIDs2() {
         Program actualProgram = ASTParser.parse(CharStreams.fromString("_ : _ := \\x : _ -> (x) \\y : _ -> x"));
         Expression actualExpression = Interpreter.getExpressions(actualProgram).get(0);
-        Expression actualWthIDs = Interpreter.addIndicies(actualExpression);
+        Expression actualWthIDs = Interpreter.addIndices(actualExpression);
         Expression expected = new Abstraction(
                 null,
                 new Variable(new Symbol("_")),
                 new Application(
-                        new Variable(new Symbol("x", 0)),
+                        new Variable(new Symbol( 0)),
                         new Abstraction(
                                 null,
                                 new Variable(new Symbol("_")),
-                                new Variable(new Symbol("x", 1))
+                                new Variable(new Symbol(1))
                         )
                 )
         );

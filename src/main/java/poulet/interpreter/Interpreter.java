@@ -147,27 +147,27 @@ public class Interpreter {
 
         // enforce unique symbol IDs
         if (result != null)
-            addIndicies(result);
+            addIndices(result);
 
         return result;
     }
 
-    public static Expression addIndicies(Expression expression) {
-        return addIndicies(new Stack<>(), expression);
+    public static Expression addIndices(Expression expression) {
+        return addIndices(new Stack<>(), expression);
     }
-    private static Expression addIndicies(Stack<Symbol> stack, Expression expression) {
+    private static Expression addIndices(Stack<Symbol> stack, Expression expression) {
         if (expression instanceof Abstraction) {
             Abstraction abstraction = (Abstraction) expression;
             // need to number types later
             Stack<Symbol> newStack = new Stack<>();
             newStack.addAll(stack);
             newStack.push(abstraction.symbol);
-            Expression body = addIndicies(newStack, abstraction.body);
+            Expression body = addIndices(newStack, abstraction.body);
             return new Abstraction(null, abstraction.type, body);
         } else if (expression instanceof Application) {
             Application application = (Application) expression;
-            Expression function = addIndicies(stack, application.function);
-            Expression argument = addIndicies(stack, application.argument);
+            Expression function = addIndices(stack, application.function);
+            Expression argument = addIndices(stack, application.argument);
             return new Application(function, argument);
         } else if (expression instanceof Variable) {
             Variable variable = (Variable) expression;
@@ -176,11 +176,12 @@ public class Interpreter {
             if (index < 0) { // free
                 return variable;
             } else { // bound
-                Symbol symbol = variable.symbol.addIndex(index - 1);
+                Symbol symbol = new Symbol(index - 1);
                 return new Variable(symbol);
             }
         }
-        return null;
+
+        return expression;
     }
 
     /*public static Expression addSymbolIDs(Expression expression) {
