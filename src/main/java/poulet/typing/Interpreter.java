@@ -46,4 +46,28 @@ public class Interpreter {
         }
         return null;
     }
+
+    private void checkKind(Context context, Expression type) throws TypeException {
+        if (type instanceof Variable) {
+            Expression kindOfType = context.lookUp(((Variable) type).symbol);
+            if (kindOfType instanceof Variable) {
+                if (((Variable) kindOfType).symbol.name.equals("*")) {
+                    return;
+                }
+            }
+            throw new TypeException("unknown identifier");
+        } else if (type instanceof PiType) {
+            PiType piType = (PiType) type;
+            checkKind(context, piType.type);
+            checkKind(context, piType.body);
+        }
+    }
+
+    private void checkType(Context context, Expression term, Expression type) {
+        if (term instanceof Abstraction && type instanceof PiType) {
+            Abstraction abstraction = (Abstraction) term;
+            PiType piType = (PiType) type;
+            context.append()
+        }
+    }
 }

@@ -18,16 +18,36 @@ public class TestInterpreter {
     void testSymbolIDs() {
         Program actualProgram = ASTParser.parse(CharStreams.fromString("_ : _ := \\x : _ -> (x) \\x : _ -> x"));
         Expression actualExpression = Interpreter.getExpressions(actualProgram).get(0);
-        Expression actualWthIDs = Interpreter.addSymbolIDs(actualExpression);
+        Expression actualWthIDs = Interpreter.addIndicies(actualExpression);
         Expression expected = new Abstraction(
-                new Symbol("x", 17),
+                null,
                 new Variable(new Symbol("_")),
                 new Application(
-                        new Variable(new Symbol("x", 17)),
+                        new Variable(new Symbol("x", 0)),
                         new Abstraction(
-                                new Symbol("x", 18),
+                                null,
                                 new Variable(new Symbol("_")),
-                                new Variable(new Symbol("x", 18))
+                                new Variable(new Symbol("x", 0))
+                        )
+                )
+        );
+        assertEquals(expected, actualWthIDs);
+    }
+
+    @Test
+    void testSymbolIDs2() {
+        Program actualProgram = ASTParser.parse(CharStreams.fromString("_ : _ := \\x : _ -> (x) \\y : _ -> x"));
+        Expression actualExpression = Interpreter.getExpressions(actualProgram).get(0);
+        Expression actualWthIDs = Interpreter.addIndicies(actualExpression);
+        Expression expected = new Abstraction(
+                null,
+                new Variable(new Symbol("_")),
+                new Application(
+                        new Variable(new Symbol("x", 0)),
+                        new Abstraction(
+                                null,
+                                new Variable(new Symbol("_")),
+                                new Variable(new Symbol("x", 1))
                         )
                 )
         );

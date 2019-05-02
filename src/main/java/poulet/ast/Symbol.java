@@ -1,49 +1,35 @@
 package poulet.ast;
 
 public class Symbol extends Node {
-    private static int nextId = 0;
-
-    public final String name;
-    private final Integer id;
+    private final String name;
+    private final Integer index;
 
     public Symbol(String name) {
         this.name = name;
-        this.id = null;
+        this.index = null;
     }
 
-    public Symbol(String name, int id) {
-        this.name = name;
-        this.id = id;
-    }
-
-    public Symbol bind() {
-        Symbol bound = new Symbol(name, nextId);
-        nextId++;
-        return bound;
-    }
-
-    public Symbol copyID(Symbol symbol) {
-        return new Symbol(symbol.name, symbol.id);
+    public Symbol(int index) {
+        this.name = null;
+        this.index = index;
     }
 
     @Override
     public String toString() {
-        if (id == null)
+        if (index == null)
             return name;
         else
-            return String.format("%s(%d)", name, id);
+            return "" + index;
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Symbol) {
             Symbol other = (Symbol) obj;
-            if (id == null && other.id == null) {
+            if (index != null && other.index != null) {
+                return index.equals(other.index);
+            } else if (name != null && other.name != null) {
                 return name.equals(other.name);
-            } else if (id != null && other.id != null) {
-                return name.equals(other.name) && id.equals(other.id);
-            } else {
-                return false;
             }
         }
 
@@ -51,7 +37,7 @@ public class Symbol extends Node {
     }
 
     public boolean isFree() {
-        return id == null;
+        return index == null;
     }
 
     /*public boolean weakEquals(Object obj) {

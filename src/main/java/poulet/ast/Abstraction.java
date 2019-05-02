@@ -20,7 +20,11 @@ public class Abstraction extends Expression {
     public boolean equals(Object obj) {
         if (obj instanceof Abstraction) {
             Abstraction other = (Abstraction) obj;
-            return symbol.equals(other.symbol) && type.equals(other.type) && body.equals(other.body);
+            if (symbol == null) {
+                return other.symbol == null && type.equals(other.type) && body.equals(other.body);
+            } else {
+                return symbol.equals(other.symbol) && type.equals(other.type) && body.equals(other.body);
+            }
         }
 
         return false;
