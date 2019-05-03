@@ -14,6 +14,10 @@ public class Symbol extends Node {
         this.index = index;
     }
 
+    public Integer getIndex() {
+        return index;
+    }
+
     @Override
     public String toString() {
         if (index == null)

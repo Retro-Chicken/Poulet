@@ -6,6 +6,9 @@ import poulet.ast.*;
 import poulet.interpreter.Interpreter;
 import poulet.parser.ASTParser;
 
+import java.io.IOException;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestInterpreter {
@@ -74,5 +77,26 @@ public class TestInterpreter {
         Expression actualResult = Interpreter.evaluateExpression(actualExpression);
         Expression expected = new Variable(new Symbol("z"));
         assertEquals(expected, actualResult);
+    }
+
+    @Test
+    void testRecursion() throws Exception {
+        Program actualProgram = ASTParser.parse(CharStreams.fromFileName("test/recursion_test.poulet"));
+        Program actualSubstitutedProgram = Interpreter.substituteCalls(actualProgram);
+        List<Expression> actualExpressions = Interpreter.getExpressions(actualSubstitutedProgram);
+        Expression actualResult = Interpreter.evaluateExpression(actualExpressions.get(actualExpressions.size() - 1));
+        System.out.println(">>> " + actualResult);
+    }
+
+    @Test
+    void testEvalWithIndices() throws Exception {
+        Program actualProgram = ASTParser.parse(CharStreams.fromString("_:_:=((\\x:_->\\y:_->x)a)b"));
+        actualProgram = Interpreter.substituteCalls(actualProgram);
+        List<Expression> expressions = Interpreter.getExpressions(actualProgram);
+        Expression expression = expressions.get(expressions.size()-1);
+        expression = Interpreter.addIndices(expression);
+        Expression output = Interpreter.evaluateExpression(expression);
+        Expression expected = new Variable(new Symbol("a"));
+        assertEquals(expected, output);
     }
 }

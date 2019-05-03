@@ -1,0 +1,7 @@
+true:_:=\a:_->\b:_->a
+false:_:=\a:_->\b:_->b
+iszero:_:=\n:_->((n)\x:_->false)true
+zero:_:=\f:_->\x:_->x
+succ:_:=\n:_->\f:_->\x:_->(f)((n)f)x
+pred:_:=\n:_->\f:_->\x:_->(((n)\g:_->\h:_->(h)(g)f)\u:_->x)\u:_->u
+_:_:=(iszero)(pred)(pred)(pred)(succ)(succ)(succ)zero

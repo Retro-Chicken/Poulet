@@ -110,11 +110,13 @@ public class Interpreter {
 
             if (function instanceof Abstraction && isValue(argument)) {
                 Abstraction abstraction = (Abstraction) function;
-                return substitute(abstraction.body, abstraction.symbol, argument);
+                if (abstraction.symbol != null)
+                    return evaluateExpression(substitute(abstraction.body, abstraction.symbol, argument));
+                else
+                    return evaluateExpression(substitute(abstraction.body, new Symbol(0), argument));
             } else {
                 return new Application(function, argument);
             }
-
         }
 
         return null;
@@ -137,10 +139,10 @@ public class Interpreter {
             result = new Application(function, argument);
         } else if (expression instanceof Abstraction) {
             Abstraction abstraction = (Abstraction) expression;
-            if (abstraction.symbol.equals(symbol)) {
+            if (abstraction.symbol != null && abstraction.symbol.equals(symbol)) {
                 result = expression;
             } else {
-                Expression body = substitute(abstraction.body, symbol, substitution);
+                Expression body = substitute(abstraction.body, symbol.increment(), substitution);
                 result = new Abstraction(abstraction.symbol, abstraction.type, body);
             }
         }
