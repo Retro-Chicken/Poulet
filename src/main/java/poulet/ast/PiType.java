@@ -15,4 +15,8 @@ public class PiType extends Expression {
     public String toString() {
         return String.format("{%s : %s} %s", variable, type, body);
     }
+
+    public PiType transform(String offset) {
+        return this;
+    }
 }

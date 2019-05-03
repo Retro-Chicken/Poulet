@@ -7,6 +7,7 @@ import poulet.interpreter.Interpreter;
 import poulet.parser.ASTParser;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class TestInterpreter {
     @Test
@@ -76,20 +77,21 @@ public class TestInterpreter {
         assertEquals(expected, actualResult);
     }
 
-    /*
+
     @Test
     void substituteFunctionCalls2() throws Exception {
         Program actualProgram = ASTParser.parse(CharStreams.fromString("func : _ := \\x : _ -> z\nfunc2 : _ := \\z : _ -> (func) z\n_ : _ := (func2) w"));
         Program actualSubstitutedProgram = Interpreter.substituteCalls(actualProgram);
         Expression actualExpression = Interpreter.getExpressions(actualSubstitutedProgram).get(2);
-        System.out.println("Actual Expression: " + actualExpression.toString());
         Expression actualResult = Interpreter.evaluateExpression(actualExpression);
-        System.out.println("Sub 2 Actual: " + actualResult.toString());
-        //Application test = new Application(new Abstraction(new Symbol("x"), new Variable(new Symbol("_")), new Variable(new Symbol("l"))), new Variable(new Symbol("w")));
-        //System.out.println("Test Re-Creation: " + test.toString());
-        //System.out.println("Test Eval: " + Interpreter.evaluateExpression(test).toString());
-        Expression expected = new Variable(new Symbol("z"));
-        assertEquals(expected, actualResult);
+
+        try {
+            Variable variable = (Variable) actualResult;
+            if(!variable.symbol.toString().matches("z[0-9]*"))
+                fail();
+        } catch(Exception e) {
+            fail();
+        }
     }
-    */
+
 }

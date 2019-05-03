@@ -52,7 +52,7 @@ public class Interpreter {
         List<Definition> definitions = getDefinitions(program);
         for (int i = definitions.size() - 1; i >= 0; i--) {
             Definition definition = definitions.get(i);
-            substituted = substitute(substituted, definition.name, definition.definition);
+            substituted = substitute(substituted, definition.name, definition.definition.transform("" + new Random().nextInt(10000)));
         }
         return substituted;
     }

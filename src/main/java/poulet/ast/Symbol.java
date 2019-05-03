@@ -66,4 +66,10 @@ public class Symbol extends Node {
 
         return false;
     }*/
+
+    public Symbol transform(String offset) {
+        if(name != null)
+            return new Symbol(name + offset);
+        return this;
+    }
 }
