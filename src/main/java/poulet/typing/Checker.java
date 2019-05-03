@@ -85,14 +85,13 @@ public class Checker {
             throw new TypeException("type mismatch");
         } else if (term instanceof Application) {
             Application application = (Application) term;
-            Expression functionType = deduceType(context, application.function);
             Expression argumentType = deduceType(context, application.argument);
             Expression requiredFunctionType = new PiType(
                     new Symbol("_"),
                     argumentType,
                     type
             );
-            checkType(context, functionType, requiredFunctionType);
+            checkType(context, application.function, requiredFunctionType);
         } else {
             throw new TypeException("type mismatch");
         }
@@ -102,7 +101,7 @@ public class Checker {
         if (term instanceof Abstraction) {
             Abstraction abstraction = (Abstraction) term;
             Context newContext = context.increment();
-            newContext = newContext.append(abstraction.symbol, abstraction.type);
+            newContext = newContext.append(new Symbol(0), abstraction.type);
             Expression bodyType = deduceType(newContext, abstraction.body);
             return new PiType(new Symbol("_"), abstraction.type, bodyType);
         } else if (term instanceof Variable) {

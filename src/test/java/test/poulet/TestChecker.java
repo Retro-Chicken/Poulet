@@ -53,4 +53,63 @@ public class TestChecker {
             fail();
         }
     }
+
+    @Test
+    void testCheckType3() {
+        Context context = new Context(Map.of(
+                new Symbol("int"), new Variable(new Symbol("*"))
+        ));
+        Expression term = parseExpression("\\x:int->x");
+        Expression type = parseExpression("{_:int}int");
+
+        try {
+            Checker.checkType(context, term, type);
+        } catch (TypeException e) {
+            fail();
+        }
+    }
+
+    @Test
+    void testCheckType4() {
+        Context context = new Context(Map.of(
+                new Symbol("int"), new Variable(new Symbol("*")),
+                new Symbol("bool"), new Variable(new Symbol("*"))
+        ));
+        Expression term = parseExpression("\\x : int -> \\y : int -> y");
+        System.out.println("Check 4: " + term.toString());
+        try {
+            System.out.println("Test 4: " + Checker.deduceType(context, term).toString());
+        } catch(Exception e) { System.out.println("Can't deduce test 4 type"); }
+
+        Expression type = parseExpression("{_:int}{_:int}int");
+
+        try {
+            Checker.checkType(context, term, type);
+        } catch (TypeException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    void testCheckTypeWithSubstitution() throws Exception {
+        Context context = new Context(Map.of(
+                new Symbol("int"), new Variable(new Symbol("*")),
+                new Symbol("bool"), new Variable(new Symbol("*"))
+        ));
+        Program actualProgram = ASTParser.parse(CharStreams.fromString("id : _ := \\x : int -> x\n_ : _ := \\x : int -> (id) x"));
+        Program actualSubstitutedProgram = Interpreter.substituteCalls(actualProgram);
+        Expression actualExpression = Interpreter.addIndices(Interpreter.getExpressions(actualSubstitutedProgram).get(1));
+        Expression type = parseExpression("{_:int}int");
+
+        System.out.println(actualExpression.toString());
+        System.out.println(Checker.deduceType(context, actualExpression));
+
+        try {
+            Checker.checkType(context, actualExpression, type);
+        } catch (TypeException e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
 }
