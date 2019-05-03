@@ -11,6 +11,13 @@ public class Interpreter {
         this.program = program;
     }
 
+    public static Program transform(Program program) throws DefinitionException {
+        Program result = new Program(program);
+        result = substituteCalls(result);
+        result = addIndices(result);
+        return result;
+    }
+
     public static Program substituteCalls(Program program) throws DefinitionException {
         Set<Symbol> definedSymbols = new HashSet<>();
 
@@ -52,7 +59,7 @@ public class Interpreter {
         List<Definition> definitions = getDefinitions(program);
         for (int i = definitions.size() - 1; i >= 0; i--) {
             Definition definition = definitions.get(i);
-            substituted = substitute(substituted, definition.name, definition.definition.transform("" + new Random().nextInt(10000)));
+            substituted = substitute(substituted, definition.name, definition.definition.transform("T" + new Random().nextInt(10000)));
         }
         return substituted;
     }
@@ -150,6 +157,27 @@ public class Interpreter {
         return result;
     }
 
+    public static Program addIndices(Program program) {
+        List<TopLevel> result = new ArrayList<>();
+        for(TopLevel topLevel : program.program) {
+            if (topLevel instanceof Definition) {
+                Definition definition = (Definition) topLevel;
+                Definition indexed = new Definition(
+                        definition.name,
+                        definition.type,
+                        addIndices(definition.definition)
+                );
+                result.add(indexed);
+            } else if (topLevel instanceof Print) {
+                Print print = (Print) topLevel;
+                Print indexed = new Print(print.command, addIndices(print.expression));
+                result.add(indexed);
+            } else { // TODO: handle type declaration
+                result.add(topLevel);
+            }
+        }
+        return new Program(result);
+    }
     public static Expression addIndices(Expression expression) {
         return addIndices(new Stack<>(), expression);
     }

@@ -79,19 +79,37 @@ public class TestInterpreter {
 
 
     @Test
-    void substituteFunctionCalls2() throws Exception {
-        Program actualProgram = ASTParser.parse(CharStreams.fromString("func : _ := \\x : _ -> z\nfunc2 : _ := \\z : _ -> (func) z\n_ : _ := (func2) w"));
-        Program actualSubstitutedProgram = Interpreter.substituteCalls(actualProgram);
-        Expression actualExpression = Interpreter.getExpressions(actualSubstitutedProgram).get(2);
-        Expression actualResult = Interpreter.evaluateExpression(actualExpression);
-
+    void substituteFunctionCalls2() {
         try {
-            Variable variable = (Variable) actualResult;
-            if(!variable.symbol.toString().matches("z[0-9]*"))
+            Program actualProgram = ASTParser.parse(CharStreams.fromString("func : _ := \\x : _ -> z\nfunc2 : _ := \\z : _ -> (func) z\n_ : _ := (func2) w"));
+            Program actualSubstitutedProgram = Interpreter.substituteCalls(actualProgram);
+            Expression actualExpression = Interpreter.getExpressions(actualSubstitutedProgram).get(2);
+            Expression actualResult = Interpreter.evaluateExpression(actualExpression);
+
+            try {
+                Variable variable = (Variable) actualResult;
+                if (!variable.symbol.toString().equals("z"))
+                    fail();
+            } catch (Exception e) {
                 fail();
-        } catch(Exception e) {
+            }
+        } catch (Exception e) {
             fail();
         }
     }
 
+    @Test
+    void transformProgram() {
+        try {
+            Program actualProgram = ASTParser.parse(CharStreams.fromString("func : _ := \\x : _ -> z\nfunc2 : _ := \\z : _ -> (func) z\n_ : _ := (func2) w"));
+            Program transformed = Interpreter.transform(actualProgram);
+            Expression transformedExpression = Interpreter.getExpressions(transformed).get(2);
+            Expression evaluated = Interpreter.evaluateExpression(transformedExpression);
+            System.out.println(transformedExpression.toString());
+            System.out.println(evaluated.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
 }

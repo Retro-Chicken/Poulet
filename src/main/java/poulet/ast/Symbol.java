@@ -4,14 +4,24 @@ public class Symbol extends Node {
     private final String name;
     private final Integer index;
 
+    private final String uniqueID;
+
+    public Symbol(String name, String uniqueID) {
+        this.name = name;
+        this.index = null;
+        this.uniqueID = uniqueID;
+    }
+
     public Symbol(String name) {
         this.name = name;
         this.index = null;
+        this.uniqueID = null;
     }
 
     public Symbol(int index) {
         this.name = null;
         this.index = index;
+        this.uniqueID = null;
     }
 
     @Override
@@ -29,7 +39,9 @@ public class Symbol extends Node {
             if (index != null && other.index != null) {
                 return index.equals(other.index);
             } else if (name != null && other.name != null) {
-                return name.equals(other.name);
+                if(uniqueID != null)
+                    return other.uniqueID != null && uniqueID.equals(other.uniqueID) && name.equals(other.name);
+                return other.uniqueID == null && name.equals(other.name);
             }
         }
 
@@ -69,7 +81,7 @@ public class Symbol extends Node {
 
     public Symbol transform(String offset) {
         if(name != null)
-            return new Symbol(name + offset);
+            return new Symbol(name, (uniqueID != null ? uniqueID : "") + offset);
         return this;
     }
 }
