@@ -3,6 +3,7 @@ package poulet.typing;
 import poulet.ast.*;
 
 public class Checker {
+    /*
     public static PiType deduceType(Expression expression, Context context) {
         if(expression instanceof Abstraction) {
             Abstraction abstraction = (Abstraction) expression;
@@ -45,7 +46,7 @@ public class Checker {
             return userType;
         }
         return null;
-    }
+    }*/
 
     public static void checkKind(Context context, Expression type) throws TypeException {
         if (type instanceof Variable) {
@@ -64,6 +65,7 @@ public class Checker {
     }
 
     public static void checkType(Context context, Expression term, Expression type) throws TypeException {
+        checkKind(context, type);
         if (term instanceof Abstraction && type instanceof PiType) {
             Abstraction abstraction = (Abstraction) term;
             PiType piType = (PiType) type;

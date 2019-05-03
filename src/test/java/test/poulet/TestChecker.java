@@ -8,6 +8,7 @@ import poulet.ast.Expression;
 import poulet.ast.Program;
 import poulet.ast.Symbol;
 import poulet.ast.Variable;
+import poulet.interpreter.DefinitionException;
 import poulet.interpreter.Interpreter;
 import poulet.parser.ASTParser;
 import poulet.typing.Checker;
@@ -86,7 +87,19 @@ public class TestChecker {
     }
 
     @Test
-    void testCheckTypeWithSubstitution() throws Exception {
+    void testCheckKind() {
+        Context context = new Context();
+        Expression term = parseExpression("\\x:int->x");
+        Expression type = parseExpression("{_:int}int");
+
+        try {
+            Checker.checkType(context, term, type);
+            fail();
+        } catch (TypeException e) { }
+    }
+
+    @Test
+    void testCheckTypeWithSubstitution() throws DefinitionException {
         Context context = new Context(Map.of(
                 new Symbol("int"), new Variable(new Symbol("*")),
                 new Symbol("bool"), new Variable(new Symbol("*"))
