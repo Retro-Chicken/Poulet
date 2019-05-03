@@ -68,11 +68,28 @@ public class TestInterpreter {
 
     @Test
     void substituteFunctionCalls() throws Exception {
-        Program actualProgram = ASTParser.parse(CharStreams.fromString("id : _ := \\x : _ -> x\nid2 : _ := \\x : _ -> id\n_ : _ := ((id2) w) z)"));
+        Program actualProgram = ASTParser.parse(CharStreams.fromString("id : _ := \\x : _ -> x\n#reduce \\x : _ -> x\nid2 : _ := \\x : _ -> id\n_ : _ := ((id2) w) z)"));
         Program actualSubstitutedProgram = Interpreter.substituteCalls(actualProgram);
         Expression actualExpression = Interpreter.getExpressions(actualSubstitutedProgram).get(2);
         Expression actualResult = Interpreter.evaluateExpression(actualExpression);
         Expression expected = new Variable(new Symbol("z"));
         assertEquals(expected, actualResult);
     }
+
+    /*
+    @Test
+    void substituteFunctionCalls2() throws Exception {
+        Program actualProgram = ASTParser.parse(CharStreams.fromString("func : _ := \\x : _ -> z\nfunc2 : _ := \\z : _ -> (func) z\n_ : _ := (func2) w"));
+        Program actualSubstitutedProgram = Interpreter.substituteCalls(actualProgram);
+        Expression actualExpression = Interpreter.getExpressions(actualSubstitutedProgram).get(2);
+        System.out.println("Actual Expression: " + actualExpression.toString());
+        Expression actualResult = Interpreter.evaluateExpression(actualExpression);
+        System.out.println("Sub 2 Actual: " + actualResult.toString());
+        //Application test = new Application(new Abstraction(new Symbol("x"), new Variable(new Symbol("_")), new Variable(new Symbol("l"))), new Variable(new Symbol("w")));
+        //System.out.println("Test Re-Creation: " + test.toString());
+        //System.out.println("Test Eval: " + Interpreter.evaluateExpression(test).toString());
+        Expression expected = new Variable(new Symbol("z"));
+        assertEquals(expected, actualResult);
+    }
+    */
 }

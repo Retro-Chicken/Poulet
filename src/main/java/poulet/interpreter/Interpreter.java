@@ -39,8 +39,8 @@ public class Interpreter {
                 Print print = (Print) topLevel;
                 Print substituted = new Print(print.command, substituteDefinitions(print.expression, new Program(substitutedProgram)));
                 substitutedProgram.add(substituted);
-            } else {
-                // TODO: handle type declaration
+            } else { // TODO: handle type declaration
+                substitutedProgram.add(topLevel);
             }
         }
 
@@ -51,10 +51,8 @@ public class Interpreter {
         Expression substituted = expression;
         List<Definition> definitions = getDefinitions(program);
         for (int i = definitions.size() - 1; i >= 0; i--) {
-            if (program.program.get(i) instanceof Definition) {
-                Definition definition = definitions.get(i);
-                substituted = substitute(substituted, definition.name, definition.definition);
-            }
+            Definition definition = definitions.get(i);
+            substituted = substitute(substituted, definition.name, definition.definition);
         }
         return substituted;
     }
@@ -110,7 +108,7 @@ public class Interpreter {
 
             if (function instanceof Abstraction && isValue(argument)) {
                 Abstraction abstraction = (Abstraction) function;
-                return substitute(abstraction.body, abstraction.symbol, argument);
+                return evaluateExpression(substitute(abstraction.body, abstraction.symbol, argument));
             } else {
                 return new Application(function, argument);
             }
