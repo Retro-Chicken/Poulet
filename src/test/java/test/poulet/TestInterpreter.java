@@ -128,8 +128,9 @@ public class TestInterpreter {
             Program transformed = Interpreter.transform(actualProgram);
             Expression transformedExpression = Interpreter.getExpressions(transformed).get(2);
             Expression evaluated = Interpreter.evaluateExpression(transformedExpression);
-            System.out.println(transformedExpression.toString());
-            System.out.println(evaluated.toString());
+            Variable variable = (Variable) evaluated;
+            if(!variable.symbol.toString().equals("z"))
+                fail();
         } catch (Exception e) {
             e.printStackTrace();
             fail();
