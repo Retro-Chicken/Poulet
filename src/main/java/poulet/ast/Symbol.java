@@ -28,6 +28,10 @@ public class Symbol extends Node {
         return index;
     }
 
+    public String getName() {
+        return name;
+    }
+
     @Override
     public String toString() {
         if (index == null)

@@ -2,6 +2,7 @@ package poulet.typing;
 
 import poulet.ast.Expression;
 import poulet.ast.Symbol;
+import poulet.ast.Variable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,7 +36,16 @@ public class Context {
         return new Context(newContext);
     }
 
-    public Expression lookUp(Symbol name) {
-        return context.getOrDefault(name, null);
+    public Expression lookUp(Symbol symbol) {
+        if (symbol.getName() != null && symbol.getName().matches("Type\\d+")) {
+            int level = Integer.parseInt(symbol.getName().substring(4));
+            return new Variable(new Symbol("Type" + (level + 1)));
+        }
+        return context.getOrDefault(symbol, null);
+    }
+
+    @Override
+    public String toString() {
+        return context.toString();
     }
 }

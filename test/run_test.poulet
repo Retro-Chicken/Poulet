@@ -1,0 +1,12 @@
+a:Type1
+bool:Type1 := {_:a}{_:a}a
+true:bool:=\a:a->\b:a->a
+false:bool:=\a:a->\b:a->b
+int:Type1
+add:{_:int}{_:int}int
+zero:int
+#check ((add) zero) zero
+id : {_:int}int := \x:int -> x
+id2 : {_:int}int := \x:int -> (id) x
+#reduce (id2) zero
+#check true

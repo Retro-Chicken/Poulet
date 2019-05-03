@@ -1,7 +1,10 @@
 package poulet.interpreter;
 
 import poulet.ast.*;
+import poulet.typing.Checker;
+import poulet.typing.Context;
 
+import java.io.PrintWriter;
 import java.util.*;
 
 public class Interpreter {
@@ -9,6 +12,31 @@ public class Interpreter {
 
     public Interpreter(Program program) {
         this.program = program;
+    }
+
+    public static void run(Program program, PrintWriter out) throws Exception {
+        program = transform(program);
+        Context context = new Context();
+
+        for (TopLevel topLevel : program.program) {
+            if (topLevel instanceof Definition) {
+                Definition definition = (Definition) topLevel;
+                Checker.checkKind(context, definition.type);
+                if (definition.definition != null)
+                    Checker.checkType(context, definition.definition, definition.type);
+                context = context.append(definition.name, definition.type);
+            } else if (topLevel instanceof Print) {
+                Print print = (Print) topLevel;
+                switch (print.command) {
+                    case reduce:
+                        out.println(evaluateExpression(print.expression));
+                        break;
+                    case check:
+                        out.println(Checker.deduceType(context, print.expression));
+                        break;
+                }
+            }
+        }
     }
 
     public static Program transform(Program program) throws DefinitionException {
@@ -33,7 +61,7 @@ public class Interpreter {
 
         List<TopLevel> substitutedProgram = new ArrayList<>();
 
-        for(TopLevel topLevel : program.program) {
+        for (TopLevel topLevel : program.program) {
             if (topLevel instanceof Definition) {
                 Definition definition = (Definition) topLevel;
                 Definition substituted = new Definition(
@@ -59,7 +87,9 @@ public class Interpreter {
         List<Definition> definitions = getDefinitions(program);
         for (int i = definitions.size() - 1; i >= 0; i--) {
             Definition definition = definitions.get(i);
-            substituted = substitute(substituted, definition.name, definition.definition.transform("T" + new Random().nextInt(10000)));
+            if (definition.definition != null) {
+                substituted = substitute(substituted, definition.name, definition.definition.transform("T" + new Random().nextInt(10000)));
+            }
         }
         return substituted;
     }
@@ -91,6 +121,17 @@ public class Interpreter {
             }
         }
         return definitions;
+    }
+
+    public static List<Print> getPrints(Program program) {
+        ArrayList<Print> prints = new ArrayList<>();
+        for (TopLevel topLevel : program.program) {
+            if (topLevel instanceof Print) {
+                Print print = (Print) topLevel;
+                prints.add(print);
+            }
+        }
+        return prints;
     }
 
     public static List<Expression> getExpressions(Program program) {
@@ -151,6 +192,11 @@ public class Interpreter {
                 Expression body = substitute(abstraction.body, symbol.increment(), substitution);
                 result = new Abstraction(abstraction.symbol, abstraction.type, body);
             }
+        } else if (expression instanceof PiType) {
+            PiType piType = (PiType) expression;
+            Expression type = substitute(piType.type, symbol, substitution);
+            Expression body = substitute(piType.body, symbol, substitution);
+            result = new PiType(piType.variable, type, body);
         }
 
         // enforce unique symbol IDs
@@ -162,7 +208,7 @@ public class Interpreter {
 
     public static Program addIndices(Program program) {
         List<TopLevel> result = new ArrayList<>();
-        for(TopLevel topLevel : program.program) {
+        for (TopLevel topLevel : program.program) {
             if (topLevel instanceof Definition) {
                 Definition definition = (Definition) topLevel;
                 Definition indexed = new Definition(
@@ -181,9 +227,11 @@ public class Interpreter {
         }
         return new Program(result);
     }
+
     public static Expression addIndices(Expression expression) {
         return addIndices(new Stack<>(), expression);
     }
+
     private static Expression addIndices(Stack<Symbol> stack, Expression expression) {
         if (expression instanceof Abstraction) {
             Abstraction abstraction = (Abstraction) expression;

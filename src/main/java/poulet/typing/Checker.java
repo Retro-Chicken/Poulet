@@ -1,6 +1,7 @@
 package poulet.typing;
 
 import poulet.ast.*;
+import poulet.interpreter.Interpreter;
 
 public class Checker {
     /*
@@ -52,7 +53,7 @@ public class Checker {
         if (type instanceof Variable) {
             Expression kindOfType = context.lookUp(((Variable) type).symbol);
             if (kindOfType instanceof Variable) {
-                if (((Variable) kindOfType).symbol.equals(new Symbol("*"))) {
+                if(((Variable) kindOfType).symbol.getName().matches("Type\\d+")) {
                     return;
                 }
             }
@@ -94,8 +95,10 @@ public class Checker {
                     type
             );
             checkType(context, application.function, requiredFunctionType);
+        } else if (term instanceof PiType && type.equals(new Variable(new Symbol("Type1")))) {
+            return;
         } else {
-            throw new TypeException("type mismatch");
+            throw new TypeException("type mismatch " + term + ", " + type);
         }
     }
 

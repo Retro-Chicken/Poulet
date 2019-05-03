@@ -1,5 +1,7 @@
 a : b := (\c : d -> c) e
 
+int : Type1
+
 type prod : {_ : Prop} {_ : Prop} Prop {
   mk : {p : Prop} {q : Prop} {_ : p} {_ : q} ((prod) p) q
 }
