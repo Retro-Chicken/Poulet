@@ -11,14 +11,21 @@ public class Interpreter {
         this.program = program;
     }
 
-    public static Program substituteCalls(Program program) throws Exception {
+    public static Program transform(Program program) throws DefinitionException {
+        Program result = new Program(program);
+        result = substituteCalls(result);
+        result = addIndices(result);
+        return result;
+    }
+
+    public static Program substituteCalls(Program program) throws DefinitionException {
         Set<Symbol> definedSymbols = new HashSet<>();
 
         for (TopLevel topLevel : program.program) {
             if (topLevel instanceof Definition) {
                 Definition definition = (Definition) topLevel;
                 if (definedSymbols.contains(definition.name)) {
-                    throw new Exception("symbol " + definition.name + " is defined twice");
+                    throw new DefinitionException("symbol " + definition.name + " is defined twice");
                 }
                 definedSymbols.add(definition.name);
             }
@@ -39,8 +46,8 @@ public class Interpreter {
                 Print print = (Print) topLevel;
                 Print substituted = new Print(print.command, substituteDefinitions(print.expression, new Program(substitutedProgram)));
                 substitutedProgram.add(substituted);
-            } else {
-                // TODO: handle type declaration
+            } else { // TODO: handle type declaration
+                substitutedProgram.add(topLevel);
             }
         }
 
@@ -51,10 +58,8 @@ public class Interpreter {
         Expression substituted = expression;
         List<Definition> definitions = getDefinitions(program);
         for (int i = definitions.size() - 1; i >= 0; i--) {
-            if (program.program.get(i) instanceof Definition) {
-                Definition definition = definitions.get(i);
-                substituted = substitute(substituted, definition.name, definition.definition);
-            }
+            Definition definition = definitions.get(i);
+            substituted = substitute(substituted, definition.name, definition.definition.transform("T" + new Random().nextInt(10000)));
         }
         return substituted;
     }
@@ -110,6 +115,7 @@ public class Interpreter {
 
             if (function instanceof Abstraction && isValue(argument)) {
                 Abstraction abstraction = (Abstraction) function;
+
                 if (abstraction.symbol != null)
                     return evaluateExpression(substitute(abstraction.body, abstraction.symbol, argument));
                 else
@@ -154,6 +160,27 @@ public class Interpreter {
         return result;
     }
 
+    public static Program addIndices(Program program) {
+        List<TopLevel> result = new ArrayList<>();
+        for(TopLevel topLevel : program.program) {
+            if (topLevel instanceof Definition) {
+                Definition definition = (Definition) topLevel;
+                Definition indexed = new Definition(
+                        definition.name,
+                        definition.type,
+                        addIndices(definition.definition)
+                );
+                result.add(indexed);
+            } else if (topLevel instanceof Print) {
+                Print print = (Print) topLevel;
+                Print indexed = new Print(print.command, addIndices(print.expression));
+                result.add(indexed);
+            } else { // TODO: handle type declaration
+                result.add(topLevel);
+            }
+        }
+        return new Program(result);
+    }
     public static Expression addIndices(Expression expression) {
         return addIndices(new Stack<>(), expression);
     }

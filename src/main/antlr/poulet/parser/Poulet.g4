@@ -30,7 +30,7 @@ REDUCE : '#reduce' ;
 
 CHECK : '#check' ;
 
-SCHOLIUMS : '#sholiums' ;
+SCHOLIUMS : '#scholiums' ;
 
 PRINT_COMMAND : 'print' ;
 
