@@ -76,17 +76,11 @@ public class TestChecker {
                 new Symbol("bool"), new Variable(new Symbol("*"))
         ));
         Expression term = parseExpression("\\x : int -> \\y : int -> y");
-        System.out.println("Check 4: " + term.toString());
-        try {
-            System.out.println("Test 4: " + Checker.deduceType(context, term).toString());
-        } catch(Exception e) { System.out.println("Can't deduce test 4 type"); }
-
         Expression type = parseExpression("{_:int}{_:int}int");
 
         try {
             Checker.checkType(context, term, type);
         } catch (TypeException e) {
-            e.printStackTrace();
             fail();
         }
     }
@@ -102,13 +96,9 @@ public class TestChecker {
         Expression actualExpression = Interpreter.addIndices(Interpreter.getExpressions(actualSubstitutedProgram).get(1));
         Expression type = parseExpression("{_:int}int");
 
-        System.out.println(actualExpression.toString());
-        System.out.println(Checker.deduceType(context, actualExpression));
-
         try {
             Checker.checkType(context, actualExpression, type);
         } catch (TypeException e) {
-            e.printStackTrace();
             fail();
         }
     }

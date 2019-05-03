@@ -11,14 +11,14 @@ public class Interpreter {
         this.program = program;
     }
 
-    public static Program substituteCalls(Program program) throws Exception {
+    public static Program substituteCalls(Program program) throws DefinitionException {
         Set<Symbol> definedSymbols = new HashSet<>();
 
         for (TopLevel topLevel : program.program) {
             if (topLevel instanceof Definition) {
                 Definition definition = (Definition) topLevel;
                 if (definedSymbols.contains(definition.name)) {
-                    throw new Exception("symbol " + definition.name + " is defined twice");
+                    throw new DefinitionException("symbol " + definition.name + " is defined twice");
                 }
                 definedSymbols.add(definition.name);
             }

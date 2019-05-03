@@ -97,7 +97,7 @@ public class Checker {
         }
     }
 
-    public static Expression deduceType(Context context,Expression term) throws TypeException {
+    public static Expression deduceType(Context context, Expression term) throws TypeException {
         if (term instanceof Abstraction) {
             Abstraction abstraction = (Abstraction) term;
             Context newContext = context.increment();
