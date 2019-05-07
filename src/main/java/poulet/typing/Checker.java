@@ -126,6 +126,8 @@ public class Checker {
                 checkType(context, application.argument, piType.type);
                 return piType.body;
             }
+        } else if (term instanceof PiType) {
+            PiType piType = (PiType) term;
         }
 
         return null;

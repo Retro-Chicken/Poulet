@@ -1,0 +1,4 @@
+int:Type1
+zero:int
+id : {a:Type1}{_:a}a := \a:Type1->\x:a->x
+#reduce ((id)int)zero

@@ -145,7 +145,7 @@ public class Interpreter {
         return expressions;
     }
 
-    public static Expression evaluateExpression(Expression expression) {
+    public static Expression evaluateExpression(Expression expression) throws Exception {
         if (isValue(expression))
             return expression;
 
@@ -164,9 +164,11 @@ public class Interpreter {
             } else {
                 return new Application(function, argument);
             }
+        } else if (expression instanceof PiType) {
+            PiType piType = (PiType) expression;
         }
 
-        return null;
+        throw new Exception("can't eval " + expression);
     }
 
     private static Expression substitute(Expression expression, Symbol symbol, Expression substitution) {
