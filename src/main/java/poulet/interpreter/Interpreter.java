@@ -3,9 +3,11 @@ package poulet.interpreter;
 import poulet.ast.*;
 import poulet.typing.Checker;
 import poulet.typing.Context;
+import poulet.value.*;
 
 import java.io.PrintWriter;
 import java.util.*;
+import java.util.function.Function;
 
 public class Interpreter {
     private Program program;
@@ -145,11 +147,12 @@ public class Interpreter {
         return expressions;
     }
 
-    public static Expression evaluateExpression(Expression expression) throws Exception {
-        if (isValue(expression))
-            return expression;
+    /*public static Value evaluateExpression(Expression expression) throws Exception {
+        if (expression instanceof Variable) {
 
-        if (expression instanceof Application) {
+        } else if (expression instanceof Abstraction) {
+
+        } else if (expression instanceof Application) {
             Application application = (Application) expression;
             Expression function = evaluateExpression(application.function);
             Expression argument = evaluateExpression(application.argument);
@@ -166,9 +169,70 @@ public class Interpreter {
             }
         } else if (expression instanceof PiType) {
             PiType piType = (PiType) expression;
+            PiType result = new PiType(
+                    piType.variable,
+                    evaluateExpression(piType.type, )
+            );
         }
 
         throw new Exception("can't eval " + expression);
+    }*/
+
+    public static Value evaluateExpression(Expression expression, List<Value> bound) {
+        if (expression instanceof Variable) {
+            Variable variable = (Variable) expression;
+
+            if (variable.symbol.isFree()) {
+                String name = variable.symbol.getName();
+                if (name.matches("Type\\d+")) {
+                    int level = Integer.parseInt(name.substring(4));
+                    return new VType(level);
+                } else {
+                    return new VNeutral(new NFree(variable.symbol));
+                }
+            } else {
+                int index = variable.symbol.getIndex();
+                return bound.get(index);
+            }
+        } else if (expression instanceof Application) {
+            Application application = (Application) expression;
+            Value function = evaluateExpression(application.function, bound);
+            Value argument = evaluateExpression(application.argument, bound);
+
+            if (function instanceof VAbstraction) {
+                VAbstraction abstraction = (VAbstraction) function;
+                return abstraction.call(argument);
+            } else if (function instanceof VNeutral) {
+                VNeutral neutral = (VNeutral) function;
+                return new VNeutral(new NApplication(neutral.neutral, argument));
+            } else {
+                System.err.println("can't apply to a " + function.getClass().getSimpleName());
+                return null;
+            }
+        } else if (expression instanceof Abstraction) {
+            Abstraction abstraction = (Abstraction) expression;
+
+            assert abstraction.symbol == null;
+
+            return new VAbstraction(argument -> {
+                List<Value> newBound = new ArrayList<>();
+                newBound.add(argument);
+                newBound.addAll(bound);
+                return evaluateExpression(abstraction.body, newBound);
+            });
+        } else if (expression instanceof PiType) {
+            PiType piType = (PiType) expression;
+            Value type = evaluateExpression(piType.type, bound);
+            Function<Value, Value> body = argument -> {
+                List<Value> newBound = new ArrayList<>();
+                newBound.add(argument);
+                newBound.addAll(bound);
+                return evaluateExpression(piType.body, newBound);
+            };
+            return new VPi(type, body);
+        }
+
+        return null;
     }
 
     private static Expression substitute(Expression expression, Symbol symbol, Expression substitution) {
