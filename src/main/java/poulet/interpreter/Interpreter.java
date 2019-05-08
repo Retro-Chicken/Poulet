@@ -23,10 +23,10 @@ public class Interpreter {
         for (TopLevel topLevel : program.program) {
             if (topLevel instanceof Definition) {
                 Definition definition = (Definition) topLevel;
-                Checker.checkKind(context, definition.type);
+                Checker.checkKind(definition.type, context);
                 if (definition.definition != null)
-                    Checker.checkType(context, definition.definition, definition.type);
-                context = context.append(definition.name, definition.type);
+                    Checker.checkType(definition.definition, evaluateExpression(definition.type), context);
+                context = context.append(definition.name, evaluateExpression(definition.type));
             } else if (topLevel instanceof Print) {
                 Print print = (Print) topLevel;
                 switch (print.command) {
@@ -34,7 +34,7 @@ public class Interpreter {
                         out.println(evaluateExpression(print.expression));
                         break;
                     case check:
-                        out.println(Checker.deduceType(context, print.expression));
+                        out.println(Checker.deduceType(print.expression, context));
                         break;
                 }
             }
@@ -177,6 +177,10 @@ public class Interpreter {
 
         throw new Exception("can't eval " + expression);
     }*/
+
+    public static Value evaluateExpression(Expression expression) {
+        return evaluateExpression(expression, new ArrayList<>());
+    }
 
     public static Value evaluateExpression(Expression expression, List<Value> bound) {
         if (expression instanceof Variable) {

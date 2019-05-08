@@ -8,4 +8,9 @@ public class NApplication extends Neutral {
         this.function = function;
         this.argument = argument;
     }
+
+    @Override
+    public String toString() {
+        return String.format("(%s) %s", function, argument);
+    }
 }

@@ -2,6 +2,10 @@ package poulet.typing;
 
 import poulet.ast.*;
 import poulet.interpreter.Interpreter;
+import poulet.value.*;
+
+import java.util.List;
+import java.util.Random;
 
 public class Checker {
     /*
@@ -48,7 +52,7 @@ public class Checker {
         }
         return null;
     }*/
-
+    /*
     public static void checkKind(Context context, Expression type) throws TypeException {
         if (type instanceof Variable) {
             Expression kindOfType = context.lookUp(((Variable) type).symbol);
@@ -128,6 +132,107 @@ public class Checker {
             }
         } else if (term instanceof PiType) {
             PiType piType = (PiType) term;
+        }
+
+        return null;
+    }*/
+    public static void checkKind(Expression expression, Context context) {
+        return;
+    }
+
+
+    public static Value deduceType(Expression expression, Context context) throws TypeException {
+        if(expression instanceof Variable) {
+            Variable variable = (Variable) expression;
+            if (variable.symbol.isFree()) {
+                String name = variable.symbol.getName();
+                if (name.matches("Type\\d+")) {
+                    int level = Integer.parseInt(name.substring(4));
+                    return new VType(level);
+                } else {
+                    Value result = context.lookUp(variable.symbol);
+                    if(result == null)
+                        throw new TypeException("Unknown Identifier");
+                    return result;
+                }
+            }
+        } else if(expression instanceof PiType) {
+            // TODO: Confirm PiType is valid
+            return new VType(1);
+        } else if(expression instanceof Application) {
+            Application application = (Application) expression;
+            Value type = deduceType(application.function, context);
+            if(type instanceof VPi) {
+                VPi vPi = (VPi) type;
+                checkType(application.argument, vPi.type, context);
+                return vPi.call(Interpreter.evaluateExpression(application.argument));
+            } else {
+                throw new TypeException("Illegal Application");
+            }
+        }
+
+        return null;
+    }
+
+    public static void checkType(Expression expression, Value type, Context context) throws TypeException {
+        if(expression instanceof Abstraction) {
+            if(type instanceof VPi) {
+                Abstraction abstraction = (Abstraction) expression;
+                VPi vPi = (VPi) type;
+                Context newContext = context.increment();
+                // TODO: Fix extreme sketchy-ness
+                Symbol uniqueSymbol = new Symbol("" + new Random().nextInt(10000));
+                newContext = newContext.append(uniqueSymbol, vPi.type);
+                checkType(substitute(abstraction.body, new Variable(uniqueSymbol)),
+                        vPi.call(new VNeutral(new NFree(uniqueSymbol))),
+                        newContext);
+            }
+        } else if (expression instanceof Variable) {
+            Variable variable = (Variable) expression;
+            Value deducedType = deduceType(variable, context);
+            if(!deducedType.equals(type))
+                throw new TypeException("Type Mismatch");
+        } else if (expression instanceof Application) {
+            Application application = (Application) expression;
+            Value deducedType = deduceType(application, context);
+            if(!deducedType.equals(type))
+                throw new TypeException("Type Mismatch");
+        }
+
+        throw new TypeException("Type Mismatch");
+    }
+
+    private static Expression substitute(Expression base, Expression substitute) {
+        return substitute(base, substitute, 0);
+    }
+
+    private static Expression substitute(Expression base, Expression substitute, int i) {
+        if(base instanceof Variable) {
+            Variable variable = (Variable) base;
+
+            if(variable.symbol.isFree()) {
+                return variable;
+            } else {
+                int index = variable.symbol.getIndex();
+                if(index == i)
+                    return substitute;
+                else
+                    return base;
+            }
+        } else if(base instanceof Application) {
+            Application application = (Application) base;
+            Expression function = substitute(application.function, substitute, i);
+            Expression argument = substitute(application.argument, substitute, i);
+            return new Application(function, argument);
+        } else if(base instanceof Abstraction) {
+            Abstraction abstraction = (Abstraction) base;
+            Expression body = substitute(abstraction.body, substitute, i + 1);
+            return new Abstraction(abstraction.symbol, abstraction.type, body);
+        } else if(base instanceof PiType) {
+            PiType piType = (PiType) base;
+            Expression type = substitute(piType.type, substitute, i);
+            Expression body = substitute(piType.body, substitute, i + 1);
+            return new PiType(piType.variable, type, body);
         }
 
         return null;

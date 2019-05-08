@@ -10,4 +10,8 @@ public class VPi extends Value {
         this.type = type;
         this.body = body;
     }
+
+    public Value call(Value argument) {
+        return body.apply(argument);
+    }
 }
