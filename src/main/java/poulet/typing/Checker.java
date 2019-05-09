@@ -1,9 +1,12 @@
 package poulet.typing;
 
+import com.sun.org.apache.xpath.internal.operations.Quo;
 import poulet.ast.*;
 import poulet.interpreter.Interpreter;
+import poulet.quote.Quote;
 import poulet.value.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -140,8 +143,11 @@ public class Checker {
         return;
     }
 
-
     public static Value deduceType(Expression expression, Context context) throws TypeException {
+        return deduceType(expression, context, new ArrayList<>());
+    }
+
+    private static Value deduceType(Expression expression, Context context, List<Value> bound) throws TypeException {
         if(expression instanceof Variable) {
             Variable variable = (Variable) expression;
             if (variable.symbol.isFree()) {
@@ -162,8 +168,6 @@ public class Checker {
         } else if(expression instanceof Application) {
             Application application = (Application) expression;
             Value type = deduceType(application.function, context);
-            System.out.println("DEDUCING: " + application.function);
-            System.out.println("APPLICATION Type: "+ type);
             if(type instanceof VPi) {
                 VPi vPi = (VPi) type;
                 checkType(application.argument, vPi.type, context);
@@ -175,17 +179,28 @@ public class Checker {
             Abstraction abstraction = (Abstraction) expression;
             Context newContext = context.increment();
             // TODO: Fix extreme sketchy-ness
-            Symbol uniqueSymbol = new Symbol("_", "" + new Random().nextInt(10000));
-            newContext = newContext.append(uniqueSymbol, Interpreter.evaluateExpression(abstraction.type));
-            Value bodyType = deduceType(substitute(abstraction.body, new Variable(uniqueSymbol)), newContext);
+            Symbol uniqueSymbol = new Symbol("bound" + bound.size(), "" + new Random().nextInt(10000));
+            //Quote uniqueSymbol = new Quote(bound.size());
+            // TODO: Need to pass bound variables from abstraction when doing types
+            newContext = newContext.append(uniqueSymbol, Interpreter.evaluateExpression(abstraction.type, bound));
+
+            List<Value> newBound = new ArrayList<>();
+            newBound.add(new VNeutral(new NFree(uniqueSymbol)));
+            newBound.addAll(bound);
+
+            Value bodyType = deduceType(substitute(abstraction.body, new Variable(uniqueSymbol)), newContext, newBound);
             PiType type = new PiType(null, abstraction.type, bodyType.expression());
-            return Interpreter.evaluateExpression(type);
+            return Interpreter.evaluateExpression(type, bound);
         }
 
         return null;
     }
 
     public static void checkType(Expression expression, Value type, Context context) throws TypeException {
+        checkType(expression, type, context, new ArrayList<>());
+    }
+
+    private static void checkType(Expression expression, Value type, Context context, List<Value> bound) throws TypeException {
         if(expression instanceof Abstraction) {
             if(type instanceof VPi) {
                 Abstraction abstraction = (Abstraction) expression;
@@ -193,10 +208,15 @@ public class Checker {
                 Context newContext = context.increment();
                 // TODO: Fix extreme sketchy-ness
                 Symbol uniqueSymbol = new Symbol("_", "" + new Random().nextInt(10000));
+
+                List<Value> newBound = new ArrayList<>();
+                newBound.add(new VNeutral(new NFree(uniqueSymbol)));
+                newBound.addAll(bound);
+
                 newContext = newContext.append(uniqueSymbol, vPi.type);
                 checkType(substitute(abstraction.body, new Variable(uniqueSymbol)),
                         vPi.call(new VNeutral(new NFree(uniqueSymbol))),
-                        newContext);
+                        newContext, newBound);
                 return;
             }
         } else if (expression instanceof Variable) {
@@ -232,11 +252,11 @@ public class Checker {
         if(base instanceof Variable) {
             Variable variable = (Variable) base;
 
-            if(variable.symbol.isFree()) {
+            if (variable.symbol.isFree()) {
                 return variable;
             } else {
                 int index = variable.symbol.getIndex();
-                if(index == i)
+                if (index == i)
                     return substitute;
                 else
                     return base;

@@ -26,10 +26,12 @@ public class Symbol extends Node implements Name {
         this.uniqueID = null;
     }
 
+    @Override
     public Integer getIndex() {
         return index;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -50,7 +52,7 @@ public class Symbol extends Node implements Name {
                 return index.equals(other.index);
             } else if (name != null && other.name != null) {
                 if(uniqueID != null)
-                    return other.uniqueID != null && uniqueID.equals(other.uniqueID) && name.equals(other.name);
+                    return uniqueID.equals(other.uniqueID) && name.equals(other.name);
                 return other.uniqueID == null && name.equals(other.name);
             }
         }
@@ -70,12 +72,14 @@ public class Symbol extends Node implements Name {
     /**
      * increment index if indexed, otherwise don't change
      */
+    @Override
     public Symbol increment() {
         if (index != null)
             return new Symbol(index + 1);
         return this;
     }
 
+    @Override
     public boolean isFree() {
         return index == null;
     }

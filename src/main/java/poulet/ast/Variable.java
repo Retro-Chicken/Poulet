@@ -1,14 +1,16 @@
 package poulet.ast;
 
+import poulet.value.Name;
+
 public class Variable extends Expression {
     public final Symbol type;
-    public final Symbol symbol;
+    public final Name symbol;
 
-    public Variable(Symbol symbol) {
+    public Variable(Name symbol) {
         this(null, symbol);
     }
 
-    public Variable(Symbol type, Symbol symbol) {
+    public Variable(Symbol type, Name symbol) {
         this.type = type;
         this.symbol = symbol;
     }
@@ -36,8 +38,11 @@ public class Variable extends Expression {
     }
 
     public Variable transform(String offset) {
+        return this;
+        /*
         if(type == null)
             return new Variable(null, symbol.transform(offset));
         return new Variable(type, symbol.transform(offset));
+        */
     }
 }

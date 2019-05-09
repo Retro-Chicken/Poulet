@@ -117,7 +117,7 @@ public class TestInterpreter {
     void substituteFunctionCalls2() {
         try {
             Program actualProgram = ASTParser.parse(CharStreams.fromString("func : _ := \\x : _ -> z\nfunc2 : _ := \\z : _ -> (func) z\n_ : _ := (func2) w"));
-            Program actualSubstitutedProgram = Interpreter.substituteCalls(actualProgram);
+            Program actualSubstitutedProgram = Interpreter.substituteCalls(Interpreter.addIndices(actualProgram));
             Expression actualExpression = Interpreter.getExpressions(actualSubstitutedProgram).get(2);
             actualExpression = Interpreter.addIndices(actualExpression);
             Value actualResult = Interpreter.evaluateExpression(actualExpression);
@@ -136,6 +136,7 @@ public class TestInterpreter {
 
     @Test
     void transformProgram() {
+        // TODO: Fix if we care about it
         try {
             Program actualProgram = ASTParser.parse(CharStreams.fromString("func : _ := \\x : _ -> z\nfunc2 : _ := \\z : _ -> (func) z\n_ : _ := (func2) w"));
             Program transformed = Interpreter.transform(actualProgram);

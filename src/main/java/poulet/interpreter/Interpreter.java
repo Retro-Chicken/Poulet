@@ -34,17 +34,45 @@ public class Interpreter {
                         out.println(evaluateExpression(print.expression));
                         break;
                     case check:
-                        out.println(Checker.deduceType(print.expression, context));
+                        out.println(Checker.deduceType(print.expression, context));//cleanCheck(Checker.deduceType(print.expression, context).expression(), 0));
                         break;
                 }
             }
         }
     }
 
+    private static Expression cleanCheck(Expression expression, int depth) {
+        if(expression instanceof Application) {
+            Application application = (Application) expression;
+            Expression function = cleanCheck(application.function, depth);
+            Expression argument = cleanCheck(application.argument, depth);
+            return new Application(function, argument);
+        } else if(expression instanceof Abstraction) {
+            Abstraction abstraction = (Abstraction) expression;
+            Expression type = cleanCheck(abstraction.type, depth);
+            Expression body = cleanCheck(abstraction.body, depth + 1);
+            return new Abstraction(null, type, body);
+        } else if(expression instanceof Variable) {
+            Variable variable = (Variable) expression;
+            String name = variable.symbol.getName();
+            if(name.matches("bound\\d+")) {
+                int level = Integer.parseInt(name.substring(5));
+                return new Variable(new Symbol(depth - level - 1));
+            } else
+                return variable;
+        } else if(expression instanceof PiType) {
+            PiType piType = (PiType) expression;
+            Expression type = cleanCheck(piType.type, depth);
+            Expression body = cleanCheck(piType.body, depth + 1);
+            return new PiType(null, type, body);
+        }
+        return expression;
+    }
+
     public static Program transform(Program program) throws DefinitionException {
         Program result = new Program(program);
-        result = substituteCalls(result);
         result = addIndices(result);
+        result = substituteCalls(result);
         return result;
     }
 
@@ -90,7 +118,7 @@ public class Interpreter {
         for (int i = definitions.size() - 1; i >= 0; i--) {
             Definition definition = definitions.get(i);
             if (definition.definition != null) {
-                substituted = substitute(substituted, definition.name, definition.definition.transform("T" + new Random().nextInt(10000)));
+                substituted = substitute(substituted, definition.name, definition.definition);//definition.definition.transform("T" + new Random().nextInt(10000)));
             }
         }
         return substituted;
@@ -183,6 +211,9 @@ public class Interpreter {
     }
 
     public static Value evaluateExpression(Expression expression, List<Value> bound) {
+        return evaluateExpression(expression, bound, 0);
+    }
+    public static Value evaluateExpression(Expression expression, List<Value> bound, int depth) {
         if (expression instanceof Variable) {
             Variable variable = (Variable) expression;
 
@@ -200,8 +231,8 @@ public class Interpreter {
             }
         } else if (expression instanceof Application) {
             Application application = (Application) expression;
-            Value function = evaluateExpression(application.function, bound);
-            Value argument = evaluateExpression(application.argument, bound);
+            Value function = evaluateExpression(application.function, bound, depth + 1);
+            Value argument = evaluateExpression(application.argument, bound, depth + 1);
 
             if (function instanceof VAbstraction) {
                 VAbstraction abstraction = (VAbstraction) function;
@@ -222,16 +253,16 @@ public class Interpreter {
                 List<Value> newBound = new ArrayList<>();
                 newBound.add(argument);
                 newBound.addAll(bound);
-                return evaluateExpression(abstraction.body, newBound);
+                return evaluateExpression(abstraction.body, newBound, depth + 1);
             });
         } else if (expression instanceof PiType) {
             PiType piType = (PiType) expression;
-            Value type = evaluateExpression(piType.type, bound);
+            Value type = evaluateExpression(piType.type, bound, depth + 1);
             Function<Value, Value> body = argument -> {
                 List<Value> newBound = new ArrayList<>();
                 newBound.add(argument);
                 newBound.addAll(bound);
-                return evaluateExpression(piType.body, newBound);
+                return evaluateExpression(piType.body, newBound, depth + 1);
             };
             return new VPi(type, body);
         }
@@ -283,7 +314,7 @@ public class Interpreter {
                 Definition definition = (Definition) topLevel;
                 Definition indexed = new Definition(
                         definition.name,
-                        definition.type,
+                        addIndices(definition.type),
                         addIndices(definition.definition)
                 );
                 result.add(indexed);
@@ -309,8 +340,9 @@ public class Interpreter {
             Stack<Symbol> newStack = new Stack<>();
             newStack.addAll(stack);
             newStack.push(abstraction.symbol);
+            Expression type = addIndices(stack, abstraction.type);
             Expression body = addIndices(newStack, abstraction.body);
-            return new Abstraction(null, abstraction.type, body);
+            return new Abstraction(null, type, body);
         } else if (expression instanceof Application) {
             Application application = (Application) expression;
             Expression function = addIndices(stack, application.function);
@@ -326,6 +358,15 @@ public class Interpreter {
                 Symbol symbol = new Symbol(index - 1);
                 return new Variable(symbol);
             }
+        } else if(expression instanceof PiType) {
+            PiType piType = (PiType) expression;
+            // need to number types later
+            Stack<Symbol> newStack = new Stack<>();
+            newStack.addAll(stack);
+            newStack.push(piType.variable);
+            Expression type = addIndices(stack, piType.type);
+            Expression body = addIndices(newStack, piType.body);
+            return new PiType(null, type, body);
         }
 
         return expression;
@@ -371,19 +412,19 @@ public class Interpreter {
         return null;
     }*/
 
-    private static Set<Symbol> getFreeVariables(Expression expression) {
+    private static Set<Name> getFreeVariables(Expression expression) {
         if (expression instanceof Variable) {
             Variable variable = (Variable) expression;
-            return new HashSet<Symbol>(Arrays.asList(variable.symbol));
+            return new HashSet<Name>(Arrays.asList(variable.symbol));
         } else if (expression instanceof Abstraction) {
             Abstraction abstraction = (Abstraction) expression;
-            Set<Symbol> bodyFree = getFreeVariables(abstraction.body);
+            Set<Name> bodyFree = getFreeVariables(abstraction.body);
             bodyFree.remove(abstraction.symbol);
             return bodyFree;
         } else if (expression instanceof Application) {
             Application application = (Application) expression;
-            Set<Symbol> functionFree = getFreeVariables(application.function);
-            Set<Symbol> argumentFree = getFreeVariables(application.argument);
+            Set<Name> functionFree = getFreeVariables(application.function);
+            Set<Name> argumentFree = getFreeVariables(application.argument);
             functionFree.addAll(argumentFree);
             return functionFree;
         }

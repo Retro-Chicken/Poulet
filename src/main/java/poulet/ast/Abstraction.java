@@ -31,6 +31,6 @@ public class Abstraction extends Expression {
     }
 
     public Abstraction transform(String offset) {
-        return new Abstraction(symbol.transform(offset), type, body.transform(offset));
+        return new Abstraction(symbol.transform(offset), type.transform(offset), body.transform(offset));
     }
 }

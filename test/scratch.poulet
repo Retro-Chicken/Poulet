@@ -1,4 +1,21 @@
-int:Type1
-zero:int
-id : {a:Type1}{_:a}a := \a:Type1->\x:a->x
-#reduce ((id)int)zero
+id : {t : Type1}{x : t} t := \t : Type1 -> \x : t -> x
+
+tid : {t : Type1} Type1 := \t : Type1 -> t
+tid2 : {t : Type1} Type1 := \t : Type1 -> (tid) t
+
+int : Type1
+n : int
+#reduce ((id) int) n
+#check id
+#check (tid2) int
+
+polytrue : {t : Type1} {v : Type1} {a : t} {b : v} t := \t : Type1 -> \v : Type1 -> \a : t -> \b : v -> a
+#check polytrue
+
+typeA : Type1
+typeB : Type1
+
+instanceA : typeA
+instanceB : typeB
+
+#reduce ((((polytrue) typeA) typeB) instanceA) instanceB
