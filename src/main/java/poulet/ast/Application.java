@@ -23,8 +23,9 @@ public class Application extends Expression {
 
         return false;
     }
-
+    /*
     public Application transform(String offset) {
         return new Application(function.transform(offset), argument.transform(offset));
     }
+     */
 }

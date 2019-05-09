@@ -36,13 +36,13 @@ public class Variable extends Expression {
 
         return false;
     }
-
+    /*
     public Variable transform(String offset) {
         return this;
-        /*
+
         if(type == null)
             return new Variable(null, symbol.transform(offset));
         return new Variable(type, symbol.transform(offset));
-        */
     }
+    */
 }

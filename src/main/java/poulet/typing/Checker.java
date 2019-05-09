@@ -1,9 +1,8 @@
 package poulet.typing;
 
-import com.sun.org.apache.xpath.internal.operations.Quo;
 import poulet.ast.*;
 import poulet.interpreter.Interpreter;
-import poulet.quote.Quote;
+import poulet.temp.TempSymbol;
 import poulet.value.*;
 
 import java.util.ArrayList;
@@ -179,8 +178,9 @@ public class Checker {
             Abstraction abstraction = (Abstraction) expression;
             Context newContext = context.increment();
             // TODO: Fix extreme sketchy-ness
-            Symbol uniqueSymbol = new Symbol("bound" + bound.size(), "" + new Random().nextInt(10000));
+            //Symbol uniqueSymbol = new Symbol("bound" + bound.size(), "" + new Random().nextInt(10000));
             //Quote uniqueSymbol = new Quote(bound.size());
+            TempSymbol uniqueSymbol = new TempSymbol(bound.size());
             // TODO: Need to pass bound variables from abstraction when doing types
             newContext = newContext.append(uniqueSymbol, Interpreter.evaluateExpression(abstraction.type, bound));
 
@@ -190,7 +190,8 @@ public class Checker {
 
             Value bodyType = deduceType(substitute(abstraction.body, new Variable(uniqueSymbol)), newContext, newBound);
             PiType type = new PiType(null, abstraction.type, bodyType.expression());
-            return Interpreter.evaluateExpression(type, bound);
+            return new VPi(Interpreter.evaluateExpression(abstraction.type, bound), argument -> bodyType);
+            //return Interpreter.evaluateExpression(type, bound);
         }
 
         return null;
@@ -207,7 +208,7 @@ public class Checker {
                 VPi vPi = (VPi) type;
                 Context newContext = context.increment();
                 // TODO: Fix extreme sketchy-ness
-                Symbol uniqueSymbol = new Symbol("_", "" + new Random().nextInt(10000));
+                Symbol uniqueSymbol = new Symbol("" + new Random().nextInt(10000));
 
                 List<Value> newBound = new ArrayList<>();
                 newBound.add(new VNeutral(new NFree(uniqueSymbol)));

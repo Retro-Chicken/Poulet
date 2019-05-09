@@ -1,6 +1,7 @@
 package poulet.interpreter;
 
 import poulet.ast.*;
+import poulet.temp.TempQuoter;
 import poulet.typing.Checker;
 import poulet.typing.Context;
 import poulet.value.*;
@@ -34,7 +35,7 @@ public class Interpreter {
                         out.println(evaluateExpression(print.expression));
                         break;
                     case check:
-                        out.println(Checker.deduceType(print.expression, context));//cleanCheck(Checker.deduceType(print.expression, context).expression(), 0));
+                        out.println(TempQuoter.quote(Checker.deduceType(print.expression, context)));//cleanCheck(Checker.deduceType(print.expression, context).expression(), 0));
                         break;
                 }
             }
