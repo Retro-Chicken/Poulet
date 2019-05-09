@@ -1,16 +1,9 @@
 package poulet.value;
 
-import poulet.ast.Symbol;
-
 public class NFree extends Neutral {
-    public final Symbol symbol;
+    public final Name symbol;
 
-    public NFree(Symbol symbol) {
+    public NFree(Name symbol) {
         this.symbol = symbol;
-    }
-
-    @Override
-    public String toString() {
-        return symbol.toString();
     }
 }

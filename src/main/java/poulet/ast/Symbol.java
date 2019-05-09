@@ -1,6 +1,8 @@
 package poulet.ast;
 
-public class Symbol extends Node {
+import poulet.value.Name;
+
+public class Symbol extends Node implements Name {
     private final String name;
     private final Integer index;
 

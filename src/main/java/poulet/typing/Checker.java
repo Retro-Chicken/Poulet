@@ -162,6 +162,8 @@ public class Checker {
         } else if(expression instanceof Application) {
             Application application = (Application) expression;
             Value type = deduceType(application.function, context);
+            System.out.println("DEDUCING: " + application.function);
+            System.out.println("APPLICATION Type: "+ type);
             if(type instanceof VPi) {
                 VPi vPi = (VPi) type;
                 checkType(application.argument, vPi.type, context);
@@ -169,6 +171,15 @@ public class Checker {
             } else {
                 throw new TypeException("Illegal Application");
             }
+        } else if(expression instanceof Abstraction) {
+            Abstraction abstraction = (Abstraction) expression;
+            Context newContext = context.increment();
+            // TODO: Fix extreme sketchy-ness
+            Symbol uniqueSymbol = new Symbol("_", "" + new Random().nextInt(10000));
+            newContext = newContext.append(uniqueSymbol, Interpreter.evaluateExpression(abstraction.type));
+            Value bodyType = deduceType(substitute(abstraction.body, new Variable(uniqueSymbol)), newContext);
+            PiType type = new PiType(null, abstraction.type, bodyType.expression());
+            return Interpreter.evaluateExpression(type);
         }
 
         return null;
@@ -181,25 +192,36 @@ public class Checker {
                 VPi vPi = (VPi) type;
                 Context newContext = context.increment();
                 // TODO: Fix extreme sketchy-ness
-                Symbol uniqueSymbol = new Symbol("" + new Random().nextInt(10000));
+                Symbol uniqueSymbol = new Symbol("_", "" + new Random().nextInt(10000));
                 newContext = newContext.append(uniqueSymbol, vPi.type);
                 checkType(substitute(abstraction.body, new Variable(uniqueSymbol)),
                         vPi.call(new VNeutral(new NFree(uniqueSymbol))),
                         newContext);
+                return;
             }
         } else if (expression instanceof Variable) {
             Variable variable = (Variable) expression;
             Value deducedType = deduceType(variable, context);
             if(!deducedType.equals(type))
                 throw new TypeException("Type Mismatch");
+            return;
         } else if (expression instanceof Application) {
             Application application = (Application) expression;
             Value deducedType = deduceType(application, context);
             if(!deducedType.equals(type))
                 throw new TypeException("Type Mismatch");
+            return;
+        } else if(expression instanceof PiType) {
+            PiType piType = (PiType) expression;
+            Value deducedType = deduceType(piType, context);
+            if(!deducedType.equals(type))
+                throw new TypeException("Type Mismatch");
+            return;
+        } else if(expression == null) {
+            throw new TypeException("Checking Type of null");
         }
 
-        throw new TypeException("Type Mismatch");
+        throw new TypeException("Cannot Check Type of " + expression.getClass().getSimpleName());
     }
 
     private static Expression substitute(Expression base, Expression substitute) {
