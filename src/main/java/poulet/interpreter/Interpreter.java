@@ -35,7 +35,7 @@ public class Interpreter {
                         out.println(evaluateExpression(print.expression));
                         break;
                     case check:
-                        out.println(TempQuoter.quote(Checker.deduceType(print.expression, context)));//cleanCheck(Checker.deduceType(print.expression, context).expression(), 0));
+                        out.println(Checker.deduceType(print.expression, context));//cleanCheck(Checker.deduceType(print.expression, context).expression(), 0));
                         break;
                 }
             }

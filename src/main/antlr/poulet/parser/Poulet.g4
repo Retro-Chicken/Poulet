@@ -37,3 +37,7 @@ PRINT_COMMAND : 'print' ;
 SYMBOL : [a-zA-Z_][a-zA-Z0-9_]* ;
 
 WHITESPACE : [ \t\r\n]+ -> skip ;
+
+COMMENT : '/*' .*? '*/' -> skip ;
+
+LINE_COMMENT : '//' ~[\r\n]* -> skip ;

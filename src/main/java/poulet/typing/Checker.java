@@ -138,6 +138,7 @@ public class Checker {
 
         return null;
     }*/
+
     public static void checkKind(Expression expression, Context context) {
         return;
     }
@@ -189,13 +190,14 @@ public class Checker {
             newBound.addAll(bound);
 
             Value bodyType = deduceType(substitute(abstraction.body, new Variable(uniqueSymbol)), newContext, newBound);
-            PiType type = new PiType(null, abstraction.type, bodyType.expression());
+            //PiType type = new PiType(null, abstraction.type, bodyType.expression());
             return new VPi(Interpreter.evaluateExpression(abstraction.type, bound), argument -> bodyType);
             //return Interpreter.evaluateExpression(type, bound);
         }
 
         return null;
     }
+
 
     public static void checkType(Expression expression, Value type, Context context) throws TypeException {
         checkType(expression, type, context, new ArrayList<>());
@@ -208,7 +210,8 @@ public class Checker {
                 VPi vPi = (VPi) type;
                 Context newContext = context.increment();
                 // TODO: Fix extreme sketchy-ness
-                Symbol uniqueSymbol = new Symbol("" + new Random().nextInt(10000));
+                //Symbol uniqueSymbol = new Symbol("" + new Random().nextInt(10000));
+                TempSymbol uniqueSymbol = new TempSymbol(bound.size());
 
                 List<Value> newBound = new ArrayList<>();
                 newBound.add(new VNeutral(new NFree(uniqueSymbol)));
@@ -223,7 +226,7 @@ public class Checker {
                 throw new TypeException("Abstraction Cannot Have Type " + type);
         } else if (expression instanceof Variable) {
             Variable variable = (Variable) expression;
-            Value deducedType = deduceType(variable, context);
+            Value deducedType = deduceType(variable, context, bound);
             if(!deducedType.equals(type))
                 throw new TypeException("Type Mismatch");
             return;
@@ -235,7 +238,7 @@ public class Checker {
             return;
         } else if(expression instanceof PiType) {
             PiType piType = (PiType) expression;
-            Value deducedType = deduceType(piType, context);
+            Value deducedType = deduceType(piType, context, bound);
             if(!deducedType.equals(type))
                 throw new TypeException("Type Mismatch");
             return;

@@ -3,7 +3,7 @@ package poulet.temp;
 import poulet.value.Name;
 
 public class TempSymbol implements Name {
-    int level;
+    public int level;
 
     public TempSymbol(int level) {
         this.level = level;
