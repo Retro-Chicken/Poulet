@@ -41,7 +41,7 @@ public class Interpreter {
             }
         }
     }
-
+    /*
     private static Expression cleanCheck(Expression expression, int depth) {
         if(expression instanceof Application) {
             Application application = (Application) expression;
@@ -68,7 +68,7 @@ public class Interpreter {
             return new PiType(null, type, body);
         }
         return expression;
-    }
+    }*/
 
     public static Program transform(Program program) throws DefinitionException {
         Program result = new Program(program);
@@ -291,19 +291,20 @@ public class Interpreter {
             if (abstraction.symbol != null && abstraction.symbol.equals(symbol)) {
                 result = expression;
             } else {
+                Expression type = substitute(abstraction.type, symbol, substitution);
                 Expression body = substitute(abstraction.body, symbol.increment(), substitution);
-                result = new Abstraction(abstraction.symbol, abstraction.type, body);
+                result = new Abstraction(abstraction.symbol, type, body);
             }
         } else if (expression instanceof PiType) {
             PiType piType = (PiType) expression;
             Expression type = substitute(piType.type, symbol, substitution);
-            Expression body = substitute(piType.body, symbol, substitution);
+            Expression body = substitute(piType.body, symbol.increment(), substitution);
             result = new PiType(piType.variable, type, body);
         }
 
         // enforce unique symbol IDs
-        if (result != null)
-            addIndices(result);
+        //if (result != null)
+        //    addIndices(result);
 
         return result;
     }

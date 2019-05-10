@@ -35,9 +35,8 @@ public class Quoter {
             if(free.symbol instanceof Quote) {
                 Quote quote = (Quote) free.symbol;
                 return new Variable(new Symbol(i - quote.level - 1));
-            } else if(free.symbol instanceof Symbol) {
-                Symbol symbol = (Symbol) free.symbol;
-                return new Variable(symbol);
+            } else {
+                return new Variable(free.symbol);
             }
         } else if(neutral instanceof NApplication) {
             NApplication application = (NApplication) neutral;

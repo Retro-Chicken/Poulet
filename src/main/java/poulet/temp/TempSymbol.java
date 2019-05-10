@@ -26,7 +26,7 @@ public class TempSymbol implements Name {
 
     @Override
     public String getName() {
-        return "" + level;
+        return "TEMP" + level;
     }
 
     @Override
@@ -36,5 +36,10 @@ public class TempSymbol implements Name {
             return tempSymbol.level == this.level;
         }
         return false;
+    }
+
+    @Override
+    public String toString() {
+        return getName();
     }
 }

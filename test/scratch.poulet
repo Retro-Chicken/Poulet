@@ -1,6 +1,5 @@
-nat : Type1 := {X : Type1} {f : {_0 : X} X} {_1 : X} X
-zero : nat := \X : Type1 -> \f : {_0 : X} X -> \a : X -> a
+nat : Type1 := {X : Type1} {f : {_ : X} X} {_ : X} X
+n0 : nat := \X : Type1 -> \f : {_ : X} X -> \a : X -> a
 
-#check \n : nat -> \X : Type1 -> \f : {_0 : X} X -> \a : X -> (f) (((n) X) f) a
-
-succ : {_ : nat} nat := \n : nat -> \X : Type1 -> \f : {_0 : X} X -> \a : X -> (f) (((n) X) f) a
+succ : {_ : nat} nat := \n : nat -> \X : Type1 -> \f : {_ : X} X -> \a : X -> (f) (((n) X) f) a
+pred : {_ : nat} nat := \n : nat -> \T : Type1 -> \f : {_ : T} T -> \x : T -> ((((n) {_ : {_ : T} T} T) \g : {_ : {_ : T} T} T -> \h : {_ : T} T -> (h) (g) f) \u : {_ : T} T -> x) \u : T -> u

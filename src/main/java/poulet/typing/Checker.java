@@ -219,7 +219,8 @@ public class Checker {
                         vPi.call(new VNeutral(new NFree(uniqueSymbol))),
                         newContext, newBound);
                 return;
-            }
+            } else
+                throw new TypeException("Abstraction Cannot Have Type " + type);
         } else if (expression instanceof Variable) {
             Variable variable = (Variable) expression;
             Value deducedType = deduceType(variable, context);

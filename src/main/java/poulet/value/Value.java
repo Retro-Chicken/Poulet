@@ -11,9 +11,10 @@ public abstract class Value {
 
     @Override
     public boolean equals(Object obj) {
+        // TODO: Figure out why checking strings works but checking Expression equality doesn't
         if(obj instanceof Value) {
             Value value = (Value) obj;
-            return expression().equals(value.expression());
+            return expression().toString().equals(value.expression().toString());
         }
         return false;
     }
