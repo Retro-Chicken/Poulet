@@ -74,7 +74,34 @@ public class Interpreter {
         Program result = new Program(program);
         result = addIndices(result);
         result = substituteCalls(result);
+        result = annotateAbstractions(result);
         return result;
+    }
+
+    public static Program annotateAbstractions(Program program) {
+
+    }
+    public static Expression annotateAbstractions(Expression expression) {
+        if (expression instanceof Abstraction) {
+            Abstraction abstraction = (Abstraction) expression;
+            Abstraction newAbstraction = new Abstraction(abstraction.symbol, null, abstraction.body);
+            return new Annotation(newAbstraction, abstraction.type);
+        } else if (expression instanceof Application) {
+            Application application = (Application) expression;
+            return new Application(
+                    annotateAbstractions(application.function),
+                    annotateAbstractions(application.argument)
+            );
+        } else if (expression instanceof PiType){
+            PiType piType = (PiType) expression;
+            return new PiType(
+                    piType.variable,
+                    annotateAbstractions(piType.type),
+                    annotateAbstractions(piType.body)
+            );
+        } else {
+            return expression;
+        }
     }
 
     public static Program substituteCalls(Program program) throws DefinitionException {
