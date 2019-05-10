@@ -166,11 +166,11 @@ public class Checker {
             return new VType(1);
         } else if(expression instanceof Application) {
             Application application = (Application) expression;
-            Value type = deduceType(application.function, context);
+            Value type = deduceType(application.function, context, bound);
             if(type instanceof VPi) {
                 VPi vPi = (VPi) type;
-                checkType(application.argument, vPi.type, context);
-                return vPi.call(Interpreter.evaluateExpression(application.argument));
+                checkType(application.argument, vPi.type, context, bound);
+                return vPi.call(Interpreter.evaluateExpression(application.argument, bound));
             } else {
                 throw new TypeException("Illegal Application");
             }
@@ -228,7 +228,7 @@ public class Checker {
             return;
         } else if (expression instanceof Application) {
             Application application = (Application) expression;
-            Value deducedType = deduceType(application, context);
+            Value deducedType = deduceType(application, context, bound);
             if(!deducedType.equals(type))
                 throw new TypeException("Type Mismatch");
             return;

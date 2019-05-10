@@ -1,21 +1,6 @@
-id : {t : Type1}{x : t} t := \t : Type1 -> \x : t -> x
+nat : Type1 := {X : Type1} {f : {_0 : X} X} {_1 : X} X
+zero : nat := \X : Type1 -> \f : {_0 : X} X -> \a : X -> a
 
-tid : {t : Type1} Type1 := \t : Type1 -> t
-tid2 : {t : Type1} Type1 := \t : Type1 -> (tid) t
+#check \n : nat -> \X : Type1 -> \f : {_0 : X} X -> \a : X -> (f) (((n) X) f) a
 
-int : Type1
-n : int
-#reduce ((id) int) n
-#check id
-#check (tid2) int
-
-polytrue : {t : Type1} {v : Type1} {a : t} {b : v} t := \t : Type1 -> \v : Type1 -> \a : t -> \b : v -> a
-#check polytrue
-
-typeA : Type1
-typeB : Type1
-
-instanceA : typeA
-instanceB : typeB
-
-#reduce ((((polytrue) typeA) typeB) instanceA) instanceB
+succ : {_ : nat} nat := \n : nat -> \X : Type1 -> \f : {_0 : X} X -> \a : X -> (f) (((n) X) f) a
