@@ -74,14 +74,34 @@ public class Interpreter {
         Program result = new Program(program);
         result = addIndices(result);
         result = substituteCalls(result);
-        result = annotateAbstractions(result);
+        //result = annotate(result);
         return result;
     }
 
-    public static Program annotateAbstractions(Program program) {
+    public static Program annotate(Program program) {
+        List<TopLevel> annotatedProgram = new ArrayList<>();
 
+        for (TopLevel topLevel : program.program) {
+            if (topLevel instanceof Definition) {
+                Definition definition = (Definition) topLevel;
+                Definition substituted = new Definition(
+                        definition.name,
+                        annotate(definition.type),
+                        annotate(definition.definition)
+                );
+                annotatedProgram.add(substituted);
+            } else if (topLevel instanceof Print) {
+                Print print = (Print) topLevel;
+                Print substituted = new Print(print.command, annotate(print.expression));
+                annotatedProgram.add(substituted);
+            } else {
+                annotatedProgram.add(topLevel);
+            }
+        }
+
+        return new Program(annotatedProgram);
     }
-    public static Expression annotateAbstractions(Expression expression) {
+    public static Expression annotate(Expression expression) {
         if (expression instanceof Abstraction) {
             Abstraction abstraction = (Abstraction) expression;
             Abstraction newAbstraction = new Abstraction(abstraction.symbol, null, abstraction.body);
@@ -89,19 +109,18 @@ public class Interpreter {
         } else if (expression instanceof Application) {
             Application application = (Application) expression;
             return new Application(
-                    annotateAbstractions(application.function),
-                    annotateAbstractions(application.argument)
+                    annotate(application.function),
+                    annotate(application.argument)
             );
         } else if (expression instanceof PiType){
             PiType piType = (PiType) expression;
             return new PiType(
                     piType.variable,
-                    annotateAbstractions(piType.type),
-                    annotateAbstractions(piType.body)
+                    annotate(piType.type),
+                    annotate(piType.body)
             );
-        } else {
-            return expression;
         }
+        return expression;
     }
 
     public static Program substituteCalls(Program program) throws DefinitionException {
@@ -293,6 +312,9 @@ public class Interpreter {
                 return evaluateExpression(piType.body, newBound, depth + 1);
             };
             return new VPi(type, body);
+        } else if(expression instanceof Annotation) {
+            Annotation annotation = (Annotation) expression;
+            return evaluateExpression(annotation.expression, bound, depth);
         }
 
         return null;

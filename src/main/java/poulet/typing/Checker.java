@@ -139,15 +139,19 @@ public class Checker {
         return null;
     }*/
 
+    private static VNeutral vFree(Name name) {
+        return new VNeutral(new NFree(name));
+    }
+
     public static void checkKind(Expression expression, Context context) {
         return;
     }
 
     public static Value deduceType(Expression expression, Context context) throws TypeException {
-        return deduceType(expression, context, new ArrayList<>());
+        return deduceType(expression, context, new ArrayList<>(), 0);
     }
 
-    private static Value deduceType(Expression expression, Context context, List<Value> bound) throws TypeException {
+    private static Value deduceType(Expression expression, Context context, List<Value> bound, int i) throws TypeException {
         if(expression instanceof Variable) {
             Variable variable = (Variable) expression;
             if (variable.symbol.isFree()) {
@@ -167,14 +171,19 @@ public class Checker {
             return new VType(1);
         } else if(expression instanceof Application) {
             Application application = (Application) expression;
-            Value type = deduceType(application.function, context, bound);
+            Value type = deduceType(application.function, context, bound, i);
             if(type instanceof VPi) {
                 VPi vPi = (VPi) type;
-                checkType(application.argument, vPi.type, context, bound);
+                checkType(application.argument, vPi.type, context, bound, i);
                 return vPi.call(Interpreter.evaluateExpression(application.argument, bound));
-            } else {
+            } else
                 throw new TypeException("Illegal Application");
-            }
+        } else if(expression instanceof Annotation) {
+            Annotation annotation = (Annotation) expression;
+            checkKind(annotation.type, context);
+            Value type = Interpreter.evaluateExpression(annotation.type);
+            checkType(annotation.expression, type, context, bound, i);
+            return type;
         } else if(expression instanceof Abstraction) {
             Abstraction abstraction = (Abstraction) expression;
             Context newContext = context.increment();
@@ -189,7 +198,7 @@ public class Checker {
             newBound.add(new VNeutral(new NFree(uniqueSymbol)));
             newBound.addAll(bound);
 
-            Value bodyType = deduceType(substitute(abstraction.body, new Variable(uniqueSymbol)), newContext, newBound);
+            Value bodyType = deduceType(substitute(abstraction.body, new Variable(uniqueSymbol)), newContext, newBound, i);
             //PiType type = new PiType(null, abstraction.type, bodyType.expression());
             return new VPi(Interpreter.evaluateExpression(abstraction.type, bound), argument -> bodyType);
             //return Interpreter.evaluateExpression(type, bound);
@@ -200,10 +209,10 @@ public class Checker {
 
 
     public static void checkType(Expression expression, Value type, Context context) throws TypeException {
-        checkType(expression, type, context, new ArrayList<>());
+        checkType(expression, type, context, new ArrayList<>(), 0);
     }
 
-    private static void checkType(Expression expression, Value type, Context context, List<Value> bound) throws TypeException {
+    private static void checkType(Expression expression, Value type, Context context, List<Value> bound, int i) throws TypeException {
         if(expression instanceof Abstraction) {
             if(type instanceof VPi) {
                 Abstraction abstraction = (Abstraction) expression;
@@ -211,34 +220,40 @@ public class Checker {
                 Context newContext = context.increment();
                 // TODO: Fix extreme sketchy-ness
                 //Symbol uniqueSymbol = new Symbol("" + new Random().nextInt(10000));
-                TempSymbol uniqueSymbol = new TempSymbol(bound.size());
+                TempSymbol uniqueSymbol = new TempSymbol(i);
 
                 List<Value> newBound = new ArrayList<>();
-                newBound.add(new VNeutral(new NFree(uniqueSymbol)));
+                newBound.add(vFree(uniqueSymbol));
                 newBound.addAll(bound);
 
                 newContext = newContext.append(uniqueSymbol, vPi.type);
                 checkType(substitute(abstraction.body, new Variable(uniqueSymbol)),
-                        vPi.call(new VNeutral(new NFree(uniqueSymbol))),
-                        newContext, newBound);
+                        vPi.call(vFree(uniqueSymbol)),
+                        newContext, newBound, i + 1);
                 return;
             } else
                 throw new TypeException("Abstraction Cannot Have Type " + type);
         } else if (expression instanceof Variable) {
             Variable variable = (Variable) expression;
-            Value deducedType = deduceType(variable, context, bound);
+            Value deducedType = deduceType(variable, context, bound, i);
             if(!deducedType.equals(type))
                 throw new TypeException("Type Mismatch");
             return;
         } else if (expression instanceof Application) {
             Application application = (Application) expression;
-            Value deducedType = deduceType(application, context, bound);
+            Value deducedType = deduceType(application, context, bound, i);
             if(!deducedType.equals(type))
                 throw new TypeException("Type Mismatch");
             return;
         } else if(expression instanceof PiType) {
             PiType piType = (PiType) expression;
-            Value deducedType = deduceType(piType, context, bound);
+            Value deducedType = deduceType(piType, context, bound, i);
+            if(!deducedType.equals(type))
+                throw new TypeException("Type Mismatch");
+            return;
+        } else if(expression instanceof Annotation) {
+            Annotation annotation = (Annotation) expression;
+            Value deducedType = deduceType(annotation, context, bound, i);
             if(!deducedType.equals(type))
                 throw new TypeException("Type Mismatch");
             return;
@@ -280,6 +295,11 @@ public class Checker {
             Expression type = substitute(piType.type, substitute, i);
             Expression body = substitute(piType.body, substitute, i + 1);
             return new PiType(piType.variable, type, body);
+        } else if(base instanceof Annotation) {
+            Annotation annotation = (Annotation) base;
+            Expression expression = substitute(annotation.expression, substitute, i);
+            Expression type = substitute(annotation.type, substitute, i);
+            return new Annotation(expression, type);
         }
 
         return null;
