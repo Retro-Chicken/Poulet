@@ -6,15 +6,16 @@ n0 : nat := \X : Type1 -> \f : {_ : X} X -> \a : X -> a
 succ : {_ : nat} nat := \n : nat -> \X : Type1 -> \f : {_ : X} X -> \a : X -> (f) (((n) X) f) a
 pred : {_ : nat} nat := \n : nat -> \T : Type1 -> \f : {_ : T} T -> \x : T -> ((((n) {_ : {_ : T} T} T) \g : {_ : {_ : T} T} T -> \h : {_ : T} T -> (h) (g) f) \u : {_ : T} T -> x) \u : T -> u
 
+
 // define bools
 bool : Type1 := {X : Type1} {_ : X} {_ : X} X
 true : bool := \X : Type1 -> \x : X -> \y : X -> x
 false : bool := \X : Type1 -> \x : X -> \y : X -> y
+ifthenelse : {X : Type1} {_ : bool} {_ : X} {_ : X} X := \X : Type1 -> \p : bool -> \a : X -> \b : X -> (((p) X) a) b
+and : {_ : bool} {_ : bool} bool := \a : bool -> \b : bool -> ((((ifthenelse) bool) a) b) false
+or : {_ : bool} {_ : bool} bool := \a : bool -> \b : bool -> ((((ifthenelse) bool) a) true) b
 
+// predicates on natural numbers
 iszero : {_ : nat} bool := \n : nat -> (((n) bool) \x : bool -> false) true
 
 n1 : nat := (succ) n0
-
-#reduce (iszero) n0
-#reduce (iszero) (succ) n0
-#reduce (iszero) (pred) (succ) n0

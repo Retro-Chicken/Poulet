@@ -22,4 +22,8 @@ public class Annotation extends Expression {
         }
         return false;
     }
+
+    public Annotation offset(int offset) {
+        return new Annotation(expression.offset(offset), type.offset(offset));
+    }
 }

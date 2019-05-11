@@ -15,6 +15,12 @@ public class TempSymbol implements Name {
     }
 
     @Override
+    public TempSymbol decrement() { return this; }
+
+    @Override
+    public TempSymbol offset(int offset) { return this; }
+
+    @Override
     public boolean isFree() {
         return true;
     }

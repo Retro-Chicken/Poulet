@@ -76,8 +76,18 @@ public class Symbol extends Node implements Name {
      */
     @Override
     public Symbol increment() {
-        if (index != null)
-            return new Symbol(index + 1);
+        return offset(1);
+    }
+
+    @Override
+    public Symbol decrement() {
+        return offset(-1);
+    }
+
+    @Override
+    public Symbol offset(int offset) {
+        if(index != null)
+            return new Symbol(index + offset);
         return this;
     }
 

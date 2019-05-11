@@ -28,4 +28,7 @@ public class Application extends Expression {
         return new Application(function.transform(offset), argument.transform(offset));
     }
      */
+    public Application offset(int offset) {
+        return new Application(function.offset(offset), argument.offset(offset));
+    }
 }

@@ -4,6 +4,7 @@ import poulet.ast.*;
 import poulet.temp.TempQuoter;
 import poulet.typing.Checker;
 import poulet.typing.Context;
+import poulet.typing.EContext;
 import poulet.value.*;
 
 import java.io.PrintWriter;
@@ -19,15 +20,15 @@ public class Interpreter {
 
     public static void run(Program program, PrintWriter out) throws Exception {
         program = transform(program);
-        Context context = new Context();
+        EContext context = new EContext();
 
         for (TopLevel topLevel : program.program) {
             if (topLevel instanceof Definition) {
                 Definition definition = (Definition) topLevel;
-                Checker.checkKind(definition.type, context);
+                Checker.checkKind(context, definition.type);
                 if (definition.definition != null)
-                    Checker.checkType(definition.definition, evaluateExpression(definition.type), context);
-                context = context.append(definition.name, evaluateExpression(definition.type));
+                    Checker.checkType(context, definition.definition, definition.type);
+                context = context.append(definition.name, definition.type);
             } else if (topLevel instanceof Print) {
                 Print print = (Print) topLevel;
                 switch (print.command) {
@@ -35,7 +36,7 @@ public class Interpreter {
                         out.println(evaluateExpression(print.expression));
                         break;
                     case check:
-                        out.println(Checker.deduceType(print.expression, context));//cleanCheck(Checker.deduceType(print.expression, context).expression(), 0));
+                        out.println(Interpreter.addIndices(Checker.deduceType(context, print.expression)));//cleanCheck(Checker.deduceType(print.expression, context).expression(), 0));
                         break;
                 }
             }

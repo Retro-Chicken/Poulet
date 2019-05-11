@@ -20,4 +20,8 @@ public class PiType extends Expression {
         return new PiType(variable.transform(offset), type.transform(offset), body.transform(offset));
     }
      */
+
+    public PiType offset(int offset) {
+        return new PiType(variable, type.offset(offset), body.offset(offset));
+    }
 }

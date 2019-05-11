@@ -45,4 +45,8 @@ public class Variable extends Expression {
         return new Variable(type, symbol.transform(offset));
     }
     */
+
+    public Variable offset(int offset) {
+        return new Variable(symbol.offset(offset));
+    }
 }

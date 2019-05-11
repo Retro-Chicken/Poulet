@@ -54,8 +54,10 @@ public class Checker {
         }
         return null;
     }*/
-    /*
-    public static void checkKind(Context context, Expression type) throws TypeException {
+
+    public static void checkKind(EContext context, Expression type) throws TypeException {
+        return;
+        /*
         if (type instanceof Variable) {
             Expression kindOfType = context.lookUp(((Variable) type).symbol);
             if (kindOfType instanceof Variable) {
@@ -68,15 +70,16 @@ public class Checker {
             PiType piType = (PiType) type;
             checkKind(context, piType.type);
             checkKind(context, piType.body);
-        }
+        }*/
     }
 
-    public static void checkType(Context context, Expression term, Expression type) throws TypeException {
+    public static void checkType(EContext context, Expression term, Expression type) throws TypeException {
+        /*
         checkKind(context, type);
         if (term instanceof Abstraction && type instanceof PiType) {
             Abstraction abstraction = (Abstraction) term;
             PiType piType = (PiType) type;
-            Context newContext = context.increment();
+            EContext newContext = context.increment();
             newContext = newContext.append(new Symbol(0), abstraction.type);
             checkType(newContext, abstraction.body, piType.body);
         } else if (term instanceof Variable) {
@@ -90,13 +93,16 @@ public class Checker {
             if (variableType.equals(type)) {
                 return;
             }
+            System.out.println("Input: " + variable);
+            System.out.println("Look-Up: " + variableType);
+            System.out.println("Type: " + type);
 
             throw new TypeException("type mismatch");
         } else if (term instanceof Application) {
             Application application = (Application) term;
             Expression argumentType = deduceType(context, application.argument);
             Expression requiredFunctionType = new PiType(
-                    new Symbol("_"),
+                    null,
                     argumentType,
                     type
             );
@@ -105,16 +111,26 @@ public class Checker {
             return;
         } else {
             throw new TypeException("type mismatch " + term + ", " + type);
+        }*/
+        Expression deduced = deduceType(context, term);
+        deduced = Interpreter.addIndices(deduced);
+        if(!deduced.toString().equals(type.toString())) {
+            throw new TypeException("Type Mismatch:\n" + term + " is of type " + deduced + ", not " + type);
         }
     }
 
-    public static Expression deduceType(Context context, Expression term) throws TypeException {
+    public static Expression deduceType(EContext context, Expression term) throws TypeException {
         if (term instanceof Abstraction) {
             Abstraction abstraction = (Abstraction) term;
-            Context newContext = context.increment();
-            newContext = newContext.append(new Symbol(0), abstraction.type);
-            Expression bodyType = deduceType(newContext, abstraction.body);
-            return new PiType(new Symbol("_"), abstraction.type, bodyType);
+            EContext newContext = context.increment();
+
+            Symbol tempSymbol = new Symbol("" + new Random().nextInt(1000));
+
+            //newContext = newContext.append(new Symbol(0), abstraction.type);
+            newContext = newContext.append(tempSymbol, abstraction.type);
+            //System.out.println(substitute(abstraction.body, new Variable(new Symbol("TEST" + new Random().nextInt(1000)))));
+            Expression bodyType = deduceType(newContext, substitute(abstraction.body, new Variable(tempSymbol)));
+            return new PiType(tempSymbol, abstraction.type, bodyType);
         } else if (term instanceof Variable) {
             Variable variable = (Variable) term;
             Expression variableType = context.lookUp(variable.symbol);
@@ -126,18 +142,33 @@ public class Checker {
             return variableType;
         } else if (term instanceof Application) {
             Application application = (Application) term;
-            Expression bodyType = deduceType(context, application.function);
-            if (bodyType instanceof PiType) {
-                PiType piType = (PiType) bodyType;
+            Expression functionType = deduceType(context, application.function);
+            if (functionType instanceof PiType) {
+                PiType piType = (PiType) functionType;
                 checkType(context, application.argument, piType.type);
-                return piType.body;
+                /*
+                if(application.argument instanceof Variable) {
+                    Symbol uniqueSymbol = new Symbol("" + new Random().nextInt(1000));
+                    EContext newContext = context.increment();
+                    newContext = newContext.append(uniqueSymbol, );
+                    functionType = deduceType(newContext, substitute(application.function, new Variable(uniqueSymbol)));
+                }*/
+                if(application.function instanceof Abstraction) {
+                    Abstraction abstraction = (Abstraction) application.function;
+                    Expression bodyType = deduceType(context, substitute(abstraction.body, application.argument));
+                    //System.out.println("Body Type: " + bodyType);
+                    return bodyType;
+                }
+                return substitute(piType.body, application.argument);
+                //return piType.body;
             }
         } else if (term instanceof PiType) {
-            PiType piType = (PiType) term;
+            //PiType piType = (PiType) term;
+            return new Variable(new Symbol("Type1"));
         }
 
         return null;
-    }*/
+    }
 
     private static VNeutral vFree(Name name) {
         return new VNeutral(new NFree(name));
@@ -288,8 +319,9 @@ public class Checker {
             return new Application(function, argument);
         } else if(base instanceof Abstraction) {
             Abstraction abstraction = (Abstraction) base;
+            Expression type = substitute(abstraction.type, substitute, i);
             Expression body = substitute(abstraction.body, substitute, i + 1);
-            return new Abstraction(abstraction.symbol, abstraction.type, body);
+            return new Abstraction(abstraction.symbol, type, body);
         } else if(base instanceof PiType) {
             PiType piType = (PiType) base;
             Expression type = substitute(piType.type, substitute, i);
@@ -302,6 +334,6 @@ public class Checker {
             return new Annotation(expression, type);
         }
 
-        return null;
+        return base;
     }
 }

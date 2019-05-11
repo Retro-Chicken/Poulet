@@ -1,5 +1,6 @@
 package poulet.quote;
 
+import poulet.temp.TempSymbol;
 import poulet.value.Name;
 
 public class Quote implements Name {
@@ -13,6 +14,12 @@ public class Quote implements Name {
     public Quote increment() {
         return this;
     }
+
+    @Override
+    public Quote decrement() { return this; }
+
+    @Override
+    public Quote offset(int offset) { return this; }
 
     @Override
     public boolean isFree() {
