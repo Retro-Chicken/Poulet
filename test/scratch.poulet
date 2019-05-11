@@ -5,7 +5,9 @@ n0 : nat := \X : Type1 -> \f : {_ : X} X -> \a : X -> a
 // define operations on natural numbers
 succ : {_ : nat} nat := \n : nat -> \X : Type1 -> \f : {_ : X} X -> \a : X -> (f) (((n) X) f) a
 pred : {_ : nat} nat := \n : nat -> \T : Type1 -> \f : {_ : T} T -> \x : T -> ((((n) {_ : {_ : T} T} T) \g : {_ : {_ : T} T} T -> \h : {_ : T} T -> (h) (g) f) \u : {_ : T} T -> x) \u : T -> u
-
+plus : {_ : nat} {_ : nat} nat := \n : nat -> \m : nat -> \X : Type1 -> \f : {_ : X} X -> \a : X -> (((m) X) f) (((n) X) f) a
+minus : {_ : nat} {_ : nat} nat := \n : nat -> \m : nat -> (((n) nat) pred) m
+mult : {_ : nat} {_ : nat} nat := \n : nat -> \m : nat -> \X : Type1 -> \f : {_ : X} X -> \a : X -> (((m) X) ((n) X) f) a
 
 // define bools
 bool : Type1 := {X : Type1} {_ : X} {_ : X} X
@@ -17,5 +19,15 @@ or : {_ : bool} {_ : bool} bool := \a : bool -> \b : bool -> ((((ifthenelse) boo
 
 // predicates on natural numbers
 iszero : {_ : nat} bool := \n : nat -> (((n) bool) \x : bool -> false) true
+gtr : {_ : nat} {_ : nat} bool := \n : nat -> \m : nat -> (iszero) ((minus) m) n
+less : {_ : nat} {_ : nat} bool := \n : nat -> \m : nat -> (iszero) ((minus) n) m
+eq : {_ : nat} {_ : nat} bool := \n : nat -> \m : nat -> ((and) ((gtr) n) m) ((gtr) m) n
 
 n1 : nat := (succ) n0
+n2 : nat := (succ) n1
+n4a : nat := ((plus) n2) n2
+n4b : nat := ((mult) n2) n2
+
+#reduce n4a
+#reduce n4b
+#reduce ((eq) n4a) n2

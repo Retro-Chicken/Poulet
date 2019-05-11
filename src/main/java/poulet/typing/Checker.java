@@ -145,6 +145,7 @@ public class Checker {
             Expression functionType = deduceType(context, application.function);
             if (functionType instanceof PiType) {
                 PiType piType = (PiType) functionType;
+                // TODO: Fix this
                 checkType(context, application.argument, piType.type);
                 /*
                 if(application.argument instanceof Variable) {

@@ -142,10 +142,12 @@ public class Interpreter {
         for (TopLevel topLevel : program.program) {
             if (topLevel instanceof Definition) {
                 Definition definition = (Definition) topLevel;
+                Expression substitutedType = substituteDefinitions(definition.type, new Program(substitutedProgram));
+                Expression substitutedDefinition = substituteDefinitions(definition.definition, new Program(substitutedProgram));
                 Definition substituted = new Definition(
                         definition.name,
-                        substituteDefinitions(definition.type, new Program(substitutedProgram)),
-                        substituteDefinitions(definition.definition, new Program(substitutedProgram))
+                        substitutedType,
+                        substitutedDefinition
                 );
                 substitutedProgram.add(substituted);
             } else if (topLevel instanceof Print) {
