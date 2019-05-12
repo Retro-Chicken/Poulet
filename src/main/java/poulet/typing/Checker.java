@@ -1,5 +1,6 @@
 package poulet.typing;
 
+import poulet.Util;
 import poulet.ast.*;
 import poulet.interpreter.Interpreter;
 import poulet.temp.TempSymbol;
@@ -10,7 +11,6 @@ import java.util.List;
 import java.util.Random;
 
 public class Checker {
-    public static int UNIQUE_TAG = 0;
     /*
     public static PiType deduceType(Expression expression, Context context) {
         if(expression instanceof Abstraction) {
@@ -57,7 +57,28 @@ public class Checker {
     }*/
 
     public static void checkKind(EContext context, Expression type) throws TypeException {
-        return;
+        if(type instanceof PiType) {
+            PiType piType = (PiType) type;
+            checkKind(context, piType.type);
+            checkKind(context, piType.body);
+            return;
+        } else if(type instanceof Variable) {
+            Variable variable = (Variable) type;
+            if(variable.symbol.isFree()) {
+                Expression deducedType = deduceType(context, variable);
+                if(deducedType instanceof Variable) {
+                    Variable variableType = (Variable) deducedType;
+                    String name = variableType.symbol.getName();
+                    if(name.matches("Type\\d+"))
+                        return;
+                }
+                String name = variable.symbol.getName();
+                if(name.matches("Type\\d+"))
+                    return;
+            } else
+                return;
+        }
+        throw new TypeException("Unrecognized Type " + type);
         /*
         if (type instanceof Variable) {
             Expression kindOfType = context.lookUp(((Variable) type).symbol);
@@ -114,7 +135,7 @@ public class Checker {
             throw new TypeException("type mismatch " + term + ", " + type);
         }*/
         Expression deduced = deduceType(context, term);
-        deduced = Interpreter.addIndices(deduced);
+        //deduced = Interpreter.addIndices(deduced);
         if(!deduced.toString().equals(type.toString())) {
             throw new TypeException("Type Mismatch:\n" + term + " is of type " + deduced + ", not " + type);
         }
@@ -123,11 +144,13 @@ public class Checker {
     public static Expression deduceType(EContext context, Expression term) throws TypeException {
         if (term instanceof Abstraction) {
             Abstraction abstraction = (Abstraction) term;
+
+            checkKind(context, abstraction.type);
+
             EContext newContext = context.increment();
 
             //Symbol tempSymbol = new Symbol("" + new Random().nextInt(1000));
-            Symbol tempSymbol = new Symbol("!" + UNIQUE_TAG);
-            UNIQUE_TAG++;
+            Symbol tempSymbol = Util.getUniqueSymbol();
 
             //newContext = newContext.append(new Symbol(0), abstraction.type);
             newContext = newContext.append(tempSymbol, abstraction.type);
@@ -180,6 +203,7 @@ public class Checker {
             }
         } else if (term instanceof PiType) {
             //PiType piType = (PiType) term;
+            checkKind(context, term);
             return new Variable(new Symbol("Type1"));
         }
 

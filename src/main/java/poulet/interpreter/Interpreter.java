@@ -37,7 +37,7 @@ public class Interpreter {
                             out.println(evaluateExpression(print.expression));
                             break;
                         case check:
-                            out.println(Interpreter.addIndices(Checker.deduceType(context, print.expression)));//cleanCheck(Checker.deduceType(print.expression, context).expression(), 0));
+                            out.println(Checker.deduceType(context, print.expression));//cleanCheck(Checker.deduceType(print.expression, context).expression(), 0));
                             break;
                     }
                 }

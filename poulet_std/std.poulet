@@ -25,7 +25,3 @@ leq : {_ : nat} {_ : nat} bool := \n : nat -> \m : nat -> (iszero) ((minus) n) m
 eq : {_ : nat} {_ : nat} bool := \n : nat -> \m : nat -> ((and) ((geq) n) m) ((geq) m) n
 gtr : {_ : nat} {_ : nat} bool := \n : nat -> \m : nat -> ((geq) (pred) n) m
 less : {_ : nat} {_ : nat} bool := \n : nat -> \m : nat -> ((leq) (succ) n) m
-
-n1 : nat := (succ) n0
-n2 : nat := (succ) n1
-n4 : nat := ((exp) n2) n2
