@@ -14,6 +14,9 @@ bool : Type1 := {X : Type1} {_ : X} {_ : X} X
 true : bool := \X : Type1 -> \x : X -> \y : X -> x
 false : bool := \X : Type1 -> \x : X -> \y : X -> y
 ifthenelse : {X : Type1} {_ : bool} {_ : X} {_ : X} X := \X : Type1 -> \p : bool -> \a : X -> \b : X -> (((p) X) a) b
+
+#check ifthenelse
+#check (ifthenelse) bool
 and : {_ : bool} {_ : bool} bool := \a : bool -> \b : bool -> ((((ifthenelse) bool) a) b) false
 or : {_ : bool} {_ : bool} bool := \a : bool -> \b : bool -> ((((ifthenelse) bool) a) true) b
 
@@ -30,4 +33,4 @@ n4b : nat := ((mult) n2) n2
 
 #reduce n4a
 #reduce n4b
-#reduce ((eq) n4a) n2
+#reduce ((eq) n4b) n1

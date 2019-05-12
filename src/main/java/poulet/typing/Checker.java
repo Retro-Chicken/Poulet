@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Random;
 
 public class Checker {
+    public static int UNIQUE_TAG = 0;
     /*
     public static PiType deduceType(Expression expression, Context context) {
         if(expression instanceof Abstraction) {
@@ -124,13 +125,15 @@ public class Checker {
             Abstraction abstraction = (Abstraction) term;
             EContext newContext = context.increment();
 
-            Symbol tempSymbol = new Symbol("" + new Random().nextInt(1000));
+            //Symbol tempSymbol = new Symbol("" + new Random().nextInt(1000));
+            Symbol tempSymbol = new Symbol("!" + UNIQUE_TAG);
+            UNIQUE_TAG++;
 
             //newContext = newContext.append(new Symbol(0), abstraction.type);
             newContext = newContext.append(tempSymbol, abstraction.type);
             //System.out.println(substitute(abstraction.body, new Variable(new Symbol("TEST" + new Random().nextInt(1000)))));
             Expression bodyType = deduceType(newContext, substitute(abstraction.body, new Variable(tempSymbol)));
-            return new PiType(tempSymbol, abstraction.type, bodyType);
+            return Interpreter.addIndices(new PiType(tempSymbol, abstraction.type, bodyType));
         } else if (term instanceof Variable) {
             Variable variable = (Variable) term;
             Expression variableType = context.lookUp(variable.symbol);
@@ -154,12 +157,24 @@ public class Checker {
                     newContext = newContext.append(uniqueSymbol, );
                     functionType = deduceType(newContext, substitute(application.function, new Variable(uniqueSymbol)));
                 }*/
+                /*
+                Expression evalFunction = Interpreter.evaluateEExpression(application.function);
+                System.out.println("EVAL FUNCTION: " + evalFunction);
+                if(evalFunction instanceof Abstraction) {
+                    Abstraction abstraction = (Abstraction) evalFunction;
+                    Expression bodyType = deduceType(context, substitute(abstraction.body, application.argument));
+                    //System.out.println("Body Type: " + bodyType);
+                    return bodyType;
+                } else if(evalFunction instanceof Variable)
+                    return context.lookUp(((Variable) evalFunction).symbol);
+                */
+                /*
                 if(application.function instanceof Abstraction) {
                     Abstraction abstraction = (Abstraction) application.function;
                     Expression bodyType = deduceType(context, substitute(abstraction.body, application.argument));
                     //System.out.println("Body Type: " + bodyType);
                     return bodyType;
-                }
+                }*/
                 return substitute(piType.body, application.argument);
                 //return piType.body;
             }
@@ -296,7 +311,7 @@ public class Checker {
         throw new TypeException("Cannot Check Type of " + expression.getClass().getSimpleName());
     }
 
-    private static Expression substitute(Expression base, Expression substitute) {
+    public static Expression substitute(Expression base, Expression substitute) {
         return substitute(base, substitute, 0);
     }
 

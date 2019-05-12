@@ -23,22 +23,28 @@ public class Interpreter {
         EContext context = new EContext();
 
         for (TopLevel topLevel : program.program) {
-            if (topLevel instanceof Definition) {
-                Definition definition = (Definition) topLevel;
-                Checker.checkKind(context, definition.type);
-                if (definition.definition != null)
-                    Checker.checkType(context, definition.definition, definition.type);
-                context = context.append(definition.name, definition.type);
-            } else if (topLevel instanceof Print) {
-                Print print = (Print) topLevel;
-                switch (print.command) {
-                    case reduce:
-                        out.println(evaluateExpression(print.expression));
-                        break;
-                    case check:
-                        out.println(Interpreter.addIndices(Checker.deduceType(context, print.expression)));//cleanCheck(Checker.deduceType(print.expression, context).expression(), 0));
-                        break;
+            try {
+                if (topLevel instanceof Definition) {
+                    Definition definition = (Definition) topLevel;
+                    Checker.checkKind(context, definition.type);
+                    if (definition.definition != null)
+                        Checker.checkType(context, definition.definition, definition.type);
+                    context = context.append(definition.name, definition.type);
+                } else if (topLevel instanceof Print) {
+                    Print print = (Print) topLevel;
+                    switch (print.command) {
+                        case reduce:
+                            out.println(evaluateExpression(print.expression));
+                            break;
+                        case check:
+                            out.println(Interpreter.addIndices(Checker.deduceType(context, print.expression)));//cleanCheck(Checker.deduceType(print.expression, context).expression(), 0));
+                            break;
+                    }
                 }
+            } catch (Exception e) {
+                out.println("Error on Line: " + topLevel);
+                e.printStackTrace();
+                return;
             }
         }
     }
@@ -488,5 +494,28 @@ public class Interpreter {
 
     private static boolean isValue(Expression expression) {
         return expression instanceof Abstraction || expression instanceof Variable;
+    }
+
+    public static Expression evaluateEExpression(Expression expression) {
+        if (isValue(expression))
+            return expression;
+
+        if (expression instanceof Application) {
+            Application application = (Application) expression;
+            Expression function = evaluateEExpression(application.function);
+            Expression argument = evaluateEExpression(application.argument);
+
+            if (function instanceof Abstraction && isValue(argument)) {
+                Abstraction abstraction = (Abstraction) function;
+
+                assert abstraction.symbol == null;
+
+                return evaluateEExpression(Checker.substitute(abstraction.body, argument));
+            } else {
+                return new Application(function, argument);
+            }
+        }
+
+        return expression;
     }
 }
