@@ -6,6 +6,8 @@ import poulet.interpreter.Interpreter;
 
 public class Checker {
     public static void checkKind(Context context, Expression type) throws TypeException {
+        // TODO: Fix kind checking and add type hierarchy
+        /*
         if(type instanceof PiType) {
             PiType piType = (PiType) type;
             checkKind(context, piType.type);
@@ -26,36 +28,51 @@ public class Checker {
                     return;
             } else
                 return;
+        } else if(type instanceof Application) {
+            // TODO: Need to actually substitute into function otherwise it's most outward bound variable will have no known type
+            Application application = (Application) type;
+            Context newContext = context.increment();
+            Expression argumentType = deduceType(context, application.argument);
+            Symbol uniqueSymbol = Util.getUniqueSymbol();
+            newContext = newContext.append(uniqueSymbol, argumentType);
+            checkKind(newContext, substitute(application.function, new Variable(uniqueSymbol)));
+            checkKind(context, application.argument);
         }
         throw new TypeException("Unrecognized Type " + type);
+         */
     }
 
     public static void checkType(Context context, Expression term, Expression type) throws TypeException {
         Expression deduced = deduceType(context, term);
+        // TODO: See if this is sound, check if they're equivalent by beta reduction
+        deduced = Interpreter.evaluateExpression(deduced).expression();
+        type = Interpreter.evaluateExpression(type).expression();
+
         if(!deduced.toString().equals(type.toString()))
             throw new TypeException("Type Mismatch:\n" + term + " is of type " + deduced + ", not " + type);
     }
 
     public static Expression deduceType(Context context, Expression term) throws TypeException {
+        Expression result = null;
         if (term instanceof Abstraction) {
             Abstraction abstraction = (Abstraction) term;
+            Expression abstractionType = Interpreter.evaluateExpression(abstraction.type).expression();
 
-            checkKind(context, abstraction.type);
+            checkKind(context, abstractionType);
 
             Context newContext = context.increment();
             Symbol tempSymbol = Util.getUniqueSymbol();
-            newContext = newContext.append(tempSymbol, abstraction.type);
+            newContext = newContext.append(tempSymbol, abstractionType);
             Expression bodyType = deduceType(newContext, substitute(abstraction.body, new Variable(tempSymbol)));
-            return Interpreter.addIndices(new PiType(tempSymbol, abstraction.type, bodyType));
+            result = Interpreter.addIndices(new PiType(tempSymbol, abstractionType, bodyType));
         } else if (term instanceof Variable) {
             Variable variable = (Variable) term;
             Expression variableType = context.lookUp(variable.symbol);
 
-            if (variableType == null) {
-                throw new TypeException("unknown identifier");
-            }
+            if (variableType == null)
+                throw new TypeException("Unknown Identifier");
 
-            return variableType;
+            result = variableType;
         } else if (term instanceof Application) {
             Application application = (Application) term;
             Expression functionType = deduceType(context, application.function);
@@ -63,14 +80,26 @@ public class Checker {
                 PiType piType = (PiType) functionType;
                 // TODO: Fix this
                 checkType(context, application.argument, piType.type);
-                return substitute(piType.body, application.argument);
-            }
+                result = substitute(piType.body, application.argument);
+            } else if(functionType instanceof Variable) { // TODO: Double check this sketchy-ness
+                Variable variable = (Variable) functionType;
+                String name = variable.symbol.getName();
+                if(name.matches("Type\\d+")) {
+                    if(application.function instanceof PiType) {
+                        PiType piType = (PiType) application.function;
+                        checkType(context, application.argument, piType.type);
+                        result = new Variable(new Symbol("Type1"));
+                    }
+                }
+            } else
+                throw new TypeException("Application Function is not a Function");
         } else if (term instanceof PiType) {
             checkKind(context, term);
-            return new Variable(new Symbol("Type1"));
+            result = new Variable(new Symbol("Type1"));
         }
-
-        return null;
+        if(result == null)
+            throw new TypeException("Type Could not be Deduced");
+        return Interpreter.evaluateExpression(result).expression();
     }
 
     public static Expression substitute(Expression base, Expression substitute) {

@@ -166,6 +166,9 @@ public class Interpreter {
             } else if (function instanceof VNeutral) {
                 VNeutral neutral = (VNeutral) function;
                 return new VNeutral(new NApplication(neutral.neutral, argument));
+            } else if(function instanceof VPi) { // TODO: Check if this is even sound
+                VPi vPi = (VPi) function;
+                return vPi.call(argument);
             } else {
                 System.err.println("can't apply to a " + function.getClass().getSimpleName());
                 return null;

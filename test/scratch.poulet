@@ -28,14 +28,20 @@ eq : {_ : nat} {_ : nat} bool := \n : nat -> \m : nat -> ((and) ((geq) n) m) ((g
 gtr : {_ : nat} {_ : nat} bool := \n : nat -> \m : nat -> ((geq) (pred) n) m
 less : {_ : nat} {_ : nat} bool := \n : nat -> \m : nat -> ((leq) (succ) n) m
 
+// integer division
+//      dividing by 0 gives dividend
+divide : {_ : nat} {_ : nat} nat := \n : nat -> \m : nat -> (((n) nat) \z : nat -> ((((ifthenelse) nat) ((leq) ((mult) m) (succ) z) n) (succ) z) z) n0
+
+// define pairs
+pair : Type1 := {X : Type1} {_ : {_ : X} {_ : X} X} X
+construct_pair : {X : Type1} {_ : X} {_ : X} (pair) X := \X : Type1 -> \a : X -> \b : X -> \f : {_ : X} {_ : X} X -> ((f) a) b
+first : {X : Type1} {_ : X} {_ : X} X := \X : Type1 -> (true) X
+second : {X : Type1} {_ : X} {_ : X} X := \X : Type1 -> (false) X
+
 n1 : nat := (succ) n0
-n2 : nat := (succ) n1
-n4 : nat := ((exp) n2) n2
 
-#reduce n4
-#check nat
+fibstep : {_ : (pair) nat} (pair) nat := \p : (pair) nat -> (((construct_pair) nat) (p) (second) nat) ((plus) (p) (first) nat) (p) (second) nat
+fibstart : (pair) nat := (((construct_pair) nat) n0) n1
+fib : {_ : nat} nat := \n : nat -> ((((n) (pair) nat) fibstep) fibstart) (first) nat
 
-#reduce ((xor) true) true
-#reduce ((xor) true) false
-#reduce ((xor) false) true
-#reduce ((xor) false) false
+#reduce (fib) (succ) n1
