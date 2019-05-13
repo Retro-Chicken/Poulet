@@ -1,14 +1,11 @@
 package poulet.quote;
 
 import poulet.ast.*;
-import poulet.temp.TempSymbol;
 import poulet.value.*;
 
 public class Quoter {
-    private static int OFFSET = 0;
 
     public static Expression quote(Value value) {
-        OFFSET = 0;
         return quote(value, 0);
     }
 
@@ -39,20 +36,6 @@ public class Quoter {
             if(free.symbol instanceof Quote) {
                 Quote quote = (Quote) free.symbol;
                 int index = i - quote.level - 1;
-                index += OFFSET;
-                if(index < 0) {
-                    OFFSET += -index;
-                    index = 0;
-                }
-                return new Variable(new Symbol(index));
-            } else if(free.symbol instanceof TempSymbol) {
-                TempSymbol tempSymbol = (TempSymbol) free.symbol;
-                int index = i - tempSymbol.level - 1;
-                index += OFFSET;
-                if(index < 0) {
-                    OFFSET += -index;
-                    index = 0;
-                }
                 return new Variable(new Symbol(index));
             } else {
                 return new Variable(free.symbol);

@@ -76,18 +76,8 @@ public class Symbol extends Node implements Name {
      */
     @Override
     public Symbol increment() {
-        return offset(1);
-    }
-
-    @Override
-    public Symbol decrement() {
-        return offset(-1);
-    }
-
-    @Override
-    public Symbol offset(int offset) {
         if(index != null)
-            return new Symbol(index + offset);
+            return new Symbol(index + 1);
         return this;
     }
 
@@ -96,18 +86,4 @@ public class Symbol extends Node implements Name {
         return index == null;
     }
 
-    /*public boolean weakEquals(Object obj) {
-        if (obj instanceof Symbol) {
-            Symbol other = (Symbol) obj;
-            return name.equals(other.name);
-        }
-
-        return false;
-    }*/
-    /*
-    public Symbol transform(String offset) {
-        if(name != null)
-            return new Symbol(name, (uniqueID != null ? uniqueID : "") + offset);
-        return this;
-    }*/
 }

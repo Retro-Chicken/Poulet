@@ -29,12 +29,4 @@ public class Abstraction extends Expression {
 
         return false;
     }
-    /*
-    public Abstraction transform(String offset) {
-        return new Abstraction(symbol.transform(offset), type.transform(offset), body.transform(offset));
-    }
-     */
-    public Abstraction offset(int offset) {
-        return new Abstraction(symbol, type.offset(offset), body.offset(offset));
-    }
 }

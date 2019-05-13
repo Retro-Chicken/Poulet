@@ -29,3 +29,6 @@ less : {_ : nat} {_ : nat} bool := \n : nat -> \m : nat -> ((leq) (succ) n) m
 n1 : nat := (succ) n0
 n2 : nat := (succ) n1
 n4 : nat := ((exp) n2) n2
+
+#reduce n4
+#check nat

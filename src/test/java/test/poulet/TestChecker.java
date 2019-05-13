@@ -2,18 +2,15 @@ package test.poulet;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.sun.tools.javac.comp.Check;
 import org.antlr.v4.runtime.CharStreams;
 import org.junit.jupiter.api.Test;
 import poulet.ast.Expression;
 import poulet.ast.Program;
 import poulet.ast.Symbol;
-import poulet.ast.Variable;
 import poulet.interpreter.DefinitionException;
 import poulet.interpreter.Interpreter;
 import poulet.parser.ASTParser;
 import poulet.typing.Checker;
-import poulet.typing.Context;
 import poulet.typing.TypeException;
 import poulet.value.NFree;
 import poulet.value.VNeutral;
@@ -32,7 +29,7 @@ public class TestChecker {
 
     @Test
     void testCheckType() {
-        Context context = new Context(Map.of(
+        VContext context = new VContext(Map.of(
                 new Symbol("int"), vFree("Type1"),
                 new Symbol("bool"), vFree("Type1")
         ));
@@ -47,7 +44,7 @@ public class TestChecker {
 
     @Test
     void testCheckType2() {
-        Context context = new Context(Map.of(
+        VContext context = new VContext(Map.of(
                 new Symbol("int"), vFree("Type1"),
                 new Symbol("bool"), vFree("Type1")
         ));
@@ -64,7 +61,7 @@ public class TestChecker {
 
     @Test
     void testCheckType3() {
-        Context context = new Context(Map.of(
+        VContext context = new VContext(Map.of(
                 new Symbol("int"), vFree("Type1")
         ));
         Expression term = parseExpression("\\x:int->x");
@@ -79,7 +76,7 @@ public class TestChecker {
 
     @Test
     void testCheckType4() {
-        Context context = new Context(Map.of(
+        VContext context = new VContext(Map.of(
                 new Symbol("int"), vFree("Type1"),
                 new Symbol("bool"), vFree("Type1")
         ));
@@ -96,7 +93,7 @@ public class TestChecker {
     @Test
     void testCheckKind() {
         /* TODO: Re-add after kind checking
-        Context context = new Context();
+        VContext context = new VContext();
         Expression term = parseExpression("\\x:int->x");
         Expression type = parseExpression("{_:int}int");
 
@@ -109,7 +106,7 @@ public class TestChecker {
 
     @Test
     void testCheckTypeWithSubstitution() throws DefinitionException {
-        Context context = new Context(Map.of(
+        VContext context = new VContext(Map.of(
                 new Symbol("int"), vFree("Type1"),
                 new Symbol("bool"), vFree("Type1")
         ));
