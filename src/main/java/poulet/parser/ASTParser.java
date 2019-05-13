@@ -92,6 +92,10 @@ public class ASTParser extends PouletBaseListener {
             PouletParser.SymbolContext context = (PouletParser.SymbolContext) payload;
             String symbol = context.SYMBOL().getText();
             return new Symbol(symbol);
+        } else if(payload instanceof PouletParser.OutputContext) {
+            PouletParser.OutputContext context = (PouletParser.OutputContext) payload;
+            String text = context.STRING().getText();
+            return new Output(text.substring(1, text.length() - 1));
         }
 
         return null;

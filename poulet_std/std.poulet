@@ -17,6 +17,8 @@ false : bool := \X : Type1 -> \x : X -> \y : X -> y
 ifthenelse : {X : Type1} {_ : bool} {_ : X} {_ : X} X := \X : Type1 -> \p : bool -> \a : X -> \b : X -> (((p) X) a) b
 and : {_ : bool} {_ : bool} bool := \a : bool -> \b : bool -> ((((ifthenelse) bool) a) b) false
 or : {_ : bool} {_ : bool} bool := \a : bool -> \b : bool -> ((((ifthenelse) bool) a) true) b
+not : {_ : bool} bool := \a : bool -> ((((ifthenelse) bool) a) false) true
+xor : {_ : bool} {_ : bool} bool := \a : bool -> \b : bool -> ((and) ((or) a) b) (not) ((and) a) b
 
 // predicates on natural numbers
 iszero : {_ : nat} bool := \n : nat -> (((n) bool) \x : bool -> false) true

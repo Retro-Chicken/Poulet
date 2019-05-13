@@ -32,6 +32,9 @@ public class Interpreter {
                             out.println(Checker.deduceType(context, print.expression));//cleanCheck(Checker.deduceType(print.expression, context).expression(), 0));
                             break;
                     }
+                } else if(topLevel instanceof Output) {
+                    Output ouput = (Output) topLevel;
+                    out.println(ouput.text);
                 }
             } catch (Exception e) {
                 out.println("Error on Line: " + topLevel);
