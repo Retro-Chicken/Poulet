@@ -3,46 +3,52 @@ package poulet.interpreter;
 import poulet.ast.*;
 import poulet.typing.Checker;
 import poulet.typing.Context;
+import poulet.value.*;
 
 import java.io.PrintWriter;
 import java.util.*;
+import java.util.function.Function;
 
 public class Interpreter {
-    private Program program;
-
-    public Interpreter(Program program) {
-        this.program = program;
-    }
-
     public static void run(Program program, PrintWriter out) throws Exception {
         program = transform(program);
         Context context = new Context();
 
         for (TopLevel topLevel : program.program) {
-            if (topLevel instanceof Definition) {
-                Definition definition = (Definition) topLevel;
-                Checker.checkKind(context, definition.type);
-                if (definition.definition != null)
-                    Checker.checkType(context, definition.definition, definition.type);
-                context = context.append(definition.name, definition.type);
-            } else if (topLevel instanceof Print) {
-                Print print = (Print) topLevel;
-                switch (print.command) {
-                    case reduce:
-                        out.println(evaluateExpression(print.expression));
-                        break;
-                    case check:
-                        out.println(Checker.deduceType(context, print.expression));
-                        break;
+            try {
+                if (topLevel instanceof Definition) {
+                    Definition definition = (Definition) topLevel;
+                    Checker.checkKind(context, definition.type);
+                    if (definition.definition != null)
+                        Checker.checkType(context, definition.definition, definition.type);
+                    context = context.append(definition.name, definition.type);
+                } else if (topLevel instanceof Print) {
+                    Print print = (Print) topLevel;
+                    switch (print.command) {
+                        case reduce:
+                            out.println(evaluateExpression(print.expression));
+                            break;
+                        case check:
+                            out.println(Checker.deduceType(context, print.expression));//cleanCheck(Checker.deduceType(print.expression, context).expression(), 0));
+                            break;
+                    }
+                } else if(topLevel instanceof Output) {
+                    Output ouput = (Output) topLevel;
+                    out.println(ouput.text);
                 }
+            } catch (Exception e) {
+                out.println("Error on Line: " + topLevel);
+                e.printStackTrace();
+                return;
             }
         }
     }
 
     public static Program transform(Program program) throws DefinitionException {
         Program result = new Program(program);
-        result = substituteCalls(result);
         result = addIndices(result);
+        result = substituteCalls(result);
+        //result = annotate(result);
         return result;
     }
 
@@ -64,10 +70,12 @@ public class Interpreter {
         for (TopLevel topLevel : program.program) {
             if (topLevel instanceof Definition) {
                 Definition definition = (Definition) topLevel;
+                Expression substitutedType = substituteDefinitions(definition.type, new Program(substitutedProgram));
+                Expression substitutedDefinition = substituteDefinitions(definition.definition, new Program(substitutedProgram));
                 Definition substituted = new Definition(
                         definition.name,
-                        substituteDefinitions(definition.type, new Program(substitutedProgram)),
-                        substituteDefinitions(definition.definition, new Program(substitutedProgram))
+                        substitutedType,
+                        substitutedDefinition
                 );
                 substitutedProgram.add(substituted);
             } else if (topLevel instanceof Print) {
@@ -88,29 +96,11 @@ public class Interpreter {
         for (int i = definitions.size() - 1; i >= 0; i--) {
             Definition definition = definitions.get(i);
             if (definition.definition != null) {
-                substituted = substitute(substituted, definition.name, definition.definition.transform("T" + new Random().nextInt(10000)));
+                substituted = substitute(substituted, definition.name, definition.definition);//definition.definition.transform("T" + new Random().nextInt(10000)));
             }
         }
         return substituted;
     }
-
-    /*private static Expression substituteExpression(Expression base, Symbol name, Expression substitute) {
-        if(base instanceof Abstraction) {
-            Abstraction abstraction = (Abstraction) base;
-            return new Abstraction(abstraction.symbol, abstraction.type, substituteExpression(abstraction.body, name, substitute));
-        } else if(base instanceof Application) {
-            Application application = (Application) base;
-            return new Application(substituteExpression(application.function, name, substitute), substituteExpression(application.argument, name, substitute));
-        } else if(base instanceof Variable) {
-            Variable variable = (Variable) base;
-            if(variable.symbol.weakEquals(name))
-                return substitute;
-            else
-                return base;
-        }
-
-        return null;
-    }*/
 
     public static List<Definition> getDefinitions(Program program) {
         ArrayList<Definition> definitions = new ArrayList<>();
@@ -145,25 +135,65 @@ public class Interpreter {
         return expressions;
     }
 
-    public static Expression evaluateExpression(Expression expression) {
-        if (isValue(expression))
-            return expression;
+    public static Value evaluateExpression(Expression expression) {
+        return evaluateExpression(expression, new ArrayList<>());
+    }
 
-        if (expression instanceof Application) {
-            Application application = (Application) expression;
-            Expression function = evaluateExpression(application.function);
-            Expression argument = evaluateExpression(application.argument);
+    public static Value evaluateExpression(Expression expression, List<Value> bound) {
+        if (expression instanceof Variable) {
+            Variable variable = (Variable) expression;
 
-            if (function instanceof Abstraction && isValue(argument)) {
-                Abstraction abstraction = (Abstraction) function;
-
-                if (abstraction.symbol != null)
-                    return evaluateExpression(substitute(abstraction.body, abstraction.symbol, argument));
-                else
-                    return evaluateExpression(substitute(abstraction.body, new Symbol(0), argument));
+            if (variable.symbol.isFree()) {
+                String name = variable.symbol.getName();
+                if (name.matches("Type\\d+")) {
+                    int level = Integer.parseInt(name.substring(4));
+                    return new VType(level);
+                } else {
+                    return new VNeutral(new NFree(variable.symbol));
+                }
             } else {
-                return new Application(function, argument);
+                int index = variable.symbol.getIndex();
+                return bound.get(index);
             }
+        } else if (expression instanceof Application) {
+            Application application = (Application) expression;
+            Value function = evaluateExpression(application.function, bound);
+            Value argument = evaluateExpression(application.argument, bound);
+
+            if (function instanceof VAbstraction) {
+                VAbstraction abstraction = (VAbstraction) function;
+                return abstraction.call(argument);
+            } else if (function instanceof VNeutral) {
+                VNeutral neutral = (VNeutral) function;
+                return new VNeutral(new NApplication(neutral.neutral, argument));
+            } else if(function instanceof VPi) { // TODO: Check if this is even sound
+                VPi vPi = (VPi) function;
+                return vPi.call(argument);
+            } else {
+                System.err.println("can't apply to a " + function.getClass().getSimpleName());
+                return null;
+            }
+        } else if (expression instanceof Abstraction) {
+            Abstraction abstraction = (Abstraction) expression;
+
+            assert abstraction.symbol == null;
+
+            return new VAbstraction(argument -> {
+                List<Value> newBound = new ArrayList<>();
+                newBound.add(argument);
+                newBound.addAll(bound);
+                return evaluateExpression(abstraction.body, newBound);
+            });
+        } else if (expression instanceof PiType) {
+            PiType piType = (PiType) expression;
+            Value type = evaluateExpression(piType.type, bound);
+            Function<Value, Value> body = argument -> {
+                List<Value> newBound = new ArrayList<>();
+                newBound.add(argument);
+                newBound.addAll(bound);
+                return evaluateExpression(piType.body, newBound);
+            };
+            return new VPi(type, body);
         }
 
         return null;
@@ -189,19 +219,16 @@ public class Interpreter {
             if (abstraction.symbol != null && abstraction.symbol.equals(symbol)) {
                 result = expression;
             } else {
+                Expression type = substitute(abstraction.type, symbol, substitution);
                 Expression body = substitute(abstraction.body, symbol.increment(), substitution);
-                result = new Abstraction(abstraction.symbol, abstraction.type, body);
+                result = new Abstraction(abstraction.symbol, type, body);
             }
         } else if (expression instanceof PiType) {
             PiType piType = (PiType) expression;
             Expression type = substitute(piType.type, symbol, substitution);
-            Expression body = substitute(piType.body, symbol, substitution);
+            Expression body = substitute(piType.body, symbol.increment(), substitution);
             result = new PiType(piType.variable, type, body);
         }
-
-        // enforce unique symbol IDs
-        if (result != null)
-            addIndices(result);
 
         return result;
     }
@@ -213,7 +240,7 @@ public class Interpreter {
                 Definition definition = (Definition) topLevel;
                 Definition indexed = new Definition(
                         definition.name,
-                        definition.type,
+                        addIndices(definition.type),
                         addIndices(definition.definition)
                 );
                 result.add(indexed);
@@ -239,8 +266,9 @@ public class Interpreter {
             Stack<Symbol> newStack = new Stack<>();
             newStack.addAll(stack);
             newStack.push(abstraction.symbol);
+            Expression type = addIndices(stack, abstraction.type);
             Expression body = addIndices(newStack, abstraction.body);
-            return new Abstraction(null, abstraction.type, body);
+            return new Abstraction(null, type, body);
         } else if (expression instanceof Application) {
             Application application = (Application) expression;
             Expression function = addIndices(stack, application.function);
@@ -256,72 +284,37 @@ public class Interpreter {
                 Symbol symbol = new Symbol(index - 1);
                 return new Variable(symbol);
             }
+        } else if(expression instanceof PiType) {
+            PiType piType = (PiType) expression;
+            // need to number types later
+            Stack<Symbol> newStack = new Stack<>();
+            newStack.addAll(stack);
+            newStack.push(piType.variable);
+            Expression type = addIndices(stack, piType.type);
+            Expression body = addIndices(newStack, piType.body);
+            return new PiType(null, type, body);
         }
 
         return expression;
     }
 
-    /*public static Expression addSymbolIDs(Expression expression) {
-        if (expression instanceof Abstraction) {
-            Abstraction abstraction = (Abstraction) expression;
-            Symbol symbol = abstraction.symbol.bind();
-            Expression body = tag(abstraction.body, symbol);
-            body = addSymbolIDs(body);
-            return new Abstraction(symbol, abstraction.type, body);
-        } else if (expression instanceof Application) {
-            Application application = (Application) expression;
-            Expression function = addSymbolIDs(application.function);
-            Expression argument = addSymbolIDs(application.argument);
-            return new Application(function, argument);
-        }
-
-        return expression;
-    }*/
-
-    /*private static Expression tag(Expression expression, Symbol bound) {
+    private static Set<Name> getFreeVariables(Expression expression) {
         if (expression instanceof Variable) {
             Variable variable = (Variable) expression;
-
-            if (variable.symbol.name.equals(bound.name)) {
-                return new Variable(variable.symbol.copyID(bound));
-            }
-
-            return variable;
+            return new HashSet<Name>(Arrays.asList(variable.symbol));
         } else if (expression instanceof Abstraction) {
             Abstraction abstraction = (Abstraction) expression;
-            Expression body = tag(abstraction.body, bound);
-            return new Abstraction(abstraction.symbol, abstraction.type, body);
-        } else if (expression instanceof Application) {
-            Application application = (Application) expression;
-            Expression function = tag(application.function, bound);
-            Expression argument = tag(application.argument, bound);
-            return new Application(function, argument);
-        }
-
-        return null;
-    }*/
-
-    private static Set<Symbol> getFreeVariables(Expression expression) {
-        if (expression instanceof Variable) {
-            Variable variable = (Variable) expression;
-            return new HashSet<Symbol>(Arrays.asList(variable.symbol));
-        } else if (expression instanceof Abstraction) {
-            Abstraction abstraction = (Abstraction) expression;
-            Set<Symbol> bodyFree = getFreeVariables(abstraction.body);
+            Set<Name> bodyFree = getFreeVariables(abstraction.body);
             bodyFree.remove(abstraction.symbol);
             return bodyFree;
         } else if (expression instanceof Application) {
             Application application = (Application) expression;
-            Set<Symbol> functionFree = getFreeVariables(application.function);
-            Set<Symbol> argumentFree = getFreeVariables(application.argument);
+            Set<Name> functionFree = getFreeVariables(application.function);
+            Set<Name> argumentFree = getFreeVariables(application.argument);
             functionFree.addAll(argumentFree);
             return functionFree;
         }
 
         return null;
-    }
-
-    private static boolean isValue(Expression expression) {
-        return expression instanceof Abstraction || expression instanceof Variable;
     }
 }
