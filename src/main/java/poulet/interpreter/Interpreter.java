@@ -26,10 +26,10 @@ public class Interpreter {
                     Print print = (Print) topLevel;
                     switch (print.command) {
                         case reduce:
-                            out.println(evaluateExpression(print.expression));
+                            out.println(evaluateExpression(print.expression).readableString());
                             break;
                         case check:
-                            out.println(Checker.deduceType(context, print.expression));//cleanCheck(Checker.deduceType(print.expression, context).expression(), 0));
+                            out.println(Checker.deduceType(context, print.expression).readableString());//cleanCheck(Checker.deduceType(print.expression, context).expression(), 0));
                             break;
                     }
                 } else if(topLevel instanceof Output) {

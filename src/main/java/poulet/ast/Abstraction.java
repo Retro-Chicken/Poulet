@@ -1,6 +1,7 @@
 package poulet.ast;
 
 import poulet.Util;
+import poulet.typing.Checker;
 
 public class Abstraction extends Expression {
     public final Symbol symbol;
@@ -30,5 +31,11 @@ public class Abstraction extends Expression {
         }
 
         return false;
+    }
+
+    @Override
+    Expression readableExpression() {
+        Symbol uniqueSymbol = Util.getReadableSymbol();
+        return new Abstraction(uniqueSymbol, type.readableExpression(), Checker.substitute(body, new Variable(uniqueSymbol)).readableExpression());
     }
 }

@@ -12,4 +12,9 @@ public class Util {
         UNIQUE_TAG++;
         return new Symbol("!" + UNIQUE_TAG);
     }
+
+    public static  Symbol getReadableSymbol() {
+        UNIQUE_TAG++;
+        return new Symbol("" + (char)(97 + UNIQUE_TAG % 26));
+    }
 }
