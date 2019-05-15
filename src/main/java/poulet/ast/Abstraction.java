@@ -1,5 +1,7 @@
 package poulet.ast;
 
+import poulet.Util;
+
 public class Abstraction extends Expression {
     public final Symbol symbol;
     public final Expression type;
@@ -13,7 +15,7 @@ public class Abstraction extends Expression {
 
     @Override
     public String toString() {
-        return String.format("\\%s : %s -> %s", symbol, type, body);
+        return String.format("\\%s : %s -> %s", symbol == null ? Util.NULL_ABSTRACTION_SYMBOL : symbol, type, body);
     }
 
     @Override

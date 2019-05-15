@@ -1,5 +1,7 @@
 package poulet.ast;
 
+import poulet.Util;
+
 public class PiType extends Expression {
     public final Symbol variable;
     public final Expression type;
@@ -13,7 +15,7 @@ public class PiType extends Expression {
 
     @Override
     public String toString() {
-        return String.format("{%s : %s} %s", variable, type, body);
+        return String.format("{%s : %s} %s", variable == null ? Util.NULL_PITYPE_SYMBOL : variable, type, body);
     }
 
 }

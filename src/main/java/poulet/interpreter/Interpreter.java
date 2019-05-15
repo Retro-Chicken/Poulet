@@ -183,7 +183,7 @@ public class Interpreter {
                 newBound.add(argument);
                 newBound.addAll(bound);
                 return evaluateExpression(abstraction.body, newBound);
-            });
+            }, evaluateExpression(abstraction.type, bound));
         } else if (expression instanceof PiType) {
             PiType piType = (PiType) expression;
             Value type = evaluateExpression(piType.type, bound);
