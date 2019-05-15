@@ -37,9 +37,9 @@ public class Interpreter {
                     out.println(ouput.text);
                 }
             } catch (Exception e) {
-                out.println("Error on Line: " + topLevel);
+                System.out.println("Error on Line: " + topLevel);
                 e.printStackTrace();
-                return;
+                throw new Exception();
             }
         }
     }

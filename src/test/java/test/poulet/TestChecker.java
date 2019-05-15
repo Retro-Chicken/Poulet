@@ -7,13 +7,13 @@ import org.junit.jupiter.api.Test;
 import poulet.ast.Expression;
 import poulet.ast.Program;
 import poulet.ast.Symbol;
+import poulet.ast.Variable;
 import poulet.interpreter.DefinitionException;
 import poulet.interpreter.Interpreter;
 import poulet.parser.ASTParser;
 import poulet.typing.Checker;
+import poulet.typing.Context;
 import poulet.typing.TypeException;
-import poulet.value.NFree;
-import poulet.value.VNeutral;
 
 import java.util.Map;
 
@@ -23,36 +23,32 @@ public class TestChecker {
         Expression expression = Interpreter.getExpressions(program).get(0);
         return Interpreter.addIndices(expression);
     }
-    private VNeutral vFree(String name) {
-        return new VNeutral(new NFree(new Symbol(name)));
-    }
-
     @Test
     void testCheckType() {
-        VContext context = new VContext(Map.of(
-                new Symbol("int"), vFree("Type1"),
-                new Symbol("bool"), vFree("Type1")
+        Context context = new Context(Map.of(
+                new Symbol("int"), new Variable(new Symbol("Type1")),
+                new Symbol("bool"), new Variable(new Symbol("Type1"))
         ));
         Expression term = parseExpression("\\x:int->x");
         Expression type = parseExpression("{_:int}bool");
 
         try {
-            Checker.checkType(term, Interpreter.evaluateExpression(type), context);
+            Checker.checkType(context, term, type);
             fail();
         } catch (TypeException e) {}
     }
 
     @Test
     void testCheckType2() {
-        VContext context = new VContext(Map.of(
-                new Symbol("int"), vFree("Type1"),
-                new Symbol("bool"), vFree("Type1")
+        Context context = new Context(Map.of(
+                new Symbol("int"), new Variable(new Symbol("Type1")),
+                new Symbol("bool"), new Variable(new Symbol("Type1"))
         ));
         Expression term = parseExpression("\\x:int->x");
         Expression type = parseExpression("{_:int}int");
 
         try {
-            Checker.checkType(term, Interpreter.evaluateExpression(type), context);
+            Checker.checkType(context, term, type);
         } catch (TypeException e) {
             e.printStackTrace();
             fail();
@@ -61,14 +57,15 @@ public class TestChecker {
 
     @Test
     void testCheckType3() {
-        VContext context = new VContext(Map.of(
-                new Symbol("int"), vFree("Type1")
+        Context context = new Context(Map.of(
+                new Symbol("int"), new Variable(new Symbol("Type1")),
+                new Symbol("bool"), new Variable(new Symbol("Type1"))
         ));
         Expression term = parseExpression("\\x:int->x");
         Expression type = parseExpression("{_:int}int");
 
         try {
-            Checker.checkType(term, Interpreter.evaluateExpression(type), context);
+            Checker.checkType(context, term, type);
         } catch (TypeException e) {
             fail();
         }
@@ -76,15 +73,15 @@ public class TestChecker {
 
     @Test
     void testCheckType4() {
-        VContext context = new VContext(Map.of(
-                new Symbol("int"), vFree("Type1"),
-                new Symbol("bool"), vFree("Type1")
+        Context context = new Context(Map.of(
+                new Symbol("int"), new Variable(new Symbol("Type1")),
+                new Symbol("bool"), new Variable(new Symbol("Type1"))
         ));
         Expression term = parseExpression("\\x : int -> \\y : int -> y");
         Expression type = parseExpression("{_:int}{_:int}int");
 
         try {
-            Checker.checkType(term, Interpreter.evaluateExpression(type), context);
+            Checker.checkType(context, term, type);
         } catch (TypeException e) {
             fail();
         }
@@ -92,23 +89,21 @@ public class TestChecker {
 
     @Test
     void testCheckKind() {
-        /* TODO: Re-add after kind checking
-        VContext context = new VContext();
+        Context context = new Context();
         Expression term = parseExpression("\\x:int->x");
         Expression type = parseExpression("{_:int}int");
 
         try {
-            Checker.checkType(term, Interpreter.evaluateExpression(type), context);
+            Checker.checkType(context, term, type);
             fail();
         } catch (TypeException e) { }
-         */
     }
 
     @Test
     void testCheckTypeWithSubstitution() throws DefinitionException {
-        VContext context = new VContext(Map.of(
-                new Symbol("int"), vFree("Type1"),
-                new Symbol("bool"), vFree("Type1")
+        Context context = new Context(Map.of(
+                new Symbol("int"), new Variable(new Symbol("Type1")),
+                new Symbol("bool"), new Variable(new Symbol("Type1"))
         ));
         Program actualProgram = ASTParser.parse(CharStreams.fromString("id : _ := \\x : int -> x\n_ : _ := \\x : int -> (id) x"));
         Program actualSubstitutedProgram = Interpreter.substituteCalls(actualProgram);
@@ -117,7 +112,7 @@ public class TestChecker {
         type = Interpreter.addIndices(type);
 
         try {
-            Checker.checkType(actualExpression, Interpreter.evaluateExpression(type), context);
+            Checker.checkType(context, actualExpression, type);
         } catch (TypeException e) {
             e.printStackTrace();
             fail();

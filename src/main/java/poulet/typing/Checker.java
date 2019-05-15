@@ -12,8 +12,12 @@ public class Checker {
             String name = variable.symbol.getName();
             if(name.matches("Type\\d+"))
                 return;
+            else { // TODO: This could be an infinite loop
+                checkKind(context, deduced);
+                return;
+            }
         }
-        throw new TypeException("Type Is Not Valid");
+        throw new TypeException("Type Is Not Valid: Deduced " + deduced);
     }
 
     public static void checkType(Context context, Expression term, Expression type) throws TypeException {

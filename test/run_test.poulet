@@ -1,7 +1,7 @@
 a:Type1
 bool:Type1 := {_:a}{_:a}a
-true:bool:=\a:a->\b:a->a
-false:bool:=\a:a->\b:a->b
+true:bool:=\x:a->\y:a->x
+false:bool:=\x:a->\y:a->x
 int:Type1
 add:{_:int}{_:int}int
 zero:int
