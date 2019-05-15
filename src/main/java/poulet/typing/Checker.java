@@ -6,40 +6,14 @@ import poulet.interpreter.Interpreter;
 
 public class Checker {
     public static void checkKind(Context context, Expression type) throws TypeException {
-        // TODO: Fix kind checking and add type hierarchy
-        /*
-        if(type instanceof PiType) {
-            PiType piType = (PiType) type;
-            checkKind(context, piType.type);
-            checkKind(context, piType.body);
-            return;
-        } else if(type instanceof Variable) {
-            Variable variable = (Variable) type;
-            if(variable.symbol.isFree()) {
-                Expression deducedType = deduceType(context, variable);
-                if(deducedType instanceof Variable) {
-                    Variable variableType = (Variable) deducedType;
-                    String name = variableType.symbol.getName();
-                    if(name.matches("Type\\d+"))
-                        return;
-                }
-                String name = variable.symbol.getName();
-                if(name.matches("Type\\d+"))
-                    return;
-            } else
+        Expression deduced = deduceType(context, type);
+        if(deduced instanceof Variable) {
+            Variable variable = (Variable) deduced;
+            String name = variable.symbol.getName();
+            if(name.matches("Type\\d+"))
                 return;
-        } else if(type instanceof Application) {
-            // TODO: Need to actually substitute into function otherwise it's most outward bound variable will have no known type
-            Application application = (Application) type;
-            Context newContext = context.increment();
-            Expression argumentType = deduceType(context, application.argument);
-            Symbol uniqueSymbol = Util.getUniqueSymbol();
-            newContext = newContext.append(uniqueSymbol, argumentType);
-            checkKind(newContext, substitute(application.function, new Variable(uniqueSymbol)));
-            checkKind(context, application.argument);
         }
-        throw new TypeException("Unrecognized Type " + type);
-         */
+        throw new TypeException("Type Is Not Valid");
     }
 
     public static void checkType(Context context, Expression term, Expression type) throws TypeException {
@@ -58,9 +32,7 @@ public class Checker {
             Abstraction abstraction = (Abstraction) term;
             Expression abstractionType = Interpreter.evaluateExpression(abstraction.type).expression();
 
-            // TODO: Make check kind the same as deduce Type
-            //checkKind(context, abstractionType);
-            deduceType(context, abstractionType);
+            checkKind(context, abstractionType);
 
             Context newContext = context.increment();
             Symbol tempSymbol = Util.getUniqueSymbol();
@@ -96,7 +68,6 @@ public class Checker {
             } else
                 throw new TypeException("Application Function is not a Function");
         } else if (term instanceof PiType) {
-            //checkKind(context, term);
             PiType piType = (PiType) term;
             Expression typeLevel = deduceType(context, piType.type);
             Symbol uniqueSymbol = Util.getUniqueSymbol();
