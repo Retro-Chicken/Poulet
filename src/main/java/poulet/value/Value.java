@@ -22,4 +22,8 @@ public abstract class Value {
     public Expression expression() {
         return Quoter.quote(this);
     }
+
+    public String readableString() {
+        return expression().readableString();
+    }
 }

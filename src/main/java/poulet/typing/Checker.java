@@ -12,10 +12,6 @@ public class Checker {
             String name = variable.symbol.getName();
             if(name.matches("Type\\d+"))
                 return;
-            else { // TODO: This could be an infinite loop
-                checkKind(context, deduced);
-                return;
-            }
         }
         throw new TypeException("Type Is Not Valid: Deduced " + deduced);
     }
@@ -25,6 +21,19 @@ public class Checker {
         // TODO: See if this is sound, check if they're equivalent by beta reduction
         deduced = Interpreter.evaluateExpression(deduced).expression();
         type = Interpreter.evaluateExpression(type).expression();
+
+        // Subtyping check first
+        // TODO: Make sure this is allowed
+        if(deduced instanceof Variable && type instanceof Variable) {
+            String nameDeduced = ((Variable) deduced).symbol.getName();
+            String nameType = ((Variable) type).symbol.getName();
+            if(nameDeduced.matches("Type\\d+") && nameType.matches("Type\\d+")) {
+                int level1 = Integer.parseInt(nameDeduced.substring(4));
+                int level2 = Integer.parseInt(nameType.substring(4));
+                if(level1 < level2)
+                    return;
+            }
+        }
 
         if(!deduced.toString().equals(type.toString()))
             throw new TypeException("Type Mismatch:\n" + term + " is of type " + deduced + ", not " + type);

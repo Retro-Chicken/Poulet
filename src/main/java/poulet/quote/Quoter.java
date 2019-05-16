@@ -16,7 +16,7 @@ public class Quoter {
     private static Expression quote(Value value, int i) {
         if(value instanceof VAbstraction) {
             VAbstraction abstraction = (VAbstraction) value;
-            return new Abstraction(null, null, quote(abstraction.call(vFree(i)), i + 1));
+            return new Abstraction(null, quote(abstraction.type, i), quote(abstraction.call(vFree(i)), i + 1));
         } else if(value instanceof VNeutral) {
             VNeutral neutral = (VNeutral) value;
             return neutralQuote(neutral.neutral, i);

@@ -1,5 +1,8 @@
 package poulet.ast;
 
+import poulet.Util;
+import poulet.typing.Checker;
+
 public class Abstraction extends Expression {
     public final Symbol symbol;
     public final Expression type;
@@ -13,7 +16,7 @@ public class Abstraction extends Expression {
 
     @Override
     public String toString() {
-        return String.format("\\%s : %s -> %s", symbol, type, body);
+        return String.format("\\%s : %s -> %s", symbol == null ? Util.NULL_ABSTRACTION_SYMBOL : symbol, type, body);
     }
 
     @Override
@@ -28,5 +31,11 @@ public class Abstraction extends Expression {
         }
 
         return false;
+    }
+
+    @Override
+    Expression readableExpression() {
+        Symbol uniqueSymbol = Util.getReadableSymbol();
+        return new Abstraction(uniqueSymbol, type.readableExpression(), Checker.substitute(body, new Variable(uniqueSymbol)).readableExpression());
     }
 }

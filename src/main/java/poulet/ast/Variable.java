@@ -36,4 +36,9 @@ public class Variable extends Expression {
 
         return false;
     }
+
+    @Override
+    public Variable readableExpression() {
+        return this;
+    }
 }
