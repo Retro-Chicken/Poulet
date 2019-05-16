@@ -49,3 +49,4 @@ fib : {_ : nat} nat := \n : nat -> ((((n) (pair) nat) fibstep) fibstart) (first)
 //proj : {n : nat} {m : nat} {X : Type1} :=
 
 #reduce (fib) (succ) (succ) (succ) (succ) n1
+#reduce (n0) nat

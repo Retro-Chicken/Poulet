@@ -15,6 +15,6 @@ public class Util {
 
     public static  Symbol getReadableSymbol() {
         UNIQUE_TAG++;
-        return new Symbol("" + (char)(97 + UNIQUE_TAG % 26));
+        return new Symbol("" + (char)('a' + UNIQUE_TAG % 26));
     }
 }
