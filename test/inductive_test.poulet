@@ -1,4 +1,15 @@
-list : {_ : Type1} Type1
-list.nil : {A : Type1} (list) A
-list.cons : {A : Type1} {_ : A} {_ : (list) A} (list) A
-#check list.cons
+bool : Type1 := {X : Type1} {_ : X} {_ : X} X
+true : bool := \X : Type1 -> \x : X -> \y : X -> x
+false : bool := \X : Type1 -> \x : X -> \y : X -> y
+
+inductive {
+    type list (A : Type1) : Type1 {
+        nil : list[A]
+        cons : {_ : A} {_ : (list) A} list[A]
+    }
+}
+
+is_empty : {A : Type1} {_ : list[A]} bool := \A : Type1 -> \l : list[A] -> match l as l in bool {
+    nil => t,
+    cons _ _ => f
+}

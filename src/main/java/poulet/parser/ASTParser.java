@@ -3,6 +3,7 @@ package poulet.parser;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import poulet.ast.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,26 +51,28 @@ public class ASTParser extends PouletBaseListener {
             return new Print(printCommand, expression);
         } else if (payload instanceof PouletParser.Type_declarationContext) {
             Symbol name = (Symbol) children.get(1);
-            Expression type = (Expression) children.get(3);
+            List<Parameter> parameters = new ArrayList<>();
             List<Constructor> constructors = new ArrayList<>();
 
-            for (int i = 5; i < children.size() - 1; i++)
+            int i = 2;
+            for (; children.get(i) instanceof Parameter; i++)
+                parameters.add((Parameter) children.get(i));
+
+            i++;
+
+            Expression type = (Expression) children.get(i);
+
+            i += 2;
+
+            for (; children.get(i) instanceof Constructor; i++)
                 constructors.add((Constructor) children.get(i));
 
-            return new TypeDeclaration(name, type, constructors);
+            return new TypeDeclaration(name, parameters, type, constructors);
         } else if (payload instanceof PouletParser.ExpressionContext) {
             return children.get(0);
         } else if (payload instanceof PouletParser.VariableContext) {
-            Symbol name;
-            switch (children.size()) {
-                case 1:
-                    name = (Symbol) children.get(0);
-                    return new Variable(name);
-                case 3:
-                    Symbol type = (Symbol) children.get(0);
-                    name = (Symbol) children.get(2);
-                    return new Variable(type, name);
-            }
+            Symbol name = (Symbol) children.get(0);
+            return new Variable(name);
         } else if (payload instanceof PouletParser.AbstractionContext) {
             Symbol variable = (Symbol) children.get(1);
             Expression type = (Expression) children.get(3);
@@ -92,18 +95,31 @@ public class ASTParser extends PouletBaseListener {
             PouletParser.SymbolContext context = (PouletParser.SymbolContext) payload;
             String symbol = context.SYMBOL().getText();
             return new Symbol(symbol);
-        } else if(payload instanceof PouletParser.OutputContext) {
+        } else if (payload instanceof PouletParser.OutputContext) {
             PouletParser.OutputContext context = (PouletParser.OutputContext) payload;
             String text = context.STRING().getText();
             return new Output(text.substring(1, text.length() - 1));
-        } else if (payload instanceof PouletParser.Inductive_typeContext) {
-            PouletParser.Inductive_typeContext context = (PouletParser.Inductive_typeContext) payload;
-            int nargs = Integer.parseInt(context.INTEGER().getText());
+        } else if (payload instanceof PouletParser.Inductive_typesContext) {
             List<TypeDeclaration> typeDeclarations = new ArrayList<>();
-            for (int i = 3; i < children.size() - 1; i++) {
+            for (int i = 2; i < children.size() - 1; i++) {
                 typeDeclarations.add((TypeDeclaration) children.get(i));
             }
-            return new InductiveDeclaration(nargs, typeDeclarations);
+            return new InductiveDeclaration(typeDeclarations);
+        } else if (payload instanceof PouletParser.ParameterContext) {
+            Symbol symbol = (Symbol) children.get(1);
+            Expression type = (Expression) children.get(3);
+            return new Parameter(symbol, type);
+        } else if (payload instanceof PouletParser.Inductive_typeContext) {
+            Symbol type = (Symbol) children.get(0);
+            List<Expression> parameters = new ArrayList<>();
+            for (int i = 1; i + 1 < children.size() && children.get(i + 1) instanceof Expression; i += 2) {
+                parameters.add((Expression) children.get(i + 1));
+            }
+            return new InductiveType(type, parameters);
+        } else if (payload instanceof PouletParser.Constructor_callContext) {
+            InductiveType inductiveType = (InductiveType) children.get(0);
+            Symbol constructor = (Symbol) children.get(2);
+            return new ConstructorCall(inductiveType, constructor);
         }
 
         return null;

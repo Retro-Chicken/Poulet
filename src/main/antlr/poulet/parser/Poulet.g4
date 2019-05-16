@@ -4,7 +4,7 @@ grammar Poulet;
     package poulet.parser;
 }
 
-program : (definition | print | inductive_type | output)+ ;
+program : (definition | print | inductive_types | output)+ ;
 
 definition : symbol ':' expression (':=' expression)? ;
 
@@ -12,13 +12,19 @@ print : (REDUCE | CHECK | SCHOLIUMS) expression ;
 
 output : OUTPUT_COMMAND STRING ;
 
-inductive_type : 'inductive' INTEGER '{' type_declaration* '}' ;
+inductive_types : 'inductive' '{' type_declaration* '}' ;
 
-type_declaration : 'type' symbol ':' expression '{' constructor* '}' ;
+type_declaration : 'type' symbol parameter* ':' expression '{' constructor* '}' ;
 
-expression : (variable | abstraction | application | pi_type) ;
+parameter : '(' symbol ':' expression ')' ;
 
-variable : (symbol '.')? symbol ;
+expression : (variable | abstraction | application | pi_type | match | inductive_type | constructor_call) ;
+
+constructor_call : inductive_type '.' symbol ;
+
+inductive_type : symbol '[' ((expression ',')* expression)? ']' ;
+
+variable : symbol ;
 
 abstraction : '\\' symbol ':' expression '->' expression ;
 
@@ -27,6 +33,10 @@ application : '(' expression ')' expression ;
 pi_type : '{' symbol ':' expression '}' expression ;
 
 constructor : symbol ':' expression ;
+
+match : 'match' expression 'as' symbol+ 'in' expression '{' ((match_clause ',')* match_clause)? '}';
+
+match_clause : symbol+ '=>' expression ;
 
 symbol : SYMBOL ;
 
@@ -39,8 +49,6 @@ SCHOLIUMS : '#scholiums' ;
 OUTPUT_COMMAND : 'print' ;
 
 STRING : ('"' .*? '"') | ('\'' .*? '\'') ;
-
-INTEGER : [0-9]+ ;
 
 SYMBOL : [a-zA-Z_][a-zA-Z0-9_]* ;
 

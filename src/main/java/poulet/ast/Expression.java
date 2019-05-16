@@ -1,7 +1,9 @@
 package poulet.ast;
 
 public abstract class Expression extends Node {
-    abstract Expression readableExpression();
+    Expression readableExpression() {
+        return this;
+    }
     public String readableString() {
         return readableExpression().toString();
     }
