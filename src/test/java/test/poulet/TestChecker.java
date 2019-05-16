@@ -33,7 +33,7 @@ public class TestChecker {
         Expression type = parseExpression("{_:int}bool");
 
         try {
-            Checker.checkType(context, term, type);
+            Checker.checkType(context, term, type, new Context());
             fail();
         } catch (TypeException e) {}
     }
@@ -48,7 +48,7 @@ public class TestChecker {
         Expression type = parseExpression("{_:int}int");
 
         try {
-            Checker.checkType(context, term, type);
+            Checker.checkType(context, term, type, new Context());
         } catch (TypeException e) {
             e.printStackTrace();
             fail();
@@ -65,7 +65,7 @@ public class TestChecker {
         Expression type = parseExpression("{_:int}int");
 
         try {
-            Checker.checkType(context, term, type);
+            Checker.checkType(context, term, type, new Context());
         } catch (TypeException e) {
             fail();
         }
@@ -81,7 +81,7 @@ public class TestChecker {
         Expression type = parseExpression("{_:int}{_:int}int");
 
         try {
-            Checker.checkType(context, term, type);
+            Checker.checkType(context, term, type, new Context());
         } catch (TypeException e) {
             fail();
         }
@@ -94,7 +94,7 @@ public class TestChecker {
         Expression type = parseExpression("{_:int}int");
 
         try {
-            Checker.checkType(context, term, type);
+            Checker.checkType(context, term, type, context);
             fail();
         } catch (TypeException e) { }
     }
@@ -112,7 +112,7 @@ public class TestChecker {
         type = Interpreter.addIndices(type);
 
         try {
-            Checker.checkType(context, actualExpression, type);
+            Checker.checkType(context, actualExpression, type, new Context());
         } catch (TypeException e) {
             e.printStackTrace();
             fail();

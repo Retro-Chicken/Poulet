@@ -1,0 +1,4 @@
+list : {_ : Type1} Type1
+list.nil : {A : Type1} (list) A
+list.cons : {A : Type1} {_ : A} {_ : (list) A} (list) A
+#check list.cons

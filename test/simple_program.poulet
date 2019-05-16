@@ -2,8 +2,10 @@ a : b := (\c : d -> c) e
 
 int : Type1
 
-type prod : {_ : Prop} {_ : Prop} Prop {
-  mk : {p : Prop} {q : Prop} {_ : p} {_ : q} ((prod) p) q
+inductive 0 {
+    type prod : {_ : Prop} {_ : Prop} Prop {
+        mk : {p : Prop} {q : Prop} {_ : p} {_ : q} ((prod) p) q
+    }
 }
 
 #reduce ((prod.mk) a) a

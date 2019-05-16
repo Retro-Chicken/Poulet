@@ -3,7 +3,7 @@ package poulet.ast;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TypeDeclaration extends TopLevel {
+public class TypeDeclaration extends Node {
     public final Symbol name;
     public final Expression type;
     public final List<Constructor> constructors;

@@ -96,6 +96,14 @@ public class ASTParser extends PouletBaseListener {
             PouletParser.OutputContext context = (PouletParser.OutputContext) payload;
             String text = context.STRING().getText();
             return new Output(text.substring(1, text.length() - 1));
+        } else if (payload instanceof PouletParser.Inductive_typeContext) {
+            PouletParser.Inductive_typeContext context = (PouletParser.Inductive_typeContext) payload;
+            int nargs = Integer.parseInt(context.INTEGER().getText());
+            List<TypeDeclaration> typeDeclarations = new ArrayList<>();
+            for (int i = 3; i < children.size() - 1; i++) {
+                typeDeclarations.add((TypeDeclaration) children.get(i));
+            }
+            return new InductiveDeclaration(nargs, typeDeclarations);
         }
 
         return null;

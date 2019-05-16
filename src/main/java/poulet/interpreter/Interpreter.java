@@ -11,28 +11,36 @@ import java.util.function.Function;
 
 public class Interpreter {
     public static void run(Program program, PrintWriter out) throws Exception {
-        program = transform(program);
+        //program = transform(program);
+        program = addIndices(program);
         Context context = new Context();
+        Context globals = new Context();
 
+        for (TopLevel topLevel : program.program) {
+            if (topLevel instanceof Definition) {
+                Definition definition = (Definition) topLevel;
+                globals = globals.append(definition.name, definition.definition);
+            }
+        }
         for (TopLevel topLevel : program.program) {
             try {
                 if (topLevel instanceof Definition) {
                     Definition definition = (Definition) topLevel;
-                    Checker.checkKind(context, definition.type);
+                    Checker.checkKind(context, definition.type, globals);
                     if (definition.definition != null)
-                        Checker.checkType(context, definition.definition, definition.type);
+                        Checker.checkType(context, definition.definition, definition.type, globals);
                     context = context.append(definition.name, definition.type);
                 } else if (topLevel instanceof Print) {
                     Print print = (Print) topLevel;
                     switch (print.command) {
                         case reduce:
-                            out.println(evaluateExpression(print.expression).readableString());
+                            out.println(evaluateExpression(print.expression, globals).readableString());
                             break;
                         case check:
-                            out.println(Checker.deduceType(context, print.expression).readableString());//cleanCheck(Checker.deduceType(print.expression, context).expression(), 0));
+                            out.println(Checker.deduceType(context, print.expression, globals).readableString());//cleanCheck(Checker.deduceType(print.expression, context).expression(), 0));
                             break;
                     }
-                } else if(topLevel instanceof Output) {
+                } else if (topLevel instanceof Output) {
                     Output ouput = (Output) topLevel;
                     out.println(ouput.text);
                 }
@@ -135,11 +143,11 @@ public class Interpreter {
         return expressions;
     }
 
-    public static Value evaluateExpression(Expression expression) {
-        return evaluateExpression(expression, new ArrayList<>());
+    public static Value evaluateExpression(Expression expression, Context globals) {
+        return evaluateExpression(expression, new ArrayList<>(), globals);
     }
 
-    public static Value evaluateExpression(Expression expression, List<Value> bound) {
+    public static Value evaluateExpression(Expression expression, List<Value> bound, Context globals) {
         if (expression instanceof Variable) {
             Variable variable = (Variable) expression;
 
@@ -149,7 +157,12 @@ public class Interpreter {
                     int level = Integer.parseInt(name.substring(4));
                     return new VType(level);
                 } else {
-                    return new VNeutral(new NFree(variable.symbol));
+                    Expression definition = globals.lookUp(variable.symbol);
+                    if (definition == null) {
+                        return new VNeutral(new NFree(variable.symbol));
+                    } else {
+                        return evaluateExpression(definition, bound, globals);
+                    }
                 }
             } else {
                 int index = variable.symbol.getIndex();
@@ -157,8 +170,8 @@ public class Interpreter {
             }
         } else if (expression instanceof Application) {
             Application application = (Application) expression;
-            Value function = evaluateExpression(application.function, bound);
-            Value argument = evaluateExpression(application.argument, bound);
+            Value function = evaluateExpression(application.function, bound, globals);
+            Value argument = evaluateExpression(application.argument, bound, globals);
 
             if (function instanceof VAbstraction) {
                 VAbstraction abstraction = (VAbstraction) function;
@@ -166,7 +179,7 @@ public class Interpreter {
             } else if (function instanceof VNeutral) {
                 VNeutral neutral = (VNeutral) function;
                 return new VNeutral(new NApplication(neutral.neutral, argument));
-            } else if(function instanceof VPi) { // TODO: Check if this is even sound
+            } else if (function instanceof VPi) { // TODO: Check if this is even sound
                 VPi vPi = (VPi) function;
                 return vPi.call(argument);
             } else {
@@ -182,16 +195,16 @@ public class Interpreter {
                 List<Value> newBound = new ArrayList<>();
                 newBound.add(argument);
                 newBound.addAll(bound);
-                return evaluateExpression(abstraction.body, newBound);
-            }, evaluateExpression(abstraction.type, bound));
+                return evaluateExpression(abstraction.body, newBound, globals);
+            }, evaluateExpression(abstraction.type, bound, globals));
         } else if (expression instanceof PiType) {
             PiType piType = (PiType) expression;
-            Value type = evaluateExpression(piType.type, bound);
+            Value type = evaluateExpression(piType.type, bound, globals);
             Function<Value, Value> body = argument -> {
                 List<Value> newBound = new ArrayList<>();
                 newBound.add(argument);
                 newBound.addAll(bound);
-                return evaluateExpression(piType.body, newBound);
+                return evaluateExpression(piType.body, newBound, globals);
             };
             return new VPi(type, body);
         }
@@ -284,7 +297,7 @@ public class Interpreter {
                 Symbol symbol = new Symbol(index - 1);
                 return new Variable(symbol);
             }
-        } else if(expression instanceof PiType) {
+        } else if (expression instanceof PiType) {
             PiType piType = (PiType) expression;
             // need to number types later
             Stack<Symbol> newStack = new Stack<>();

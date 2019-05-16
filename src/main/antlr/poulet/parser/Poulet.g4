@@ -4,13 +4,15 @@ grammar Poulet;
     package poulet.parser;
 }
 
-program : (definition | print | type_declaration | output)+ ;
+program : (definition | print | inductive_type | output)+ ;
 
 definition : symbol ':' expression (':=' expression)? ;
 
 print : (REDUCE | CHECK | SCHOLIUMS) expression ;
 
 output : OUTPUT_COMMAND STRING ;
+
+inductive_type : 'inductive' INTEGER '{' type_declaration* '}' ;
 
 type_declaration : 'type' symbol ':' expression '{' constructor* '}' ;
 
@@ -37,6 +39,8 @@ SCHOLIUMS : '#scholiums' ;
 OUTPUT_COMMAND : 'print' ;
 
 STRING : ('"' .*? '"') | ('\'' .*? '\'') ;
+
+INTEGER : [0-9]+ ;
 
 SYMBOL : [a-zA-Z_][a-zA-Z0-9_]* ;
 

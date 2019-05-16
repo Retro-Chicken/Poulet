@@ -6,11 +6,14 @@ import poulet.ast.*;
 import poulet.interpreter.Interpreter;
 import poulet.parser.ASTParser;
 import poulet.quote.Quoter;
+import poulet.typing.Context;
 import poulet.value.NFree;
 import poulet.value.VNeutral;
 import poulet.value.Value;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -62,7 +65,7 @@ public class TestInterpreter {
         Program actualProgram = ASTParser.parse(CharStreams.fromString("_ : _ := (\\x : _ -> x) z"));
         Expression actualExpression = Interpreter.getExpressions(actualProgram).get(0);
         actualExpression = Interpreter.addIndices(actualExpression);
-        Value actualResult = Interpreter.evaluateExpression(actualExpression);
+        Value actualResult = Interpreter.evaluateExpression(actualExpression, new Context());
         Value expected = new VNeutral(new NFree(new Symbol("z")));
         assertEquals(expected, actualResult);
     }
@@ -73,7 +76,7 @@ public class TestInterpreter {
         Program actualSubstitutedProgram = Interpreter.substituteCalls(actualProgram);
         Expression actualExpression = Interpreter.getExpressions(actualSubstitutedProgram).get(2);
         actualExpression = Interpreter.addIndices(actualExpression);
-        Value actualResult = Interpreter.evaluateExpression(actualExpression);
+        Value actualResult = Interpreter.evaluateExpression(actualExpression, new Context());
         Value expected = new VNeutral(new NFree(new Symbol("z")));
         assertEquals(expected, actualResult);
     }
@@ -85,7 +88,7 @@ public class TestInterpreter {
         List<Expression> actualExpressions = Interpreter.getExpressions(actualSubstitutedProgram);
         Expression actualExpression = actualExpressions.get(actualExpressions.size() - 1);
         actualExpression = Interpreter.addIndices(actualExpression);
-        Value actualResult = Interpreter.evaluateExpression(actualExpression);
+        Value actualResult = Interpreter.evaluateExpression(actualExpression, new Context());
         System.out.println(">>> " + actualResult);
     }
 
@@ -96,7 +99,7 @@ public class TestInterpreter {
         List<Expression> expressions = Interpreter.getExpressions(actualProgram);
         Expression expression = expressions.get(expressions.size() - 1);
         expression = Interpreter.addIndices(expression);
-        Value output = Interpreter.evaluateExpression(expression);
+        Value output = Interpreter.evaluateExpression(expression, new Context());
         Value expected = new VNeutral(new NFree(new Symbol("a")));
         assertEquals(expected, output);
     }
@@ -108,7 +111,7 @@ public class TestInterpreter {
             Program actualSubstitutedProgram = Interpreter.substituteCalls(Interpreter.addIndices(actualProgram));
             Expression actualExpression = Interpreter.getExpressions(actualSubstitutedProgram).get(2);
             actualExpression = Interpreter.addIndices(actualExpression);
-            Value actualResult = Interpreter.evaluateExpression(actualExpression);
+            Value actualResult = Interpreter.evaluateExpression(actualExpression, new Context());
 
             try {
                 Variable variable = (Variable) Quoter.quote(actualResult);
@@ -128,12 +131,27 @@ public class TestInterpreter {
             Program actualProgram = ASTParser.parse(CharStreams.fromString("func : _ := \\x : _ -> z\nfunc2 : _ := \\z : _ -> (func) z\n_ : _ := (func2) w"));
             Program transformed = Interpreter.transform(actualProgram);
             Expression transformedExpression = Interpreter.getExpressions(transformed).get(2);
-            Expression evaluated = Interpreter.evaluateExpression(transformedExpression).expression();
+            Expression evaluated = Interpreter.evaluateExpression(transformedExpression, new Context()).expression();
             Variable variable = (Variable) evaluated;
             if(!variable.symbol.toString().equals("z"))
                 fail();
         } catch (Exception e) {
             e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    void testDeclareOutOfOrder() {
+        try {
+            Program program = ASTParser.parse(CharStreams.fromString("c : Type1\na : Type1 := b\n b : Type1 := c\n#reduce a"));
+            StringWriter stringWriter = new StringWriter();
+            PrintWriter printWriter = new PrintWriter(stringWriter);
+            Interpreter.run(program, printWriter);
+            String expectedOutput = "c";
+            String actualOutput = stringWriter.getBuffer().toString().trim();
+            assertEquals(expectedOutput, actualOutput);
+        } catch (Exception e) {
             fail();
         }
     }
