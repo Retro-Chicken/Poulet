@@ -48,5 +48,5 @@ fib : {_ : nat} nat := \n : nat -> ((((n) (pair) nat) fibstep) fibstart) (first)
 //vec : Type1 := {n : nat} {X : Type1} {_ : ((nvar_func) n) X} X
 //proj : {n : nat} {m : nat} {X : Type1} :=
 
-#reduce (fib) (succ) (succ) (succ) (succ) n1
-#reduce (n0) nat
+#reduce (fib) (succ) (succ) (succ) (succ) (succ) (succ) n1
+#reduce n0

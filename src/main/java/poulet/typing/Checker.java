@@ -22,6 +22,19 @@ public class Checker {
         deduced = Interpreter.evaluateExpression(deduced).expression();
         type = Interpreter.evaluateExpression(type).expression();
 
+        // Subtyping check first
+        // TODO: Make sure this is allowed
+        if(deduced instanceof Variable && type instanceof Variable) {
+            String nameDeduced = ((Variable) deduced).symbol.getName();
+            String nameType = ((Variable) type).symbol.getName();
+            if(nameDeduced.matches("Type\\d+") && nameType.matches("Type\\d+")) {
+                int level1 = Integer.parseInt(nameDeduced.substring(4));
+                int level2 = Integer.parseInt(nameType.substring(4));
+                if(level1 < level2)
+                    return;
+            }
+        }
+
         if(!deduced.toString().equals(type.toString()))
             throw new TypeException("Type Mismatch:\n" + term + " is of type " + deduced + ", not " + type);
     }
