@@ -5,6 +5,7 @@ import poulet.ast.*;
 import poulet.interpreter.Interpreter;
 import poulet.value.*;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -164,6 +165,63 @@ public class Checker {
             }
 
             result = Interpreter.evaluateExpression(constructor.definition, newEnvironment).expression();
+        } else if (term instanceof Match) {
+            Match match = (Match) term;
+            Expression expressionType = deduceType(match.expression, environment);
+
+            if (expressionType instanceof InductiveType) {
+                InductiveType inductiveType = (InductiveType) expressionType;
+                TypeDeclaration typeDeclaration = environment.lookUpTypeDeclaration(inductiveType.type);
+
+                if (typeDeclaration == null)
+                    throw new TypeException("type declaration " + inductiveType.type + " not found");
+
+                Value value = Interpreter.evaluateExpression(match.expression, environment);
+
+                if (value instanceof VConstructed) {
+                    VConstructed constructed = (VConstructed) value;
+
+                    if (inductiveType.arguments.size() != match.argumentSymbols.size())
+                        throw new TypeException("wrong number of arguments");
+
+                    Environment newEnvironment = environment.appendGlobal(match.expressionSymbol, ((Match) term).expression);
+
+                    for (int i = 0; i < inductiveType.arguments.size(); i++) {
+                        Symbol symbol = match.argumentSymbols.get(i);
+                        Expression argument = inductiveType.arguments.get(i);
+                        newEnvironment = newEnvironment.appendGlobal(symbol, argument);
+                    }
+
+                    Expression returnType = Interpreter.evaluateExpression(match.type, newEnvironment).expression();
+
+                    Match.Clause matchingClause = null;
+                    for (Match.Clause clause : match.clauses) {
+                        newEnvironment = environment;
+
+                        if (clause.constructorSymbol.equals(constructed.constructor.name)) {
+                            matchingClause = clause;
+                            break;
+                        }
+                    }
+
+                    if (constructed.arguments.size() != matchingClause.argumentSymbols.size())
+                        throw new TypeException("wrong number of arguments");
+
+                    for (int i = 0; i < constructed.arguments.size(); i++) {
+                        Symbol symbol = matchingClause.argumentSymbols.get(i);
+                        Expression argument = constructed.arguments.get(i).expression();
+                        newEnvironment = newEnvironment.appendGlobal(symbol, argument);
+                    }
+
+
+                    if (matchingClause == null)
+                        throw new TypeException("no matching clause");
+
+                    checkType(matchingClause.expression, returnType, newEnvironment);
+
+                    result = returnType;
+                }
+            }
         }
         if (result == null) {
             System.out.println("term =" + term);
