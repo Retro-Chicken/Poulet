@@ -4,11 +4,13 @@ grammar Poulet;
     package poulet.parser;
 }
 
-program : (definition | print | inductive_types | output)+ ;
+program : (definition | print | inductive_types | output | import_command)+ ;
 
 definition : symbol ':' expression (':=' expression)? ;
 
 print : (REDUCE | CHECK | SCHOLIUMS) expression ;
+
+import_command : IMPORT  STRING ;
 
 output : OUTPUT_COMMAND STRING ;
 
@@ -57,3 +59,5 @@ WHITESPACE : [ \t\r\n]+ -> skip ;
 COMMENT : '/*' .*? ('*/' | EOF) -> skip ;
 
 LINE_COMMENT : '//' ~[\r\n]* -> skip ;
+
+IMPORT : '#import' ;

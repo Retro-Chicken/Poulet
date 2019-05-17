@@ -1,6 +1,8 @@
 package poulet.interpreter;
 
+import org.antlr.v4.runtime.CharStreams;
 import poulet.ast.*;
+import poulet.parser.ASTParser;
 import poulet.quote.Quoter;
 import poulet.typing.Checker;
 import poulet.typing.Environment;
@@ -12,7 +14,36 @@ import java.util.function.Function;
 
 public class Interpreter {
     public static void run(Program program, PrintWriter out) throws Exception {
+        run(program, out, new HashMap<String, Program>());
+    }
+
+    public static void run(Program program, PrintWriter out, Map<String, Program> imports) throws Exception {
         //program = transform(program);
+        // Add imports
+        List<String> existingImports = new ArrayList<>();
+        while(true) {
+            boolean imported = false;
+            List<TopLevel> modifiedProgram = new ArrayList<>();
+            for(TopLevel topLevel : program.program) {
+                if(topLevel instanceof Import) {
+                    Import importStatement = (Import) topLevel;
+                    String fileName = importStatement.fileName;
+                    if(existingImports.contains(fileName))
+                        continue;
+                    if(!imports.containsKey(fileName))
+                        throw new Exception("Invalid Import");
+                    existingImports.add(fileName);
+                    modifiedProgram.addAll(imports.get(fileName).program);
+                    imported = true;
+                } else {
+                    modifiedProgram.add(topLevel);
+                }
+            }
+            program = new Program(modifiedProgram);
+            if(!imported)
+                break;
+        }
+
         program = addIndices(program);
         Environment environment = new Environment();
 
