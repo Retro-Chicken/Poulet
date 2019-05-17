@@ -34,9 +34,9 @@ pi_type : '{' symbol ':' expression '}' expression ;
 
 constructor : symbol ':' expression ;
 
-match : 'match' expression 'as' symbol+ 'in' expression '{' ((match_clause ',')* match_clause)? '}';
+match : 'match' expression 'as' symbol '(' ((symbol ',')* symbol)? ')' 'in' expression '{' ((match_clause ',')* match_clause)? '}';
 
-match_clause : symbol+ '=>' expression ;
+match_clause : symbol '(' ((symbol ',')* symbol)? ')' '=>' expression ;
 
 symbol : SYMBOL ;
 

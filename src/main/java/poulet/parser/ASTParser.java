@@ -120,6 +120,39 @@ public class ASTParser extends PouletBaseListener {
             InductiveType inductiveType = (InductiveType) children.get(0);
             Symbol constructor = (Symbol) children.get(2);
             return new ConstructorCall(inductiveType, constructor);
+        } else if (payload instanceof PouletParser.MatchContext) {
+            Expression expression = (Expression) children.get(1);
+            Symbol expressionSymbol = (Symbol) children.get(3);
+            List<Symbol> argumentSymbols = new ArrayList<>();
+
+            int i = 5;
+
+            for (; children.get(i) instanceof Symbol; i++) {
+                argumentSymbols.add((Symbol) children.get(i));
+            }
+
+            i += 2;
+            Expression type = (Expression) children.get(i);
+            i += 2;
+
+            List<Match.Clause> clauses = new ArrayList<>();
+
+            for (; i < children.size() - 1 && children.get(i) instanceof Match.Clause; i += 2) {
+                clauses.add((Match.Clause) children.get(i));
+            }
+
+            return new Match(expression, expressionSymbol, argumentSymbols, type, clauses);
+        } else if (payload instanceof PouletParser.Match_clauseContext) {
+            Symbol expressionSymbol = (Symbol) children.get(0);
+            List<Symbol> argumentSymbols = new ArrayList<>();
+
+            for (int i = 1; i < children.size() - 3 && children.get(i + 1) instanceof Symbol; i += 2) {
+                argumentSymbols.add((Symbol) children.get(i + 1));
+            }
+
+            Expression expression = (Expression) children.get(children.size() - 1);
+
+            return new Match.Clause(expressionSymbol, argumentSymbols, expression);
         }
 
         return null;

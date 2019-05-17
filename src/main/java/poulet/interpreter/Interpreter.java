@@ -1,6 +1,7 @@
 package poulet.interpreter;
 
 import poulet.ast.*;
+import poulet.quote.Quoter;
 import poulet.typing.Checker;
 import poulet.typing.Context;
 import poulet.typing.Environment;
@@ -273,6 +274,39 @@ public class Interpreter {
             Value type = evaluateExpression(constructor.definition, newEnvironment);
 
             return constructorToValue(type, constructor, parameters);
+        } else if (expression instanceof Match) {
+            Match match = (Match) expression;
+            Value value = evaluateExpression(match.expression, environment);
+
+            if (value instanceof VConstructed) {
+                VConstructed constructed = (VConstructed) value;
+
+                for (Match.Clause clause : match.clauses) {
+                    if (clause.constructorSymbol.equals(constructed.constructor.name)) {
+                        if (clause.argumentSymbols.size() != constructed.arguments.size()) {
+                            System.err.println("wrong number of arguments for clause " + clause);
+                            return null;
+                        }
+
+                        Environment newEnvironment = environment;
+
+                        for (int i = 0; i < clause.argumentSymbols.size(); i++) {
+                            Symbol argumentSymbol = clause.argumentSymbols.get(i);
+                            // skeeeeetch
+                            Expression argument = Quoter.quote(constructed.arguments.get(i));
+                            newEnvironment = newEnvironment.appendGlobals(argumentSymbol, argument);
+                        }
+
+                        return evaluateExpression(clause.expression, newEnvironment);
+                    }
+                }
+
+                System.err.println("no clause found for constructor " + constructed.constructor.name);
+                return null;
+            } else {
+                System.err.println("can only match on constructed value");
+                return null;
+            }
         }
 
         return null;

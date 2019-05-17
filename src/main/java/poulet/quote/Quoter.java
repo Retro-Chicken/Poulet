@@ -43,7 +43,6 @@ public class Quoter {
             VConstructed constructed = (VConstructed) value;
             List<Expression> arguments = constructed.arguments.stream().map(Quoter::quote).collect(Collectors.toList());
             InductiveType inductiveType = (InductiveType) quote(constructed.inductiveType, i);
-            System.out.println("itv = " + constructed.inductiveType);
 
             return new ConstructorCall(
                     inductiveType,
