@@ -29,7 +29,7 @@ public class Environment {
         return new Environment(newTypes, globals, typeDeclarations);
     }
 
-    public Environment appendGlobals(Name name, Expression global) {
+    public Environment appendGlobal(Name name, Expression global) {
         Map<Name, Expression> newGlobals = new HashMap<>(globals);
         newGlobals.put(name, global);
         return new Environment(types, newGlobals, typeDeclarations);

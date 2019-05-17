@@ -123,19 +123,47 @@ public class Checker {
             InductiveType inductiveType = (InductiveType) term;
             TypeDeclaration typeDeclaration = environment.lookUpTypeDeclaration(inductiveType.type);
 
+            if (typeDeclaration == null)
+                throw new TypeException("type declaration not found");
+
             if (inductiveType.parameters.size() != typeDeclaration.parameters.size())
                 throw new TypeException("wrong number of parameters");
 
             Environment newEnvironment = environment;
 
-            for (int i = 0;i < inductiveType.parameters.size(); i++) {
+            for (int i = 0; i < inductiveType.parameters.size(); i++) {
                 Expression parameterType = typeDeclaration.parameters.get(i).type;
                 Expression parameter = inductiveType.parameters.get(i);
                 checkType(parameter, parameterType, environment);
-                newEnvironment = newEnvironment.appendGlobals(typeDeclaration.parameters.get(i).symbol, parameter);
+                newEnvironment = newEnvironment.appendGlobal(typeDeclaration.parameters.get(i).symbol, parameter);
             }
 
             result = Interpreter.evaluateExpression(typeDeclaration.type, newEnvironment).expression();
+        } else if (term instanceof ConstructorCall) {
+            ConstructorCall constructorCall = (ConstructorCall) term;
+            Constructor constructor = environment.lookUpConstructor(constructorCall);
+
+            if (constructor == null)
+                throw new TypeException("constructor not found");
+
+            TypeDeclaration typeDeclaration = environment.lookUpTypeDeclaration(constructorCall.inductiveType.type);
+
+            if (typeDeclaration == null)
+                throw new TypeException("type declaration not found");
+
+            if (constructorCall.inductiveType.parameters.size() != typeDeclaration.parameters.size())
+                throw new TypeException("wrong number of parameters");
+
+            Environment newEnvironment = environment;
+
+            for (int i = 0; i < constructorCall.inductiveType.parameters.size(); i++) {
+                Expression parameterType = typeDeclaration.parameters.get(i).type;
+                Expression parameter = constructorCall.inductiveType.parameters.get(i);
+                checkType(parameter, parameterType, environment);
+                newEnvironment = newEnvironment.appendGlobal(typeDeclaration.parameters.get(i).symbol, parameter);
+            }
+
+            result = Interpreter.evaluateExpression(constructor.definition, newEnvironment).expression();
         }
         if (result == null) {
             System.out.println("term =" + term);
@@ -176,6 +204,45 @@ public class Checker {
             Expression type = substitute(piType.type, substitute, i);
             Expression body = substitute(piType.body, substitute, i + 1);
             return new PiType(piType.variable, type, body);
+        } else if (base instanceof ConstructorCall) {
+            ConstructorCall constructorCall = (ConstructorCall) base;
+
+            List<Expression> arguments = null;
+
+            if (constructorCall.isConcrete()) {
+                arguments = new ArrayList<>();
+                for (Expression argument : constructorCall.arguments) {
+                    arguments.add(substitute(argument, substitute));
+                }
+            }
+
+            return new ConstructorCall(
+                    (InductiveType) substitute(constructorCall.inductiveType, substitute, i),
+                    constructorCall.constructor,
+                    arguments
+            );
+        } else if (base instanceof InductiveType) {
+            InductiveType inductiveType = (InductiveType) base;
+
+            List<Expression> parameters = new ArrayList<>();
+            for (Expression parameter : inductiveType.parameters) {
+                parameters.add(substitute(parameter, substitute));
+            }
+
+            List<Expression> arguments = null;
+
+            if (inductiveType.isConcrete()) {
+                arguments = new ArrayList<>();
+                for (Expression argument : inductiveType.arguments) {
+                    arguments.add(substitute(argument, substitute));
+                }
+            }
+
+            return new InductiveType(
+                    inductiveType.type,
+                    inductiveType.parameters,
+                    arguments
+            );
         }
 
         return base;
@@ -226,7 +293,7 @@ public class Checker {
         return false; // TODO
     }
 
-    private static void inductiveDeclarationWellFormed(InductiveDeclaration inductiveDeclaration, Context globals) throws TypeException {
+    private static void inductiveDeclarationWellFormed(InductiveDeclaration inductiveDeclaration, Environment environment) throws TypeException {
         List<TypeDeclaration> tds = inductiveDeclaration.typeDeclarations;
 
         try {
@@ -240,10 +307,10 @@ public class Checker {
             // A_j is an arity of sort s_j and I_j ∉ E
             List<VType> arities = new ArrayList<>();
             for (TypeDeclaration td : tds) {
-                Value type = Interpreter.evaluateExpression(td.type, globals);
+                Value type = Interpreter.evaluateExpression(td.type, new ArrayList<>(), environment);
                 assert isArity(type);
                 arities.add(getArity(type));
-                assert globals.lookUp(td.name) == null;
+                assert environment.lookUpGlobal(td.name) == null;
             }
 
             // C_jk is a type of constructor I_j which satisfies the positivity

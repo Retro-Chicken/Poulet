@@ -1,20 +1,16 @@
-inductive {
-    type list (A : Type1) : Type1 {
-        nil : list[A]
-        cons : {_ : A} {_ : list[A]} list[A]
-    }
-}
-
 int : Type1
 zero : int
 
-bool : Type1
-true : bool
-
 inductive {
     type and (p : Type1) (q : Type1) : {_ : p} {_ : q} Type1 {
-        mk : {_ : p} {_ : q} ((and[p, q]) p) q
+        mk : {a : p} {b : q} ((and[p, q]) a) b
     }
 }
 
-#check ((and[int, int]) zero) zero
+inductive {
+    type wrap : {_ : int} Type1 {
+        mk : {a : int} (wrap[]) a
+    }
+}
+
+#check (wrap[].mk) zero

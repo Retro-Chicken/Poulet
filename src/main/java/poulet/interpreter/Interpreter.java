@@ -3,7 +3,6 @@ package poulet.interpreter;
 import poulet.ast.*;
 import poulet.quote.Quoter;
 import poulet.typing.Checker;
-import poulet.typing.Context;
 import poulet.typing.Environment;
 import poulet.value.*;
 
@@ -20,25 +19,28 @@ public class Interpreter {
         for (TopLevel topLevel : program.program) {
             if (topLevel instanceof Definition) {
                 Definition definition = (Definition) topLevel;
-                environment = environment.appendGlobals(definition.name, definition.definition);
+                if (definition.definition != null)
+                    environment = environment.appendGlobal(definition.name, definition.definition);
             } else if (topLevel instanceof InductiveDeclaration) {
                 InductiveDeclaration inductiveDeclaration = (InductiveDeclaration) topLevel;
                 environment = environment.appendInductive(inductiveDeclaration);
             }
         }
         for (TopLevel topLevel : program.program) {
+            if (topLevel instanceof Definition) {
+                Definition definition = (Definition) topLevel;
+                if (definition.definition != null)
+                    Checker.checkType(definition.definition, definition.type, environment);
+                environment = environment.appendType(definition.name, definition.type);
+            }
+        }
+        for (TopLevel topLevel : program.program) {
             try {
-                if (topLevel instanceof Definition) {
-                    Definition definition = (Definition) topLevel;
-                    Checker.checkKind(definition.type, environment);
-                    if (definition.definition != null)
-                        Checker.checkType(definition.definition, definition.type, environment);
-                    environment = environment.appendType(definition.name, definition.type);
-                } else if (topLevel instanceof Print) {
+                if (topLevel instanceof Print) {
                     Print print = (Print) topLevel;
                     switch (print.command) {
                         case reduce:
-                            out.println(evaluateExpression(print.expression, environment).readableString());
+                            out.println(evaluateExpression(print.expression, new ArrayList<>(), environment).readableString());
                             break;
                         case check:
                             out.println(Checker.deduceType(print.expression, environment).readableString());//cleanCheck(Checker.deduceType(print.expression, context).expression(), 0));
@@ -47,8 +49,6 @@ public class Interpreter {
                 } else if (topLevel instanceof Output) {
                     Output ouput = (Output) topLevel;
                     out.println(ouput.text);
-                } else if (topLevel instanceof InductiveDeclaration) {
-                    // TODO
                 }
             } catch (Exception e) {
                 System.out.println("Error on Line: " + topLevel);
@@ -149,15 +149,9 @@ public class Interpreter {
         return expressions;
     }
 
-    public static Value evaluateExpression(Expression expression, Context globals) {
-        Environment environment = new Environment(new HashMap<>(), globals.context, new HashMap<>());
-        return evaluateExpression(expression, environment);
-    }
-
     public static Value evaluateExpression(Expression expression, Environment environment) {
         return evaluateExpression(expression, new ArrayList<>(), environment);
     }
-
     public static Value evaluateExpression(Expression expression, List<Value> bound, Environment environment) {
         if (expression instanceof Variable) {
             Variable variable = (Variable) expression;
@@ -215,6 +209,7 @@ public class Interpreter {
                 List<Value> newBound = new ArrayList<>();
                 newBound.add(argument);
                 newBound.addAll(bound);
+                //System.out.println("pb = " + piType.body + ", nb = " + newBound);
                 return evaluateExpression(piType.body, newBound, environment);
             };
             return new VPi(type, body);
@@ -227,7 +222,6 @@ public class Interpreter {
                 return null;
             }
 
-            Value type = evaluateExpression(td.type, environment);
             List<Value> parameters = new ArrayList<>();
 
             if (inductiveType.parameters.size() != td.parameters.size()) {
@@ -236,10 +230,22 @@ public class Interpreter {
             }
 
             for (Expression parameter : inductiveType.parameters) {
-                parameters.add(evaluateExpression(parameter, environment));
+                parameters.add(evaluateExpression(parameter, bound, environment));
             }
 
-            return inductiveTypeToValue(type, td, parameters);
+            if (inductiveType.isConcrete()) {
+                List<Value> arguments = new ArrayList<>();
+
+                // do we need to change environment here?
+                // TODO think
+                for (Expression argument : inductiveType.arguments)
+                    arguments.add(evaluateExpression(argument, bound, environment));
+
+                return new VInductiveType(td, parameters, arguments);
+            } else {
+                Value type = evaluateExpression(td.type, bound, environment);
+                return inductiveTypeToValue(type, td, parameters);
+            }
         } else if (expression instanceof ConstructorCall) {
             ConstructorCall constructorCall = (ConstructorCall) expression;
             Constructor constructor = environment.lookUpConstructor(constructorCall);
@@ -267,16 +273,27 @@ public class Interpreter {
             for (int i = 0; i < td.parameters.size(); i++) {
                 Parameter parameter = td.parameters.get(i);
                 Expression parameterExpression = constructorCall.inductiveType.parameters.get(i);
-                newEnvironment = newEnvironment.appendGlobals(parameter.symbol, parameterExpression);
-                parameters.add(evaluateExpression(parameterExpression, environment));
+                newEnvironment = newEnvironment.appendGlobal(parameter.symbol, parameterExpression);
+                parameters.add(evaluateExpression(parameterExpression, bound, environment));
             }
 
-            Value type = evaluateExpression(constructor.definition, newEnvironment);
+            if (constructorCall.isConcrete()) {
+                List<Value> arguments = new ArrayList<>();
 
-            return constructorToValue(type, constructor, parameters);
+                // do we need to change environment here?
+                // TODO think
+                for (Expression argument : constructorCall.arguments)
+                    arguments.add(evaluateExpression(argument, bound, environment));
+
+                VInductiveType inductiveType = (VInductiveType) evaluateExpression(constructorCall.inductiveType, bound, environment);
+                return new VConstructed(inductiveType, parameters, constructor, arguments);
+            } else {
+                Value type = evaluateExpression(constructor.definition, bound, newEnvironment);
+                return constructorToValue(type, constructor, parameters);
+            }
         } else if (expression instanceof Match) {
             Match match = (Match) expression;
-            Value value = evaluateExpression(match.expression, environment);
+            Value value = evaluateExpression(match.expression, bound, environment);
 
             if (value instanceof VConstructed) {
                 VConstructed constructed = (VConstructed) value;
@@ -294,10 +311,10 @@ public class Interpreter {
                             Symbol argumentSymbol = clause.argumentSymbols.get(i);
                             // skeeeeetch
                             Expression argument = Quoter.quote(constructed.arguments.get(i));
-                            newEnvironment = newEnvironment.appendGlobals(argumentSymbol, argument);
+                            newEnvironment = newEnvironment.appendGlobal(argumentSymbol, argument);
                         }
 
-                        return evaluateExpression(clause.expression, newEnvironment);
+                        return evaluateExpression(clause.expression, bound, newEnvironment);
                     }
                 }
 
@@ -315,6 +332,7 @@ public class Interpreter {
     private static Value inductiveTypeToValue(Value type, TypeDeclaration typeDeclaration, List<Value> parameters) {
         return inductiveTypeToValue(type, typeDeclaration, parameters, new ArrayList<>());
     }
+
     private static Value inductiveTypeToValue(Value type, TypeDeclaration typeDeclaration, List<Value> parameters, List<Value> arguments) {
         if (type instanceof VPi) {
             VPi vPi = (VPi) type;
@@ -334,6 +352,7 @@ public class Interpreter {
     private static Value constructorToValue(Value type, Constructor constructor, List<Value> parameters) {
         return constructorToValue(type, constructor, parameters, new ArrayList<>());
     }
+
     private static Value constructorToValue(Value type, Constructor constructor, List<Value> parameters, List<Value> arguments) {
         if (type instanceof VPi) {
             VPi vPi = (VPi) type;
@@ -400,11 +419,35 @@ public class Interpreter {
                 Print print = (Print) topLevel;
                 Print indexed = new Print(print.command, addIndices(print.expression));
                 result.add(indexed);
-            } else { // TODO: handle type declaration
-                result.add(topLevel);
+            } else if (topLevel instanceof InductiveDeclaration) {
+                InductiveDeclaration inductiveDeclaration = (InductiveDeclaration) topLevel;
+                List<TypeDeclaration> typeDeclarations = new ArrayList<>();
+
+                for (TypeDeclaration typeDeclaration : inductiveDeclaration.typeDeclarations) {
+                    typeDeclarations.add(addIndices(typeDeclaration));
+                }
+
+                InductiveDeclaration indexed = new InductiveDeclaration(typeDeclarations);
+                result.add(indexed);
             }
         }
         return new Program(result);
+    }
+
+    public static TypeDeclaration addIndices(TypeDeclaration typeDeclaration) {
+        List<Constructor> constructors = new ArrayList<>();
+
+        for (Constructor constructor : typeDeclaration.constructors) {
+            Constructor indexed = new Constructor(constructor.name, addIndices(constructor.definition));
+            constructors.add(indexed);
+        }
+
+        return new TypeDeclaration(
+                typeDeclaration.name,
+                typeDeclaration.parameters,
+                addIndices(typeDeclaration.type),
+                constructors
+        );
     }
 
     public static Expression addIndices(Expression expression) {

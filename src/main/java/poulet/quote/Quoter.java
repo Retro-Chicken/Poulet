@@ -31,8 +31,8 @@ public class Quoter {
             return new PiType(null, quote(piType.type, i), quote(piType.call(vFree(i)), i + 1));
         } else if (value instanceof VInductiveType) {
             VInductiveType inductiveType = (VInductiveType) value;
-            List<Expression> parameters = inductiveType.parameters.stream().map(Quoter::quote).collect(Collectors.toList());
-            List<Expression> arguments = inductiveType.arguments.stream().map(Quoter::quote).collect(Collectors.toList());
+            List<Expression> parameters = inductiveType.parameters.stream().map(p -> quote(p, i)).collect(Collectors.toList());
+            List<Expression> arguments = inductiveType.arguments.stream().map(a -> quote(a, i)).collect(Collectors.toList());
 
             return new InductiveType(
                     inductiveType.typeDeclaration.name,
@@ -41,7 +41,7 @@ public class Quoter {
             );
         } else if (value instanceof VConstructed) {
             VConstructed constructed = (VConstructed) value;
-            List<Expression> arguments = constructed.arguments.stream().map(Quoter::quote).collect(Collectors.toList());
+            List<Expression> arguments = constructed.arguments.stream().map(a -> quote(a, i)).collect(Collectors.toList());
             InductiveType inductiveType = (InductiveType) quote(constructed.inductiveType, i);
 
             return new ConstructorCall(
