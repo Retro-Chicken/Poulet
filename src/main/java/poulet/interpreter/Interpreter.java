@@ -218,23 +218,61 @@ public class Interpreter {
             };
             return new VPi(type, body);
         } else if (expression instanceof InductiveType) {
-
             InductiveType inductiveType = (InductiveType) expression;
-            TypeDeclaration td = environment.lookUpInductive(inductiveType.type);
+            TypeDeclaration td = environment.lookUpTypeDeclaration(inductiveType.type);
 
             if (td == null) {
-                System.err.println("typeDeclarations type " + inductiveType.type + " doesn't exist");
+                System.err.println("inductive type " + inductiveType.type + " doesn't exist");
                 return null;
             }
 
-            Value tdType = evaluateExpression(td.type, environment);
+            Value type = evaluateExpression(td.type, environment);
             List<Value> parameters = new ArrayList<>();
 
-            for (Parameter parameter : td.parameters) {
-                parameters.add(evaluateExpression(parameter.type, environment));
+            if (inductiveType.parameters.size() != td.parameters.size()) {
+                System.err.println("wrong number of parameters");
+                return null;
             }
 
-            return inductiveTypeToValue(tdType, td, parameters);
+            for (Expression parameter : inductiveType.parameters) {
+                parameters.add(evaluateExpression(parameter, environment));
+            }
+
+            return inductiveTypeToValue(type, td, parameters);
+        } else if (expression instanceof ConstructorCall) {
+            ConstructorCall constructorCall = (ConstructorCall) expression;
+            Constructor constructor = environment.lookUpConstructor(constructorCall);
+
+            if (constructor == null) {
+                System.err.println("constructor " + constructor.name + " doesn't exist");
+                return null;
+            }
+
+            List<Value> parameters = new ArrayList<>();
+            TypeDeclaration td = environment.lookUpTypeDeclaration(constructorCall.inductiveType.type);
+
+            if (td == null) {
+                System.err.println("inductive type " + constructorCall.inductiveType.type + " doesn't exist");
+                return null;
+            }
+
+            Environment newEnvironment = environment;
+
+            if (constructorCall.inductiveType.parameters.size() != td.parameters.size()) {
+                System.err.println("wrong number of parameters");
+                return null;
+            }
+
+            for (int i = 0; i < td.parameters.size(); i++) {
+                Parameter parameter = td.parameters.get(i);
+                Expression parameterExpression = constructorCall.inductiveType.parameters.get(i);
+                newEnvironment = newEnvironment.appendGlobals(parameter.symbol, parameterExpression);
+                parameters.add(evaluateExpression(parameterExpression, environment));
+            }
+
+            Value type = evaluateExpression(constructor.definition, newEnvironment);
+
+            return constructorToValue(type, constructor, parameters);
         }
 
         return null;
@@ -255,6 +293,26 @@ public class Interpreter {
             return new VInductiveType(typeDeclaration, parameters, arguments);
         } else {
             System.err.println("type declaration " + typeDeclaration + " invalid");
+            return null;
+        }
+    }
+
+    private static Value constructorToValue(Value type, Constructor constructor, List<Value> parameters) {
+        return constructorToValue(type, constructor, parameters, new ArrayList<>());
+    }
+    private static Value constructorToValue(Value type, Constructor constructor, List<Value> parameters, List<Value> arguments) {
+        if (type instanceof VPi) {
+            VPi vPi = (VPi) type;
+            return new VAbstraction(vPi.type, argument -> {
+                List<Value> newArgs = new ArrayList<>(arguments);
+                newArgs.add(argument);
+                return constructorToValue(vPi.call(argument), constructor, parameters, newArgs);
+            });
+        } else if (type instanceof VInductiveType) {
+            VInductiveType inductiveType = (VInductiveType) type;
+            return new VConstructed(inductiveType, parameters, constructor, arguments);
+        } else {
+            System.err.println("constructor call to " + constructor.name + " invalid");
             return null;
         }
     }

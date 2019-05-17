@@ -27,9 +27,12 @@ inductive {
 }
 
 inductive {
-    type and (p : prop) (q : prop) : {_ : p} {_ : q} Type1 {
+    type and (p : Type1) (q : Type1) : {_ : p} {_ : q} Type1 {
         mk : {_ : p} {_ : q} ((and[p, q]) p) q
     }
 }
 
-#reduce ((and[a, a]) p) q
+a : Type1
+b : a
+
+#reduce ((and[a, a].mk) b) b

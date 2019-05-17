@@ -72,8 +72,23 @@ public class Environment {
         return globals.getOrDefault(name, null);
     }
 
-    public TypeDeclaration lookUpInductive(Name name) {
+    public TypeDeclaration lookUpTypeDeclaration(Name name) {
         return typeDeclarations.getOrDefault(name, null);
+    }
+
+    public Constructor lookUpConstructor(ConstructorCall constructorCall) {
+        TypeDeclaration td = lookUpTypeDeclaration(constructorCall.inductiveType.type);
+
+        if (td == null)
+            return null;
+
+        for (Constructor c : td.constructors) {
+            if (c.name.equals(constructorCall.constructor)) {
+                return c;
+            }
+        }
+
+        return null;
     }
 
     @Override

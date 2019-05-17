@@ -39,6 +39,17 @@ public class Quoter {
                     parameters,
                     arguments
             );
+        } else if (value instanceof VConstructed) {
+            VConstructed constructed = (VConstructed) value;
+            List<Expression> arguments = constructed.arguments.stream().map(Quoter::quote).collect(Collectors.toList());
+            InductiveType inductiveType = (InductiveType) quote(constructed.inductiveType, i);
+            System.out.println("itv = " + constructed.inductiveType);
+
+            return new ConstructorCall(
+                    inductiveType,
+                    constructed.constructor.name,
+                    arguments
+            );
         }
         return null;
     }
