@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class InductiveDeclaration extends TopLevel {
-    private List<TypeDeclaration> typeDeclarations;
+    public final List<TypeDeclaration> typeDeclarations;
 
     public InductiveDeclaration(List<TypeDeclaration> typeDeclarations) {
         this.typeDeclarations = typeDeclarations;

@@ -1,8 +1,8 @@
 package poulet.ast;
 
 public class ConstructorCall extends Expression {
-    private InductiveType inductiveType;
-    private Symbol constructor;
+    private final InductiveType inductiveType;
+    private final Symbol constructor;
 
     public ConstructorCall(InductiveType inductiveType, Symbol constructor) {
         this.inductiveType = inductiveType;

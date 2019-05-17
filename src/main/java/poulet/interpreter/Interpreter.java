@@ -3,6 +3,7 @@ package poulet.interpreter;
 import poulet.ast.*;
 import poulet.typing.Checker;
 import poulet.typing.Context;
+import poulet.typing.Environment;
 import poulet.value.*;
 
 import java.io.PrintWriter;
@@ -13,36 +14,40 @@ public class Interpreter {
     public static void run(Program program, PrintWriter out) throws Exception {
         //program = transform(program);
         program = addIndices(program);
-        Context context = new Context();
-        Context globals = new Context();
+        Environment environment = new Environment();
 
         for (TopLevel topLevel : program.program) {
             if (topLevel instanceof Definition) {
                 Definition definition = (Definition) topLevel;
-                globals = globals.append(definition.name, definition.definition);
+                environment = environment.appendGlobals(definition.name, definition.definition);
+            } else if (topLevel instanceof InductiveDeclaration) {
+                InductiveDeclaration inductiveDeclaration = (InductiveDeclaration) topLevel;
+                environment = environment.appendInductive(inductiveDeclaration);
             }
         }
         for (TopLevel topLevel : program.program) {
             try {
                 if (topLevel instanceof Definition) {
                     Definition definition = (Definition) topLevel;
-                    Checker.checkKind(context, definition.type, globals);
+                    Checker.checkKind(definition.type, environment);
                     if (definition.definition != null)
-                        Checker.checkType(context, definition.definition, definition.type, globals);
-                    context = context.append(definition.name, definition.type);
+                        Checker.checkType(definition.definition, definition.type, environment);
+                    environment = environment.appendType(definition.name, definition.type);
                 } else if (topLevel instanceof Print) {
                     Print print = (Print) topLevel;
                     switch (print.command) {
                         case reduce:
-                            out.println(evaluateExpression(print.expression, globals).readableString());
+                            out.println(evaluateExpression(print.expression, environment).readableString());
                             break;
                         case check:
-                            out.println(Checker.deduceType(context, print.expression, globals).readableString());//cleanCheck(Checker.deduceType(print.expression, context).expression(), 0));
+                            out.println(Checker.deduceType(print.expression, environment).readableString());//cleanCheck(Checker.deduceType(print.expression, context).expression(), 0));
                             break;
                     }
                 } else if (topLevel instanceof Output) {
                     Output ouput = (Output) topLevel;
                     out.println(ouput.text);
+                } else if (topLevel instanceof InductiveDeclaration) {
+                    // TODO
                 }
             } catch (Exception e) {
                 System.out.println("Error on Line: " + topLevel);
@@ -144,10 +149,15 @@ public class Interpreter {
     }
 
     public static Value evaluateExpression(Expression expression, Context globals) {
-        return evaluateExpression(expression, new ArrayList<>(), globals);
+        Environment environment = new Environment(new HashMap<>(), globals.context, new HashMap<>());
+        return evaluateExpression(expression, environment);
     }
 
-    public static Value evaluateExpression(Expression expression, List<Value> bound, Context globals) {
+    public static Value evaluateExpression(Expression expression, Environment environment) {
+        return evaluateExpression(expression, new ArrayList<>(), environment);
+    }
+
+    public static Value evaluateExpression(Expression expression, List<Value> bound, Environment environment) {
         if (expression instanceof Variable) {
             Variable variable = (Variable) expression;
 
@@ -157,11 +167,11 @@ public class Interpreter {
                     int level = Integer.parseInt(name.substring(4));
                     return new VType(level);
                 } else {
-                    Expression definition = globals.lookUp(variable.symbol);
+                    Expression definition = environment.lookUpGlobal(variable.symbol);
                     if (definition == null) {
                         return new VNeutral(new NFree(variable.symbol));
                     } else {
-                        return evaluateExpression(definition, bound, globals);
+                        return evaluateExpression(definition, bound, environment);
                     }
                 }
             } else {
@@ -170,8 +180,8 @@ public class Interpreter {
             }
         } else if (expression instanceof Application) {
             Application application = (Application) expression;
-            Value function = evaluateExpression(application.function, bound, globals);
-            Value argument = evaluateExpression(application.argument, bound, globals);
+            Value function = evaluateExpression(application.function, bound, environment);
+            Value argument = evaluateExpression(application.argument, bound, environment);
 
             if (function instanceof VAbstraction) {
                 VAbstraction abstraction = (VAbstraction) function;
@@ -191,25 +201,62 @@ public class Interpreter {
 
             assert abstraction.symbol == null;
 
-            return new VAbstraction(argument -> {
+            return new VAbstraction(evaluateExpression(abstraction.type, bound, environment), argument -> {
                 List<Value> newBound = new ArrayList<>();
                 newBound.add(argument);
                 newBound.addAll(bound);
-                return evaluateExpression(abstraction.body, newBound, globals);
-            }, evaluateExpression(abstraction.type, bound, globals));
+                return evaluateExpression(abstraction.body, newBound, environment);
+            });
         } else if (expression instanceof PiType) {
             PiType piType = (PiType) expression;
-            Value type = evaluateExpression(piType.type, bound, globals);
+            Value type = evaluateExpression(piType.type, bound, environment);
             Function<Value, Value> body = argument -> {
                 List<Value> newBound = new ArrayList<>();
                 newBound.add(argument);
                 newBound.addAll(bound);
-                return evaluateExpression(piType.body, newBound, globals);
+                return evaluateExpression(piType.body, newBound, environment);
             };
             return new VPi(type, body);
+        } else if (expression instanceof InductiveType) {
+
+            InductiveType inductiveType = (InductiveType) expression;
+            TypeDeclaration td = environment.lookUpInductive(inductiveType.type);
+
+            if (td == null) {
+                System.err.println("typeDeclarations type " + inductiveType.type + " doesn't exist");
+                return null;
+            }
+
+            Value tdType = evaluateExpression(td.type, environment);
+            List<Value> parameters = new ArrayList<>();
+
+            for (Parameter parameter : td.parameters) {
+                parameters.add(evaluateExpression(parameter.type, environment));
+            }
+
+            return inductiveTypeToValue(tdType, td, parameters);
         }
 
         return null;
+    }
+
+    private static Value inductiveTypeToValue(Value type, TypeDeclaration typeDeclaration, List<Value> parameters) {
+        return inductiveTypeToValue(type, typeDeclaration, parameters, new ArrayList<>());
+    }
+    private static Value inductiveTypeToValue(Value type, TypeDeclaration typeDeclaration, List<Value> parameters, List<Value> arguments) {
+        if (type instanceof VPi) {
+            VPi vPi = (VPi) type;
+            return new VAbstraction(vPi.type, argument -> {
+                List<Value> newArgs = new ArrayList<>(arguments);
+                newArgs.add(argument);
+                return inductiveTypeToValue(vPi.call(argument), typeDeclaration, parameters, newArgs);
+            });
+        } else if (type instanceof VType) {
+            return new VInductiveType(typeDeclaration, parameters, arguments);
+        } else {
+            System.err.println("type declaration " + typeDeclaration + " invalid");
+            return null;
+        }
     }
 
     private static Expression substitute(Expression expression, Symbol symbol, Expression substitution) {

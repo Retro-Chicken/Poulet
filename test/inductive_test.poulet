@@ -5,11 +5,31 @@ false : bool := \X : Type1 -> \x : X -> \y : X -> y
 inductive {
     type list (A : Type1) : Type1 {
         nil : list[A]
-        cons : {_ : A} {_ : (list) A} list[A]
+        cons : {_ : A} {_ : list[A]} list[A]
     }
 }
 
-is_empty : {A : Type1} {_ : list[A]} bool := \A : Type1 -> \l : list[A] -> match l as l in bool {
-    nil => t,
-    cons _ _ => f
+inductive {
+    type nat : Type1 {
+        Z : nat[]
+        S : {_ : nat[]} nat[]
+    }
 }
+
+inductive {
+    type even : {_ : nat[]} Type1 {
+        evenZ : (even[]) nat[].Z
+        evenS : {n : nat} {_ : (odd[]) n} (even[]) (nat[].S) Z
+    }
+    type odd : {_ : nat[]} Type1 {
+        evenS : {n : nat} {_ : (even[]) n} (odd[]) (nat[].S) Z
+    }
+}
+
+inductive {
+    type and (p : prop) (q : prop) : {_ : p} {_ : q} Type1 {
+        mk : {_ : p} {_ : q} ((and[p, q]) p) q
+    }
+}
+
+#reduce ((and[a, a]) p) q

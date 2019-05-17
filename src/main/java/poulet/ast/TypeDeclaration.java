@@ -8,12 +8,26 @@ public class TypeDeclaration extends Node {
     public final List<Parameter> parameters;
     public final Expression type;
     public final List<Constructor> constructors;
+    private final InductiveDeclaration inductiveDeclaration;
 
     public TypeDeclaration(Symbol name, List<Parameter> parameters, Expression type, List<Constructor> constructors) {
         this.name = name;
         this.parameters = parameters;
         this.type = type;
         this.constructors = constructors;
+        this.inductiveDeclaration = null;
+    }
+
+    public TypeDeclaration(Symbol name, List<Parameter> parameters, Expression type, List<Constructor> constructors, InductiveDeclaration inductiveDeclaration) {
+        this.name = name;
+        this.parameters = parameters;
+        this.type = type;
+        this.constructors = constructors;
+        this.inductiveDeclaration = inductiveDeclaration;
+    }
+
+    public TypeDeclaration addInductiveDeclaration(InductiveDeclaration inductiveDeclaration) {
+        return new TypeDeclaration(name, parameters, type, constructors, inductiveDeclaration);
     }
 
     @Override

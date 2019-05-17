@@ -1,8 +1,8 @@
 package poulet.ast;
 
 public class Parameter extends Node {
-    private Symbol symbol;
-    private Expression type;
+    public final Symbol symbol;
+    public final Expression type;
 
     public Parameter(Symbol symbol, Expression type) {
         this.symbol = symbol;
