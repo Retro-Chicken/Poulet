@@ -10,9 +10,11 @@ zero : int
 
 bool : Type1
 true : bool
-false : bool
 
-#reduce match ((list[int].cons) zero) list[int].nil as l() in bool {
-    nil() => false,
-    cons(h, t) => true
+inductive {
+    type and (p : Type1) (q : Type1) : {_ : p} {_ : q} Type1 {
+        mk : {_ : p} {_ : q} ((and[p, q]) p) q
+    }
 }
+
+#check ((and[int, int]) zero) zero

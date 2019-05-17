@@ -119,6 +119,23 @@ public class Checker {
                     result = new Variable(new Symbol("Type" + umax(level1, level2)));
                 }
             }
+        } else if (term instanceof InductiveType) {
+            InductiveType inductiveType = (InductiveType) term;
+            TypeDeclaration typeDeclaration = environment.lookUpTypeDeclaration(inductiveType.type);
+
+            if (inductiveType.parameters.size() != typeDeclaration.parameters.size())
+                throw new TypeException("wrong number of parameters");
+
+            Environment newEnvironment = environment;
+
+            for (int i = 0;i < inductiveType.parameters.size(); i++) {
+                Expression parameterType = typeDeclaration.parameters.get(i).type;
+                Expression parameter = inductiveType.parameters.get(i);
+                checkType(parameter, parameterType, environment);
+                newEnvironment = newEnvironment.appendGlobals(typeDeclaration.parameters.get(i).symbol, parameter);
+            }
+
+            result = Interpreter.evaluateExpression(typeDeclaration.type, newEnvironment).expression();
         }
         if (result == null) {
             System.out.println("term =" + term);
