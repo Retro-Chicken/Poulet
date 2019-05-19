@@ -12,9 +12,7 @@ import java.util.function.Function;
 
 public class Interpreter {
     public static void run(Program program, PrintWriter out) throws Exception {
-        // program = transform(program);
         program = makeSymbolsUnique(program);
-        System.out.println("unique = " + program);
         Environment environment = new Environment();
 
         for (TopLevel topLevel : program.program) {
@@ -151,6 +149,12 @@ public class Interpreter {
     }
 
     public static Value evaluateExpression(Expression expression, Environment environment) {
+        /*System.out.println("=============================");
+        System.out.println("eval -> " + expression);
+        System.out.println("-----------------------------");
+        System.out.println("env -> " + environment);
+        System.out.println("=============================");*/
+
         if (expression instanceof Variable) {
             Variable variable = (Variable) expression;
 
@@ -199,7 +203,8 @@ public class Interpreter {
                     return null;
                 }
 
-                return evaluateExpression(callingDefinition.definition, newEnvironment);
+                Expression newApplication = new Application(callingDefinition.definition, application.argument);
+                return evaluateExpression(newApplication, newEnvironment);
             } else {
                 System.err.println("can't apply to a " + function.getClass().getSimpleName());
                 return null;
@@ -209,6 +214,7 @@ public class Interpreter {
 
             return new VAbstraction(evaluateExpression(abstraction.type, environment), argument -> {
                 Environment newEnvironment = environment.appendScope(abstraction.symbol, argument.expression());
+                System.out.println("adding " + argument.getClass().getSimpleName());
                 return evaluateExpression(abstraction.body, newEnvironment);
             });
         } else if (expression instanceof PiType) {
@@ -341,7 +347,7 @@ public class Interpreter {
     }
 
     private static Value inductiveTypeToValue(Value type, TypeDeclaration typeDeclaration, List<Value> parameters) {
-        return inductiveTypeToValue(type, typeDeclaration, parameters, new ArrayList<>());
+        return inductiveTypeToValue(type, typeDeclaration, parameters, null);
     }
 
     private static Value inductiveTypeToValue(Value type, TypeDeclaration typeDeclaration, List<Value> parameters, List<Value> arguments) {
@@ -434,8 +440,60 @@ public class Interpreter {
                     type,
                     clauses
             );
-        } else if (expression instanceof Fix) {
+        } else if (expression instanceof InductiveType) {
+            InductiveType inductiveType = (InductiveType) expression;
+            List<Expression> parameters = new ArrayList<>();
 
+            for (Expression parameter : inductiveType.parameters) {
+                parameters.add(substitute(parameter, symbol, substitution));
+            }
+
+            List<Expression> arguments = null;
+
+            if (inductiveType.isConcrete()) {
+                arguments = new ArrayList<>();
+
+                for (Expression argument : inductiveType.arguments) {
+                    arguments.add(substitute(argument, symbol, substitution));
+                }
+            }
+
+            return new InductiveType(
+                    inductiveType.type,
+                    parameters,
+                    arguments
+            );
+        } else if (expression instanceof ConstructorCall) {
+            ConstructorCall constructorCall = (ConstructorCall) expression;
+
+            List<Expression> arguments = null;
+
+            if (constructorCall.isConcrete()) {
+                arguments = new ArrayList<>();
+                for (Expression argument : constructorCall.arguments) {
+                    arguments.add(substitute(argument, symbol, substitution));
+                }
+            }
+
+            return new ConstructorCall(
+                    (InductiveType) substitute(constructorCall.inductiveType, symbol, substitution),
+                    constructorCall.constructor,
+                    arguments
+            );
+        } else if (expression instanceof Fix) {
+            Fix fix = (Fix) expression;
+            List<Definition> definitions = new ArrayList<>();
+
+            for (Definition definition : fix.definitions) {
+                Definition newDefinition = new Definition(
+                        definition.name,
+                        substitute(definition.type, symbol, substitution),
+                        substitute(definition.definition, symbol, substitution)
+                );
+                definitions.add(newDefinition);
+            }
+
+            return new Fix(definitions, fix.symbol);
         }
 
         return result;

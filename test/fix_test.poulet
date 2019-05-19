@@ -5,12 +5,20 @@ inductive {
     }
 }
 
-n : nat[] := (nat[].S) nat[].Z
+inductive {
+    type list (A : Type1) : Type1 {
+        nil : list[A]
+        cons : {_ : A} {_ : list[A]} list[A]
+    }
+}
+
+int : Type1
+zero : int
+l : list[int] := ((list[int].cons) zero) list[int].nil
 
 #reduce (fix {
-    wf : {_ : nat[]} bool := \k : nat[] -> match k as l() in bool {
-        Z() => true,
-        S(m) => (wf) m
+    length : {A : Type1} {_ : list[A]} nat[] := \A : Type1 -> \l : list[A] -> match l as l() in nat {
+        nil() => nat[].Z,
+        cons(h, t) => (nat[].S) ((length) A) t
     }
-}.wf) nat[].Z
-
+}.length) l

@@ -73,6 +73,8 @@ public class Checker {
                 // TODO: Fix this
                 checkType(application.argument, piType.type, environment);
                 result = Interpreter.substitute(piType.body, piType.variable, application.argument);
+                if (result == null)
+                    System.out.printf("sub(%s, %s, %s)\n", piType.body, piType.variable, application.argument);
             } else if (functionType instanceof Variable) { // TODO: Double check this sketchy-ness
                 Variable variable = (Variable) functionType;
                 String name = variable.symbol.name;
@@ -169,57 +171,78 @@ public class Checker {
                 if (typeDeclaration == null)
                     throw new TypeException("type declaration " + inductiveType.type + " not found");
 
-                Value value = Interpreter.evaluateExpression(match.expression, environment);
+                List<Expression> typeArgumentsTypes = argumentTypes(typeDeclaration.type, environment);
+                if (match.argumentSymbols.size() != typeArgumentsTypes.size())
+                    throw new TypeException("wrong number of arguments");
 
-                if (value instanceof VConstructed) {
-                    VConstructed constructed = (VConstructed) value;
+                Environment newEnvironment = environment.appendScope(match.expressionSymbol, match.expression);
 
-                    if (inductiveType.arguments.size() != match.argumentSymbols.size())
-                        throw new TypeException("wrong number of arguments");
+                for (int i = 0; i < typeArgumentsTypes.size(); i++) {
+                    Symbol symbol = match.argumentSymbols.get(i);
+                    Expression argument = typeArgumentsTypes.get(i);
+                    newEnvironment = newEnvironment.appendType(symbol, argument);
+                }
 
-                    Environment newEnvironment = environment.appendScope(match.expressionSymbol, ((Match) term).expression);
+                Expression returnType = Interpreter.evaluateExpression(match.type, newEnvironment).expression();
 
-                    for (int i = 0; i < inductiveType.arguments.size(); i++) {
-                        Symbol symbol = match.argumentSymbols.get(i);
-                        Expression argument = inductiveType.arguments.get(i);
-                        newEnvironment = newEnvironment.appendScope(symbol, argument);
-                    }
-
-                    Expression returnType = Interpreter.evaluateExpression(match.type, newEnvironment).expression();
-
+                for (Constructor constructor : typeDeclaration.constructors) {
                     Match.Clause matchingClause = null;
                     for (Match.Clause clause : match.clauses) {
                         newEnvironment = environment;
 
-                        if (clause.constructorSymbol.equals(constructed.constructor.name)) {
+                        if (clause.constructorSymbol.equals(constructor.name)) {
                             matchingClause = clause;
                             break;
                         }
                     }
 
                     if (matchingClause == null)
-                        throw new TypeException("no matching clause");
+                        throw new TypeException("no matching clause for constructor " + constructor.name);
 
-                    if (constructed.arguments.size() != matchingClause.argumentSymbols.size())
+                    List<Expression> constructorArgumentTypes = argumentTypes(constructor.definition, environment);
+
+                    if (matchingClause.argumentSymbols.size() != constructorArgumentTypes.size())
                         throw new TypeException("wrong number of arguments");
 
-                    for (int i = 0; i < constructed.arguments.size(); i++) {
+                    for (int i = 0; i < constructorArgumentTypes.size(); i++) {
                         Symbol symbol = matchingClause.argumentSymbols.get(i);
-                        Expression argument = constructed.arguments.get(i).expression();
-                        newEnvironment = newEnvironment.appendScope(symbol, argument);
+                        Expression argumentType = constructorArgumentTypes.get(i);
+                        newEnvironment = newEnvironment.appendType(symbol, argumentType);
                     }
 
                     checkType(matchingClause.expression, returnType, newEnvironment);
-
-                    result = returnType;
                 }
+
+                result = returnType;
             }
         }
         if (result == null) {
             System.out.println("term =" + term);
+            System.out.println("env = " + environment);
             throw new TypeException("Type Could not be Deduced");
         }
         return Interpreter.evaluateExpression(result, environment).expression();
+    }
+
+    /*
+
+    given an expression M = {a_1:A_1}...{a_n:A_n}N with N not being a pi type,
+    this function returns the list {A_1, ..., A_n}
+
+     */
+    private static List<Expression> argumentTypes(Expression expression, Environment environment) {
+        return argumentTypes(expression, environment, new ArrayList<>());
+    }
+    private static List<Expression> argumentTypes(Expression expression, Environment environment, List<Expression> argumentTypes) {
+        if (expression instanceof PiType) {
+            PiType piType = (PiType) expression;
+            argumentTypes.add(piType.type);
+            Environment newEnvironment = environment.appendType(piType.variable, piType.type);
+            Expression body = Interpreter.evaluateExpression(piType.body, newEnvironment).expression();
+            return argumentTypes(body, newEnvironment, argumentTypes);
+        } else {
+            return argumentTypes;
+        }
     }
 
     /*public static Expression substitute(Expression base, Expression substitute) {

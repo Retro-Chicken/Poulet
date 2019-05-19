@@ -27,7 +27,10 @@ public class Quoter {
         } else if (value instanceof VInductiveType) {
             VInductiveType inductiveType = (VInductiveType) value;
             List<Expression> parameters = inductiveType.parameters.stream().map(Quoter::quote).collect(Collectors.toList());
-            List<Expression> arguments = inductiveType.arguments.stream().map(Quoter::quote).collect(Collectors.toList());
+            List<Expression> arguments = null;
+
+            if (inductiveType.arguments != null)
+                arguments = inductiveType.arguments.stream().map(Quoter::quote).collect(Collectors.toList());
 
             return new InductiveType(
                     inductiveType.typeDeclaration.name,
