@@ -1,5 +1,6 @@
 package poulet.ast;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -10,7 +11,7 @@ public class Program extends Node {
         this.program = program;
     }
 
-    public Program(Program program) { this.program = List.copyOf(program.program); }
+    public Program(Program program) { this.program = new ArrayList<>(program.program); }
 
     @Override
     public String toString() {

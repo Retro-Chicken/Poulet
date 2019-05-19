@@ -1,4 +1,4 @@
-#import 'std.poulet'
+#import 'test.poulet'
 
 n1 : nat := (succ) n0
 

@@ -2,6 +2,7 @@ package poulet;
 
 import org.antlr.v4.runtime.CharStreams;
 import poulet.ast.*;
+import poulet.interpreter.ImportHandler;
 import poulet.interpreter.Interpreter;
 import poulet.parser.ASTParser;
 
@@ -13,35 +14,23 @@ import java.util.*;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        /*
-        System.out.println(Arrays.toString(args));
-        Program program = ASTParser.parse(CharStreams.fromFileName("test/inductive_test.poulet"));
+        assert args.length >= 1;
+
+        // Get imports
+        String fileName = new File(args[0]).getCanonicalPath();
+        Map<File, Boolean> directories = new HashMap<>();
+        boolean recursive = false;
+        for(int i = 1; i < args.length; i++)
+            if(args[i].equals("-r"))
+                recursive = true;
+            else
+                directories.put(new File(args[i]), recursive);
+
+        Program program = ASTParser.parse(CharStreams.fromFileName(fileName));
+        program = ImportHandler.includeImports(program, directories, fileName);
+
         PrintWriter printWriter = new PrintWriter(System.out);
         Interpreter.run(program, printWriter);
-        printWriter.flush();
-        printWriter.close();
-         */
-        assert args.length >= 1;
-        String fileName = args[0];
-        List<String> directories = new ArrayList<>();
-        if(fileName.contains("/"))
-            directories.add(fileName.substring(0, fileName.lastIndexOf("/") + 1));
-        else
-            directories.add("");
-        for(int i = 1; i < args.length; i++)
-            directories.add(args[i]);
-        Program program = ASTParser.parse(CharStreams.fromFileName(fileName));
-        List<String> imported = new ArrayList<>();
-        imported.add(fileName);
-        Map<String, Program> imports = getImports(program, directories, imported);
-        String simpleName;
-        if(fileName.contains("/"))
-            simpleName = fileName.substring(fileName.lastIndexOf("/") + 1, fileName.length());
-        else
-            simpleName = fileName;
-        imports.put(simpleName, new Program(new ArrayList<>()));
-        PrintWriter printWriter = new PrintWriter(System.out);
-        Interpreter.run(program, printWriter, imports);
         printWriter.flush();
         printWriter.close();
     }
