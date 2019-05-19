@@ -23,9 +23,4 @@ public class Application extends Expression {
 
         return false;
     }
-
-    @Override
-    Expression readableExpression() {
-        return new Application(function.readableExpression(), argument.readableExpression());
-    }
 }

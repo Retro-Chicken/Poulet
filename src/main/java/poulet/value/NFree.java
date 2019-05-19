@@ -1,9 +1,11 @@
 package poulet.value;
 
-public class NFree extends Neutral {
-    public final Name symbol;
+import poulet.ast.Symbol;
 
-    public NFree(Name symbol) {
+public class NFree extends Neutral {
+    public final Symbol symbol;
+
+    public NFree(Symbol symbol) {
         this.symbol = symbol;
     }
 

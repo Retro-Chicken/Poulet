@@ -5,24 +5,12 @@ import poulet.ast.*;
 import poulet.interpreter.Interpreter;
 import poulet.value.*;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class Checker {
-    public static void checkKind(Expression type, Environment environment) throws TypeException {
-        Expression deduced = deduceType(type, environment);
-        if (deduced instanceof Variable) {
-            Variable variable = (Variable) deduced;
-            String name = variable.symbol.getName();
-            if (name.matches("Type\\d+"))
-                return;
-        }
-        throw new TypeException("Type Is Not Valid: Deduced " + deduced);
-    }
-
     public static void checkType(Expression term, Expression type, Environment environment) throws TypeException {
         Expression deduced = deduceType(term, environment);
         // TODO: See if this is sound, check if they're equivalent by beta reduction
@@ -32,8 +20,8 @@ public class Checker {
         // Subtyping check first
         // TODO: Make sure this is allowed
         if (deduced instanceof Variable && type instanceof Variable) {
-            String nameDeduced = ((Variable) deduced).symbol.getName();
-            String nameType = ((Variable) type).symbol.getName();
+            String nameDeduced = ((Variable) deduced).symbol.name;
+            String nameType = ((Variable) type).symbol.name;
             if (nameDeduced.matches("Type\\d+") && nameType.matches("Type\\d+")) {
                 int level1 = Integer.parseInt(nameDeduced.substring(4));
                 int level2 = Integer.parseInt(nameType.substring(4));
@@ -42,8 +30,19 @@ public class Checker {
             }
         }
 
-        if (!deduced.toString().equals(type.toString()))
-            throw new TypeException("Type Mismatch:\n" + term + " is of type " + deduced + ", not " + type);
+        if (!equivalent(deduced, type))
+            throw new TypeException("Type Mismatch:\n" + term + " is of type " + deduced + ", not " + type + " in env " + environment);
+    }
+
+    private static boolean equivalent(Expression a, Expression b) {
+        // skeeeeeetchy
+        int oldNextId = Symbol.nextId;
+        Symbol.nextId = 0;
+        Expression newA = Interpreter.makeSymbolsUnique(a);
+        Symbol.nextId = 0;
+        Expression newB = Interpreter.makeSymbolsUnique(b);
+        Symbol.nextId = oldNextId;
+        return newA.toString().equals(newB.toString());
     }
 
     public static Expression deduceType(Expression term, Environment environment) throws TypeException {
@@ -51,25 +50,20 @@ public class Checker {
         if (term instanceof Abstraction) {
             Abstraction abstraction = (Abstraction) term;
             Expression abstractionType = Interpreter.evaluateExpression(abstraction.type, environment).expression();
-
-            checkKind(abstractionType, environment);
-
-            Environment newEnvironment = environment.increment();
-            Symbol tempSymbol = Util.getUniqueSymbol();
-            newEnvironment = newEnvironment.appendType(tempSymbol, abstractionType);
-            Expression bodyType = deduceType(substitute(abstraction.body, new Variable(tempSymbol)), newEnvironment);
-            result = Interpreter.addIndices(new PiType(tempSymbol, abstractionType, bodyType));
+            Environment newEnvironment = environment.appendType(abstraction.symbol, abstractionType);
+            Expression bodyType = deduceType(abstraction.body, newEnvironment);
+            result = Interpreter.makeSymbolsUnique(new PiType(abstraction.symbol, abstractionType, bodyType));
         } else if (term instanceof Variable) {
             Variable variable = (Variable) term;
             Expression variableType = environment.lookUpType(variable.symbol);
-            Expression definition = environment.lookUpGlobal(variable.symbol);
+            Expression definition = environment.lookUpScope(variable.symbol);
 
             if (variableType != null) {
                 result = variableType;
             } else if (definition != null) {
                 result = deduceType(definition, environment);
             } else {
-                throw new TypeException("Unknown Identifier");
+                throw new TypeException("Unknown Identifier " + variable);
             }
         } else if (term instanceof Application) {
             Application application = (Application) term;
@@ -78,10 +72,10 @@ public class Checker {
                 PiType piType = (PiType) functionType;
                 // TODO: Fix this
                 checkType(application.argument, piType.type, environment);
-                result = substitute(piType.body, application.argument);
+                result = Interpreter.substitute(piType.body, piType.variable, application.argument);
             } else if (functionType instanceof Variable) { // TODO: Double check this sketchy-ness
                 Variable variable = (Variable) functionType;
-                String name = variable.symbol.getName();
+                String name = variable.symbol.name;
 
                 if (name.matches("Type\\d+")) {
                     if (application.function instanceof PiType) {
@@ -90,7 +84,7 @@ public class Checker {
                         result = new Variable(new Symbol(name));
                     } else if (application.function instanceof Variable) {
                         Variable free = (Variable) application.function;
-                        Expression definition = environment.lookUpGlobal(free.symbol);
+                        Expression definition = environment.lookUpScope(free.symbol);
 
                         if (definition instanceof PiType) {
                             PiType piType = (PiType) definition;
@@ -105,15 +99,14 @@ public class Checker {
         } else if (term instanceof PiType) {
             PiType piType = (PiType) term;
             Expression typeLevel = deduceType(piType.type, environment);
-            Symbol uniqueSymbol = Util.getUniqueSymbol();
-            Environment newEnvironment = environment.increment();
-            newEnvironment = newEnvironment.appendType(uniqueSymbol, Interpreter.evaluateExpression(piType.type, environment).expression());
-            Expression bodyLevel = deduceType(substitute(piType.body, new Variable(uniqueSymbol)), newEnvironment);
+            Symbol tempSymbol = new Symbol("temp").makeUnique();
+            Environment newEnvironment = environment.appendType(tempSymbol, Interpreter.evaluateExpression(piType.type, environment).expression());
+            Expression bodyLevel = deduceType(Interpreter.substitute(piType.body, piType.variable, new Variable(tempSymbol)), newEnvironment);
             if (typeLevel instanceof Variable && bodyLevel instanceof Variable) {
                 Variable typeVar = (Variable) typeLevel;
                 Variable bodyVar = (Variable) bodyLevel;
-                String typeName = typeVar.symbol.getName();
-                String bodyName = bodyVar.symbol.getName();
+                String typeName = typeVar.symbol.name;
+                String bodyName = bodyVar.symbol.name;
                 if (typeName.matches("Type\\d+") && bodyName.matches("Type\\d+")) {
                     int level1 = Integer.parseInt(typeName.substring(4));
                     int level2 = Integer.parseInt(bodyName.substring(4));
@@ -136,7 +129,7 @@ public class Checker {
                 Expression parameterType = typeDeclaration.parameters.get(i).type;
                 Expression parameter = inductiveType.parameters.get(i);
                 checkType(parameter, parameterType, environment);
-                newEnvironment = newEnvironment.appendGlobal(typeDeclaration.parameters.get(i).symbol, parameter);
+                newEnvironment = newEnvironment.appendScope(typeDeclaration.parameters.get(i).symbol, parameter);
             }
 
             result = Interpreter.evaluateExpression(typeDeclaration.type, newEnvironment).expression();
@@ -161,7 +154,7 @@ public class Checker {
                 Expression parameterType = typeDeclaration.parameters.get(i).type;
                 Expression parameter = constructorCall.inductiveType.parameters.get(i);
                 checkType(parameter, parameterType, environment);
-                newEnvironment = newEnvironment.appendGlobal(typeDeclaration.parameters.get(i).symbol, parameter);
+                newEnvironment = newEnvironment.appendScope(typeDeclaration.parameters.get(i).symbol, parameter);
             }
 
             result = Interpreter.evaluateExpression(constructor.definition, newEnvironment).expression();
@@ -184,12 +177,12 @@ public class Checker {
                     if (inductiveType.arguments.size() != match.argumentSymbols.size())
                         throw new TypeException("wrong number of arguments");
 
-                    Environment newEnvironment = environment.appendGlobal(match.expressionSymbol, ((Match) term).expression);
+                    Environment newEnvironment = environment.appendScope(match.expressionSymbol, ((Match) term).expression);
 
                     for (int i = 0; i < inductiveType.arguments.size(); i++) {
                         Symbol symbol = match.argumentSymbols.get(i);
                         Expression argument = inductiveType.arguments.get(i);
-                        newEnvironment = newEnvironment.appendGlobal(symbol, argument);
+                        newEnvironment = newEnvironment.appendScope(symbol, argument);
                     }
 
                     Expression returnType = Interpreter.evaluateExpression(match.type, newEnvironment).expression();
@@ -204,18 +197,17 @@ public class Checker {
                         }
                     }
 
+                    if (matchingClause == null)
+                        throw new TypeException("no matching clause");
+
                     if (constructed.arguments.size() != matchingClause.argumentSymbols.size())
                         throw new TypeException("wrong number of arguments");
 
                     for (int i = 0; i < constructed.arguments.size(); i++) {
                         Symbol symbol = matchingClause.argumentSymbols.get(i);
                         Expression argument = constructed.arguments.get(i).expression();
-                        newEnvironment = newEnvironment.appendGlobal(symbol, argument);
+                        newEnvironment = newEnvironment.appendScope(symbol, argument);
                     }
-
-
-                    if (matchingClause == null)
-                        throw new TypeException("no matching clause");
 
                     checkType(matchingClause.expression, returnType, newEnvironment);
 
@@ -230,7 +222,7 @@ public class Checker {
         return Interpreter.evaluateExpression(result, environment).expression();
     }
 
-    public static Expression substitute(Expression base, Expression substitute) {
+    /*public static Expression substitute(Expression base, Expression substitute) {
         return substitute(base, substitute, 0);
     }
 
@@ -238,7 +230,7 @@ public class Checker {
         if (base instanceof Variable) {
             Variable variable = (Variable) base;
 
-            if (variable.symbol.isFree()) {
+            if (variable.isFree()) {
                 return variable;
             } else {
                 int index = variable.symbol.getIndex();
@@ -304,7 +296,7 @@ public class Checker {
         }
 
         return base;
-    }
+    }*/
 
     private static int umax(int level1, int level2) {
         if (level1 <= 2 && level2 <= 2) return 1;
@@ -318,7 +310,7 @@ public class Checker {
     private static boolean isSort(Expression expression) {
         if (expression instanceof Variable) {
             Variable variable = (Variable) expression;
-            return variable.symbol.getName().matches("Type\\d");
+            return variable.symbol.name.matches("Type\\d");
         }
         return false;
     }
@@ -365,10 +357,10 @@ public class Checker {
             // A_j is an arity of sort s_j and I_j ∉ E
             List<VType> arities = new ArrayList<>();
             for (TypeDeclaration td : tds) {
-                Value type = Interpreter.evaluateExpression(td.type, new ArrayList<>(), environment);
+                Value type = Interpreter.evaluateExpression(td.type, environment);
                 assert isArity(type);
                 arities.add(getArity(type));
-                assert environment.lookUpGlobal(td.name) == null;
+                assert environment.lookUpScope(td.name) == null;
             }
 
             // C_jk is a type of constructor I_j which satisfies the positivity

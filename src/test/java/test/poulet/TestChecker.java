@@ -12,7 +12,6 @@ import poulet.interpreter.DefinitionException;
 import poulet.interpreter.Interpreter;
 import poulet.parser.ASTParser;
 import poulet.typing.Checker;
-import poulet.typing.Context;
 import poulet.typing.Environment;
 import poulet.typing.TypeException;
 
@@ -23,7 +22,7 @@ public class TestChecker {
     private Expression parseExpression(String string) {
         Program program = ASTParser.parse(CharStreams.fromString("_:_:=" + string));
         Expression expression = Interpreter.getExpressions(program).get(0);
-        return Interpreter.addIndices(expression);
+        return Interpreter.makeSymbolsUnique(expression);
     }
     @Test
     void testCheckType() {
@@ -97,8 +96,10 @@ public class TestChecker {
 
         try {
             Checker.checkType(term, type, environment);
+        } catch (TypeException e) {
+            e.printStackTrace();
             fail();
-        } catch (TypeException e) { }
+        }
     }
 
     @Test
@@ -109,9 +110,9 @@ public class TestChecker {
         ), new HashMap<>(), new HashMap<>());
         Program actualProgram = ASTParser.parse(CharStreams.fromString("id : _ := \\x : int -> x\n_ : _ := \\x : int -> (id) x"));
         Program actualSubstitutedProgram = Interpreter.substituteCalls(actualProgram);
-        Expression actualExpression = Interpreter.addIndices(Interpreter.getExpressions(actualSubstitutedProgram).get(1));
+        Expression actualExpression = Interpreter.makeSymbolsUnique(Interpreter.getExpressions(actualSubstitutedProgram).get(1));
         Expression type = parseExpression("{_:int}int");
-        type = Interpreter.addIndices(type);
+        type = Interpreter.makeSymbolsUnique(type);
 
         try {
             Checker.checkType(actualExpression, type, environment);
