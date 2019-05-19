@@ -53,13 +53,15 @@ public class ImportHandler {
         Map<String, Program> imports = new HashMap<>();
         for(TopLevel topLevel : program.program) {
             if(topLevel instanceof Import) {
+                boolean found = false;
                 String name = ((Import) topLevel).fileName;
                 for(File dir : directories.keySet()) {
                     List<String> results = search(dir, name, directories.get(dir));
                     if(results.size() == 0)
-                        throw new Exception("Import does not exist");
+                        continue;
                     else if(results.size() > 1)
                         throw new Exception("Multiple possible imports");
+                    found = true;
                     String result = results.get(0);
                     if(!imported.contains(result)) {
                         List<TopLevel> importedTops = ASTParser.parse(CharStreams.fromFileName(result)).program;
@@ -74,6 +76,8 @@ public class ImportHandler {
                         break;
                     }
                 }
+                if(!found)
+                    throw new Exception("Import " + name + " does not exist");
             }
         }
         return imports;
@@ -81,18 +85,22 @@ public class ImportHandler {
 
     private static List<String> search(File directory, String name, boolean recursive) throws Exception {
         if(!directory.isDirectory())
-            throw new Exception("Linked library is not a directory");
+            throw new Exception("Linked library " + directory.getCanonicalPath() + " is not a directory");
 
         List<String> result = new ArrayList<>();
-        if(directory.canRead())
-            for (File temp : directory.listFiles())
+        if(directory.canRead()) {
+            for (File temp : directory.listFiles()) {
                 if (temp.isDirectory() && recursive)
-                    search(temp, name, recursive);
-                else
-                    if(name.equals(temp.getName()))
-                        result.add(temp.getCanonicalPath());
-        else
-            throw new Exception("Linked library does not have read permission");
+                    result.addAll(search(temp, name, recursive));
+                else if (name.equals(temp.getName()))
+                    result.add(temp.getCanonicalPath());
+            }
+        } else {
+            if (!directory.exists())
+                throw new Exception("Linked library " + directory.getCanonicalPath() + " does not exist");
+            else
+                throw new Exception("Linked library " + directory.getCanonicalPath() + " does not have read permission");
+        }
         return result;
     }
 }
