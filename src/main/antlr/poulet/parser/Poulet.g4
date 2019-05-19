@@ -18,7 +18,7 @@ type_declaration : 'type' symbol parameter* ':' expression '{' constructor* '}' 
 
 parameter : '(' symbol ':' expression ')' ;
 
-expression : (variable | abstraction | application | pi_type | match | inductive_type | constructor_call) ;
+expression : (variable | abstraction | application | pi_type | match | inductive_type | constructor_call | fix) ;
 
 constructor_call : inductive_type '.' symbol ;
 
@@ -38,6 +38,10 @@ match : 'match' expression 'as' symbol '(' ((symbol ',')* symbol)? ')' 'in' expr
 
 match_clause : symbol '(' ((symbol ',')* symbol)? ')' '=>' expression ;
 
+fix : 'fix' '{' fix_definition* '}' '.' symbol ;
+
+fix_definition : symbol ':' expression ':=' expression ;
+
 symbol : SYMBOL ;
 
 REDUCE : '#reduce' ;
@@ -51,6 +55,8 @@ OUTPUT_COMMAND : 'print' ;
 STRING : ('"' .*? '"') | ('\'' .*? '\'') ;
 
 SYMBOL : [a-zA-Z_][a-zA-Z0-9_]* ;
+
+INTEGER : [0-9]+ ;
 
 WHITESPACE : [ \t\r\n]+ -> skip ;
 

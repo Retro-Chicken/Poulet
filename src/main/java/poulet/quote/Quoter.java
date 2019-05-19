@@ -49,6 +49,9 @@ public class Quoter {
                     constructed.constructor.name,
                     arguments
             );
+        } else if (value instanceof VFix) {
+            VFix fix = (VFix) value;
+            return new Fix(fix.definitions, fix.symbol);
         }
         return null;
     }

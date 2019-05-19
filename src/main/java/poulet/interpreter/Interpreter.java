@@ -14,6 +14,7 @@ public class Interpreter {
     public static void run(Program program, PrintWriter out) throws Exception {
         //program = transform(program);
         program = addIndices(program);
+        System.out.println("indices = " + program);
         Environment environment = new Environment();
 
         for (TopLevel topLevel : program.program) {
@@ -51,7 +52,7 @@ public class Interpreter {
                     out.println(ouput.text);
                 }
             } catch (Exception e) {
-                System.out.println("Error on Line: " + topLevel);
+                System.err.println("Error on Line: " + topLevel);
                 e.printStackTrace();
                 throw new Exception();
             }
@@ -187,6 +188,26 @@ public class Interpreter {
             } else if (function instanceof VPi) { // TODO: Check if this is even sound
                 VPi vPi = (VPi) function;
                 return vPi.call(argument);
+            } else if (function instanceof VFix) {
+                // TODO: how the fuck does this work lmao
+                VFix fix = (VFix) function;
+                Definition callingDefinition = null;
+                Environment newEnvironment = environment;
+
+                for (Definition definition : fix.definitions) {
+                    if (definition.name.equals(fix.symbol)) {
+                        callingDefinition = definition;
+                    }
+                    Fix newFix = new Fix(fix.definitions, definition.name);
+                    newEnvironment = newEnvironment.appendGlobal(definition.name, newFix);
+                }
+
+                if (callingDefinition == null) {
+                    System.err.println("function " + fix.symbol + " not defined in " + fix);
+                    return null;
+                }
+
+                return evaluateExpression(callingDefinition.definition, bound, newEnvironment);
             } else {
                 System.err.println("can't apply to a " + function.getClass().getSimpleName());
                 return null;
@@ -321,9 +342,13 @@ public class Interpreter {
                 System.err.println("no clause found for constructor " + constructed.constructor.name);
                 return null;
             } else {
+                System.out.println("v = " + value);
                 System.err.println("can only match on constructed value");
                 return null;
             }
+        } else if (expression instanceof Fix) {
+            Fix fix = (Fix) expression;
+            return new VFix(fix.definitions, fix.symbol);
         }
 
         return null;
@@ -399,6 +424,31 @@ public class Interpreter {
             Expression type = substitute(piType.type, symbol, substitution);
             Expression body = substitute(piType.body, symbol.increment(), substitution);
             result = new PiType(piType.variable, type, body);
+        } else if (expression instanceof Match) {
+            Match match = (Match) expression;
+            Expression matchExpression = substitute(match.expression, symbol, substitution);
+            Expression type = substitute(match.type, symbol, substitution);
+            List<Match.Clause> clauses = new ArrayList<>();
+
+            for (Match.Clause clause : match.clauses) {
+                Expression clauseExpression = substitute(clause.expression, symbol, expression);
+                Match.Clause newClause = new Match.Clause(
+                        clause.constructorSymbol,
+                        clause.argumentSymbols,
+                        clauseExpression
+                );
+                clauses.add(newClause);
+            }
+
+            result = new Match(
+                    matchExpression,
+                    match.expressionSymbol,
+                    match.argumentSymbols,
+                    type,
+                    clauses
+            );
+        } else if (expression instanceof Fix) {
+
         }
 
         return result;
@@ -488,6 +538,42 @@ public class Interpreter {
             Expression type = addIndices(stack, piType.type);
             Expression body = addIndices(newStack, piType.body);
             return new PiType(null, type, body);
+        } else if (expression instanceof Match) {
+            Match match = (Match) expression;
+            Expression matchExpression = addIndices(stack, match.expression);
+            Expression type = addIndices(stack, match.type);
+            List<Match.Clause> clauses = new ArrayList<>();
+
+            for (Match.Clause clause : match.clauses) {
+                Match.Clause newClause = new Match.Clause(
+                    clause.constructorSymbol,
+                    clause.argumentSymbols,
+                    addIndices(stack, clause.expression)
+                );
+                clauses.add(newClause);
+            }
+
+            return new Match(
+                    matchExpression,
+                    match.expressionSymbol,
+                    match.argumentSymbols,
+                    type,
+                    clauses
+            );
+        } else if (expression instanceof Fix) {
+            Fix fix = (Fix) expression;
+            List<Definition> definitions = new ArrayList<>();
+
+            for (Definition definition : fix.definitions) {
+                Definition newDefinition = new Definition(
+                        definition.name,
+                        addIndices(stack, definition.type),
+                        addIndices(stack, definition.definition)
+                );
+                definitions.add(newDefinition);
+            }
+
+            return new Fix(definitions, fix.symbol);
         }
 
         return expression;

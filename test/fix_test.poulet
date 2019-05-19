@@ -1,0 +1,16 @@
+inductive {
+    type nat : Type1 {
+        Z : nat[]
+        S : {_ : nat[]} nat[]
+    }
+}
+
+n : nat[] := (nat[].S) nat[].Z
+
+#reduce (fix {
+    wf : {_ : nat[]} bool := \k : nat[] -> match k as l() in bool {
+        Z() => true,
+        S(m) => (wf) m
+    }
+}.wf) nat[].Z
+

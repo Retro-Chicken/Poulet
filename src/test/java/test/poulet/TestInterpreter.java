@@ -7,6 +7,7 @@ import poulet.interpreter.Interpreter;
 import poulet.parser.ASTParser;
 import poulet.quote.Quoter;
 import poulet.typing.Context;
+import poulet.typing.Environment;
 import poulet.value.NFree;
 import poulet.value.VNeutral;
 import poulet.value.Value;
@@ -65,7 +66,7 @@ public class TestInterpreter {
         Program actualProgram = ASTParser.parse(CharStreams.fromString("_ : _ := (\\x : _ -> x) z"));
         Expression actualExpression = Interpreter.getExpressions(actualProgram).get(0);
         actualExpression = Interpreter.addIndices(actualExpression);
-        Value actualResult = Interpreter.evaluateExpression(actualExpression, new Context());
+        Value actualResult = Interpreter.evaluateExpression(actualExpression, new Environment());
         Value expected = new VNeutral(new NFree(new Symbol("z")));
         assertEquals(expected, actualResult);
     }
@@ -76,7 +77,7 @@ public class TestInterpreter {
         Program actualSubstitutedProgram = Interpreter.substituteCalls(actualProgram);
         Expression actualExpression = Interpreter.getExpressions(actualSubstitutedProgram).get(2);
         actualExpression = Interpreter.addIndices(actualExpression);
-        Value actualResult = Interpreter.evaluateExpression(actualExpression, new Context());
+        Value actualResult = Interpreter.evaluateExpression(actualExpression, new Environment());
         Value expected = new VNeutral(new NFree(new Symbol("z")));
         assertEquals(expected, actualResult);
     }
@@ -88,7 +89,7 @@ public class TestInterpreter {
         List<Expression> actualExpressions = Interpreter.getExpressions(actualSubstitutedProgram);
         Expression actualExpression = actualExpressions.get(actualExpressions.size() - 1);
         actualExpression = Interpreter.addIndices(actualExpression);
-        Value actualResult = Interpreter.evaluateExpression(actualExpression, new Context());
+        Value actualResult = Interpreter.evaluateExpression(actualExpression, new Environment());
         System.out.println(">>> " + actualResult);
     }
 
@@ -99,7 +100,7 @@ public class TestInterpreter {
         List<Expression> expressions = Interpreter.getExpressions(actualProgram);
         Expression expression = expressions.get(expressions.size() - 1);
         expression = Interpreter.addIndices(expression);
-        Value output = Interpreter.evaluateExpression(expression, new Context());
+        Value output = Interpreter.evaluateExpression(expression, new Environment());
         Value expected = new VNeutral(new NFree(new Symbol("a")));
         assertEquals(expected, output);
     }
@@ -111,7 +112,7 @@ public class TestInterpreter {
             Program actualSubstitutedProgram = Interpreter.substituteCalls(Interpreter.addIndices(actualProgram));
             Expression actualExpression = Interpreter.getExpressions(actualSubstitutedProgram).get(2);
             actualExpression = Interpreter.addIndices(actualExpression);
-            Value actualResult = Interpreter.evaluateExpression(actualExpression, new Context());
+            Value actualResult = Interpreter.evaluateExpression(actualExpression, new Environment());
 
             try {
                 Variable variable = (Variable) Quoter.quote(actualResult);
@@ -131,7 +132,7 @@ public class TestInterpreter {
             Program actualProgram = ASTParser.parse(CharStreams.fromString("func : _ := \\x : _ -> z\nfunc2 : _ := \\z : _ -> (func) z\n_ : _ := (func2) w"));
             Program transformed = Interpreter.transform(actualProgram);
             Expression transformedExpression = Interpreter.getExpressions(transformed).get(2);
-            Expression evaluated = Interpreter.evaluateExpression(transformedExpression, new Context()).expression();
+            Expression evaluated = Interpreter.evaluateExpression(transformedExpression, new Environment()).expression();
             Variable variable = (Variable) evaluated;
             if(!variable.symbol.toString().equals("z"))
                 fail();
