@@ -4,7 +4,7 @@ grammar Poulet;
     package poulet.parser;
 }
 
-program : (definition | print | inductive_types | output | import_command)+ ;
+program : (definition | print | inductive_types | output | import_command)+ EOF ;
 
 definition : symbol ':' expression (':=' expression)? ;
 
