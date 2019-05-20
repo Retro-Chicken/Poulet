@@ -8,4 +8,10 @@ fix pred : nat[] -> nat[] := \n : nat[] -> match n as n() in nat[] {
     S(m) => m
 }
 
+nat : Type1 := {X : Type1} (X -> X) -> X -> X
+n0 : nat := \X : Type1 -> \f : (X -> X) -> \a : X -> a
+
+succ : nat -> nat := \n : nat -> \X : Type1 -> \f : (X -> X) -> \a : X -> f(n(X, f, a))
+pred : nat -> nat := \n : nat -> \T : Type1 -> \f : (T -> T) -> \x : T -> n((T -> T) -> T, \g : ((T -> T) -> T) -> \h : (T -> T) -> h(g(f)), \u : (T -> T) -> x)(\u : T -> u)
+
 #reduce pred(nat[].S(nat[].Z))
