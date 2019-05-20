@@ -1,16 +1,11 @@
 package poulet.value;
 
-import poulet.ast.Definition;
-import poulet.ast.Symbol;
-
-import java.util.List;
+import poulet.ast.Fix;
 
 public class VFix extends Value {
-    public final List<Definition> definitions;
-    public final Symbol symbol;
+    public final Fix fix;
 
-    public VFix(List<Definition> definitions, Symbol symbol) {
-        this.definitions = definitions;
-        this.symbol = symbol;
+    public VFix(Fix fix) {
+        this.fix = fix;
     }
 }

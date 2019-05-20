@@ -186,7 +186,7 @@ public class Interpreter {
                 return vPi.call(argument);
             } else if (function instanceof VFix) {
                 // TODO: how the fuck does this work lmao
-                VFix fix = (VFix) function;
+                Fix fix = ((VFix) function).fix;
                 Definition callingDefinition = null;
                 Environment newEnvironment = environment;
 
@@ -214,7 +214,6 @@ public class Interpreter {
 
             return new VAbstraction(evaluateExpression(abstraction.type, environment), argument -> {
                 Environment newEnvironment = environment.appendScope(abstraction.symbol, argument.expression());
-                System.out.println("adding " + argument.getClass().getSimpleName());
                 return evaluateExpression(abstraction.body, newEnvironment);
             });
         } else if (expression instanceof PiType) {
@@ -340,7 +339,7 @@ public class Interpreter {
             }
         } else if (expression instanceof Fix) {
             Fix fix = (Fix) expression;
-            return new VFix(fix.definitions, fix.symbol);
+            return new VFix(fix);
         }
 
         return null;
@@ -531,16 +530,26 @@ public class Interpreter {
     }
 
     public static TypeDeclaration makeSymbolsUnique(TypeDeclaration typeDeclaration) {
+        List<Parameter> parameters = new ArrayList<>();
+        Map<Symbol, Symbol> map = new HashMap<>();
+
+        for (Parameter parameter : typeDeclaration.parameters) {
+            Symbol unique = parameter.symbol.makeUnique();
+            Parameter newParameter = new Parameter(unique, parameter.type);
+            parameters.add(newParameter);
+            map.put(parameter.symbol, unique);
+        }
+
         List<Constructor> constructors = new ArrayList<>();
 
         for (Constructor constructor : typeDeclaration.constructors) {
-            Constructor unique = new Constructor(constructor.name, makeSymbolsUnique(constructor.definition));
+            Constructor unique = new Constructor(constructor.name, makeSymbolsUnique(map, constructor.definition));
             constructors.add(unique);
         }
 
         return new TypeDeclaration(
                 typeDeclaration.name,
-                typeDeclaration.parameters,
+                parameters,
                 makeSymbolsUnique(typeDeclaration.type),
                 constructors
         );
@@ -567,59 +576,130 @@ public class Interpreter {
             return new Application(function, argument);
         } else if (expression instanceof Variable) {
             Variable variable = (Variable) expression;
-            Symbol symbol = map.get(variable.symbol); // 1-based
+            Symbol symbol = map.get(variable.symbol);
 
-            if (symbol == null) { // free
-                return variable;
-            } else { // bound
+            if (symbol == null) {
+                if (variable.isFree()) {
+                    return variable;
+                } else {
+                    return new Variable(variable.symbol.makeUnique());
+                }
+            } else {
                 return new Variable(symbol.copy());
             }
         } else if (expression instanceof PiType) {
             PiType piType = (PiType) expression;
-            // need to number types later
             Map<Symbol, Symbol> newMap = new HashMap<>(map);
             Symbol unique = piType.variable.makeUnique();
-            map.put(piType.variable, unique);
+            newMap.put(piType.variable, unique);
             Expression type = makeSymbolsUnique(map, piType.type);
             Expression body = makeSymbolsUnique(newMap, piType.body);
-            assert unique != null;
             return new PiType(unique, type, body);
         } else if (expression instanceof Match) {
             Match match = (Match) expression;
             Expression matchExpression = makeSymbolsUnique(map, match.expression);
+
+            Map<Symbol, Symbol> newMap = new HashMap<>(map);
+            Symbol expressionSymbol = match.expressionSymbol.makeUnique();
+            newMap.put(match.expressionSymbol, expressionSymbol);
+            List<Symbol> argumentSymbols = new ArrayList<>();
+
+            for (Symbol symbol : match.argumentSymbols) {
+                Symbol unique = symbol.makeUnique();
+                argumentSymbols.add(unique);
+                newMap.put(symbol, unique);
+            }
+
             Expression type = makeSymbolsUnique(map, match.type);
+
             List<Match.Clause> clauses = new ArrayList<>();
 
             for (Match.Clause clause : match.clauses) {
+                List<Symbol> clauseArgumentSymbols = new ArrayList<>();
+                Map<Symbol, Symbol> clauseNewMap = new HashMap<>(newMap);
+
+                for (Symbol symbol : clause.argumentSymbols) {
+                    Symbol unique = symbol.makeUnique();
+                    clauseArgumentSymbols.add(unique);
+                    clauseNewMap.put(symbol, unique);
+                }
+
                 Match.Clause newClause = new Match.Clause(
                         clause.constructorSymbol,
-                        clause.argumentSymbols,
-                        makeSymbolsUnique(map, clause.expression)
+                        clauseArgumentSymbols,
+                        makeSymbolsUnique(clauseNewMap, clause.expression)
                 );
                 clauses.add(newClause);
             }
 
             return new Match(
                     matchExpression,
-                    match.expressionSymbol,
-                    match.argumentSymbols,
+                    expressionSymbol,
+                    argumentSymbols,
                     type,
                     clauses
             );
         } else if (expression instanceof Fix) {
             Fix fix = (Fix) expression;
             List<Definition> definitions = new ArrayList<>();
+            Symbol symbol = null;
 
             for (Definition definition : fix.definitions) {
+                Map<Symbol, Symbol> newMap = new HashMap<>(map);
+                Symbol name = definition.name.makeUnique();
+                newMap.put(definition.name, name);
+
+                if (definition.name.equals(fix.symbol)) {
+                    symbol = name;
+                }
+
                 Definition newDefinition = new Definition(
-                        definition.name,
-                        makeSymbolsUnique(map, definition.type),
-                        makeSymbolsUnique(map, definition.definition)
+                        name,
+                        makeSymbolsUnique(newMap, definition.type),
+                        makeSymbolsUnique(newMap, definition.definition)
                 );
                 definitions.add(newDefinition);
             }
 
-            return new Fix(definitions, fix.symbol);
+            if (symbol == null) {
+                System.err.println("function " + fix.symbol + " not defined in " + fix);
+                return null;
+            }
+
+            return new Fix(definitions, symbol);
+        } else if (expression instanceof InductiveType) {
+            InductiveType inductiveType = (InductiveType) expression;
+            List<Expression> parameters = new ArrayList<>();
+
+            for (Expression parameter : inductiveType.parameters) {
+                parameters.add(makeSymbolsUnique(map, parameter));
+            }
+
+            List<Expression> arguments = null;
+
+            if (inductiveType.isConcrete()) {
+                arguments = new ArrayList<>();
+
+                for (Expression parameter : inductiveType.parameters) {
+                    parameters.add(makeSymbolsUnique(map, parameter));
+                }
+            }
+
+            return new InductiveType(inductiveType.type, parameters, arguments);
+        } else if (expression instanceof ConstructorCall) {
+            ConstructorCall constructorCall = (ConstructorCall) expression;
+            InductiveType inductiveType = (InductiveType) makeSymbolsUnique(map, constructorCall.inductiveType);
+            List<Expression> arguments = null;
+
+            if (constructorCall.isConcrete()) {
+                arguments = new ArrayList<>();
+
+                for (Expression argument : arguments) {
+                    arguments.add(makeSymbolsUnique(map, argument));
+                }
+            }
+
+            return new ConstructorCall(inductiveType, constructorCall.constructor, arguments);
         }
 
         return expression;

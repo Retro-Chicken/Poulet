@@ -16,9 +16,18 @@ int : Type1
 zero : int
 l : list[int] := ((list[int].cons) zero) list[int].nil
 
-#reduce (fix {
+/*#reduce ((fix {
     length : {A : Type1} {_ : list[A]} nat[] := \A : Type1 -> \l : list[A] -> match l as l() in nat {
         nil() => nat[].Z,
         cons(h, t) => (nat[].S) ((length) A) t
     }
-}.length) l
+}.length) int) l*/
+
+length : {A : Type1} {_ : list[A]} nat[] := fix {
+    length : {A : Type1} {_ : list[A]} nat[] := \A : Type1 -> \l : list[A] -> match l as l() in nat[] {
+        nil() => nat[].Z,
+        cons(h, t) => (nat[].S) ((length) A) t
+    }
+}.length
+
+#reduce ((length) int) l

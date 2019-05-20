@@ -1,19 +1,16 @@
 package poulet.typing;
 
-import poulet.Util;
 import poulet.ast.*;
 import poulet.interpreter.Interpreter;
 import poulet.value.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Checker {
     public static void checkType(Expression term, Expression type, Environment environment) throws TypeException {
         Expression deduced = deduceType(term, environment);
-        // TODO: See if this is sound, check if they're equivalent by beta reduction
+        // TODO: See if this is sound, check if they're checkEquivalent by beta reduction
         deduced = Interpreter.evaluateExpression(deduced, environment).expression();
         type = Interpreter.evaluateExpression(type, environment).expression();
 
@@ -30,19 +27,20 @@ public class Checker {
             }
         }
 
-        if (!equivalent(deduced, type))
-            throw new TypeException("Type Mismatch:\n" + term + " is of type " + deduced + ", not " + type + " in env " + environment);
+        checkEquivalent(term, deduced, type, environment);
     }
 
-    private static boolean equivalent(Expression a, Expression b) {
+    private static void checkEquivalent(Expression term, Expression actual, Expression expected, Environment environment) throws TypeException {
         // skeeeeeetchy
         int oldNextId = Symbol.nextId;
         Symbol.nextId = 0;
-        Expression newA = Interpreter.makeSymbolsUnique(a);
+        Expression newActual = Interpreter.makeSymbolsUnique(actual);
         Symbol.nextId = 0;
-        Expression newB = Interpreter.makeSymbolsUnique(b);
+        Expression newExpected = Interpreter.makeSymbolsUnique(expected);
         Symbol.nextId = oldNextId;
-        return newA.toString().equals(newB.toString());
+
+        if (!newActual.toString().equals(newExpected.toString()))
+            throw new TypeException("Type Mismatch:\n" + term + " is of type " + newActual + ", not " + newExpected + " in env " + environment);
     }
 
     public static Expression deduceType(Expression term, Environment environment) throws TypeException {
@@ -52,7 +50,7 @@ public class Checker {
             Expression abstractionType = Interpreter.evaluateExpression(abstraction.type, environment).expression();
             Environment newEnvironment = environment.appendType(abstraction.symbol, abstractionType);
             Expression bodyType = deduceType(abstraction.body, newEnvironment);
-            result = Interpreter.makeSymbolsUnique(new PiType(abstraction.symbol, abstractionType, bodyType));
+            result = new PiType(abstraction.symbol, abstractionType, bodyType);
         } else if (term instanceof Variable) {
             Variable variable = (Variable) term;
             Expression variableType = environment.lookUpType(variable.symbol);
@@ -171,7 +169,7 @@ public class Checker {
                 if (typeDeclaration == null)
                     throw new TypeException("type declaration " + inductiveType.type + " not found");
 
-                List<Expression> typeArgumentsTypes = argumentTypes(typeDeclaration.type, environment);
+                List<Expression> typeArgumentsTypes = getPiTypes(typeDeclaration.type, environment);
                 if (match.argumentSymbols.size() != typeArgumentsTypes.size())
                     throw new TypeException("wrong number of arguments");
 
@@ -199,7 +197,7 @@ public class Checker {
                     if (matchingClause == null)
                         throw new TypeException("no matching clause for constructor " + constructor.name);
 
-                    List<Expression> constructorArgumentTypes = argumentTypes(constructor.definition, environment);
+                    List<Expression> constructorArgumentTypes = getPiTypes(constructor.definition, environment);
 
                     if (matchingClause.argumentSymbols.size() != constructorArgumentTypes.size())
                         throw new TypeException("wrong number of arguments");
@@ -215,110 +213,385 @@ public class Checker {
 
                 result = returnType;
             }
+        } else if (term instanceof Fix) {
+            Fix fix = (Fix) term;
+            Definition callingDefinition = null;
+            Environment newEnvironment = environment;
+
+            for (Definition definition : fix.definitions) {
+                if (definition.name.equals(fix.symbol)) {
+                    callingDefinition = definition;
+                }
+
+                newEnvironment = newEnvironment.appendType(definition.name, definition.type);
+            }
+
+            for (Definition definition : fix.definitions) {
+                checkType(definition.definition, definition.type, newEnvironment);
+            }
+
+            if (callingDefinition == null) {
+                throw new TypeException("function " + fix.symbol + " not defined in " + fix);
+            }
+
+            checkGuarded(fix, environment);
+
+            return callingDefinition.type;
         }
+
         if (result == null) {
             System.out.println("term =" + term);
             System.out.println("env = " + environment);
             throw new TypeException("Type Could not be Deduced");
         }
+
+        // TODO: do we need this uncommented?
+        // result = Interpreter.makeSymbolsUnique(result);
         return Interpreter.evaluateExpression(result, environment).expression();
     }
 
-    /*
-
-    given an expression M = {a_1:A_1}...{a_n:A_n}N with N not being a pi type,
-    this function returns the list {A_1, ..., A_n}
-
-     */
-    private static List<Expression> argumentTypes(Expression expression, Environment environment) {
-        return argumentTypes(expression, environment, new ArrayList<>());
+    // given an expression M = {a_1:A_1}...{a_n:A_n}N with N not being a pi type,
+    // this function returns the list {A_1, ..., A_n}
+    private static List<Expression> getPiTypes(Expression expression, Environment environment) {
+        return getPiTypes(expression, environment, new ArrayList<>());
     }
-    private static List<Expression> argumentTypes(Expression expression, Environment environment, List<Expression> argumentTypes) {
+
+    private static List<Expression> getPiTypes(Expression expression, Environment environment, List<Expression> piTypes) {
         if (expression instanceof PiType) {
             PiType piType = (PiType) expression;
-            argumentTypes.add(piType.type);
+            piTypes.add(piType.type);
             Environment newEnvironment = environment.appendType(piType.variable, piType.type);
             Expression body = Interpreter.evaluateExpression(piType.body, newEnvironment).expression();
-            return argumentTypes(body, newEnvironment, argumentTypes);
+            return getPiTypes(body, newEnvironment, piTypes);
         } else {
-            return argumentTypes;
+            return piTypes;
         }
     }
 
-    /*public static Expression substitute(Expression base, Expression substitute) {
-        return substitute(base, substitute, 0);
+    private static class ArgumentDecomposition {
+        private List<Symbol> arguments;
+        private List<Expression> argumentTypes;
+        private Expression body;
+
+        private ArgumentDecomposition() {
+            this.arguments = new ArrayList<>();
+            this.argumentTypes = new ArrayList<>();
+            this.body = null;
+        }
     }
 
-    private static Expression substitute(Expression base, Expression substitute, int i) {
-        if (base instanceof Variable) {
-            Variable variable = (Variable) base;
+    // given an expression M = \a_1:A_1->...\a_n:A_n->N with N not being an abstraction,
+    // this function returns the list {a_1=A_1, ..., a_n=A_n}
+    private static ArgumentDecomposition getArgumentDecomposition(Expression expression, Environment environment) {
+        return getArgumentDecomposition(expression, environment, new ArgumentDecomposition());
+    }
 
-            if (variable.isFree()) {
-                return variable;
-            } else {
-                int index = variable.symbol.getIndex();
-                if (index == i)
-                    return substitute;
-                else
-                    return base;
+    private static ArgumentDecomposition getArgumentDecomposition(Expression expression, Environment environment, ArgumentDecomposition argumentDecomposition) {
+        if (expression instanceof Abstraction) {
+            Abstraction abstraction = (Abstraction) expression;
+            argumentDecomposition.arguments.add(abstraction.symbol);
+            argumentDecomposition.argumentTypes.add(abstraction.type);
+            Environment newEnvironment = environment.appendType(abstraction.symbol, abstraction.type);
+
+            try {
+                Expression body = abstraction.body;
+                return getArgumentDecomposition(body, newEnvironment, argumentDecomposition);
+            } catch (NullPointerException e) {
+                System.err.println("body = " + abstraction.body);
+                throw e;
             }
-        } else if (base instanceof Application) {
-            Application application = (Application) base;
-            Expression function = substitute(application.function, substitute, i);
-            Expression argument = substitute(application.argument, substitute, i);
-            return new Application(function, argument);
-        } else if (base instanceof Abstraction) {
-            Abstraction abstraction = (Abstraction) base;
-            Expression type = substitute(abstraction.type, substitute, i);
-            Expression body = substitute(abstraction.body, substitute, i + 1);
-            return new Abstraction(abstraction.symbol, type, body);
-        } else if (base instanceof PiType) {
-            PiType piType = (PiType) base;
-            Expression type = substitute(piType.type, substitute, i);
-            Expression body = substitute(piType.body, substitute, i + 1);
-            return new PiType(piType.variable, type, body);
-        } else if (base instanceof ConstructorCall) {
-            ConstructorCall constructorCall = (ConstructorCall) base;
+        } else {
+            argumentDecomposition.body = expression;
+            return argumentDecomposition;
+        }
+    }
 
-            List<Expression> arguments = null;
+    private static class ApplicationDecomposition {
+        private Expression function = null;
+        private List<Expression> arguments = new ArrayList<>();
+    }
 
-            if (constructorCall.isConcrete()) {
-                arguments = new ArrayList<>();
-                for (Expression argument : constructorCall.arguments) {
-                    arguments.add(substitute(argument, substitute));
+    private static ApplicationDecomposition getApplicationDecomposition(Expression expression, Environment environment) {
+        return getApplicationDecomposition(expression, environment, new ApplicationDecomposition());
+    }
+
+    private static ApplicationDecomposition getApplicationDecomposition(Expression expression, Environment environment, ApplicationDecomposition applicationDecomposition) {
+        if (expression instanceof Application) {
+            Application application = (Application) expression;
+            Expression argument = Interpreter.evaluateExpression(application.argument, environment).expression();
+            applicationDecomposition.arguments.add(0, argument);
+            Expression function = Interpreter.evaluateExpression(application.function, environment).expression();
+            return getApplicationDecomposition(function, environment, applicationDecomposition);
+        } else {
+            applicationDecomposition.function = Interpreter.evaluateExpression(expression, environment).expression();
+            return applicationDecomposition;
+        }
+    }
+
+    private static void checkGuarded(Fix fix, Environment environment) throws TypeException {
+        List<Integer> ks = new ArrayList<>();
+        List<Symbol> xs = new ArrayList<>();
+
+        for (Definition definition : fix.definitions) {
+            ArgumentDecomposition argumentDecomposition = getArgumentDecomposition(definition.definition, environment);
+
+            if (!(argumentDecomposition.body instanceof Match))
+                throw new TypeException("body of fix definition must be a match, not a " + argumentDecomposition.body.getClass().getSimpleName());
+
+            Match match = (Match) argumentDecomposition.body;
+
+            if (!(match.expression instanceof Variable))
+                throw new TypeException("body of fix definition must match on an argument");
+
+            Variable variable = (Variable) match.expression;
+            Integer k = null;
+
+            for (int i = 0; i < argumentDecomposition.arguments.size(); i++) {
+                Symbol argument = argumentDecomposition.arguments.get(i);
+
+                if (argument.equals(variable.symbol)) {
+                    k = i;
+                    break;
                 }
             }
 
-            return new ConstructorCall(
-                    (InductiveType) substitute(constructorCall.inductiveType, substitute, i),
-                    constructorCall.constructor,
-                    arguments
-            );
-        } else if (base instanceof InductiveType) {
-            InductiveType inductiveType = (InductiveType) base;
+            if (k == null)
+                throw new TypeException("" + variable + " isn't an argument to the fix function");
 
-            List<Expression> parameters = new ArrayList<>();
-            for (Expression parameter : inductiveType.parameters) {
-                parameters.add(substitute(parameter, substitute));
+            ks.add(k);
+            xs.add(variable.symbol);
+        }
+
+        for (int i = 0; i < fix.definitions.size(); i++) {
+            Definition definition = fix.definitions.get(i);
+            if (definition.name.equals(fix.symbol)) {
+                checkGuarded(fix, environment, ks, xs, i, new ArrayList<>(), definition.definition);
+                return;
+            }
+        }
+
+        throw new TypeException("function " + fix.symbol + " not defined in " + fix);
+    }
+
+    static int depth = 0;
+    private static void checkGuarded(Fix fix, Environment environment, List<Integer> ks, List<Symbol> xs, int i, List<Symbol> v, Expression expression) throws TypeException {
+        depth++;
+
+        String indent = "";
+        for (int j = 0; j < depth; j++)
+            indent += "--";
+        indent += " ";
+
+        String message = indent + "checking if " + expression + " is guarded";
+        message = message.replaceAll("\n", "\n" + indent);
+        // System.err.println(message);
+        // TODO: figure this out
+
+        /*boolean recursive = false;
+
+        for (Definition definition : fix.definitions) {
+            if (symbolAppearsIn(definition.name, expression)) {
+                recursive = true;
+            }
+        }
+        if (!recursive)
+            return;*/
+
+        if (expression instanceof Variable) {
+            Variable variable = (Variable) expression;
+
+            for (Definition definition : fix.definitions) {
+                if (variable.symbol.equals(definition.name)) {
+                    throw new TypeException("expression " + expression + " not guarded in " + fix);
+                }
+            }
+        } else if (expression instanceof Abstraction) {
+            Abstraction abstraction = (Abstraction) expression;
+            checkGuarded(fix, environment, ks, xs, i, v, abstraction.type);
+            checkGuarded(fix, environment, ks, xs, i, v, abstraction.body);
+        } else if (expression instanceof PiType) {
+            PiType piType = (PiType) expression;
+            checkGuarded(fix, environment, ks, xs, i, v, piType.type);
+            checkGuarded(fix, environment, ks, xs, i, v, piType.body);
+        } else if (expression instanceof Fix) {
+            Fix innerFix = (Fix) expression;
+            Definition callingDefinition = null;
+
+            for (Definition definition : innerFix.definitions) {
+                if (definition.name.equals(innerFix.symbol)) {
+                    callingDefinition = definition;
+                }
             }
 
-            List<Expression> arguments = null;
+            if (callingDefinition == null) {
+                throw new TypeException("function " + innerFix.symbol + " not defined in " + innerFix);
+            }
+
+            checkGuarded(fix, environment, ks, xs, i, v, callingDefinition.type);
+            checkGuarded(fix, environment, ks, xs, i, v, callingDefinition.definition);
+        } else if (expression instanceof InductiveType) {
+            InductiveType inductiveType = (InductiveType) expression;
+
+            for (Expression parameter : inductiveType.parameters) {
+                checkGuarded(fix, environment, ks, xs, i, v, parameter);
+            }
 
             if (inductiveType.isConcrete()) {
-                arguments = new ArrayList<>();
                 for (Expression argument : inductiveType.arguments) {
-                    arguments.add(substitute(argument, substitute));
+                    checkGuarded(fix, environment, ks, xs, i, v, argument);
+                }
+            }
+        } else if (expression instanceof ConstructorCall) {
+            ConstructorCall constructorCall = (ConstructorCall) expression;
+            checkGuarded(fix, environment, ks, xs, i, v, constructorCall.inductiveType);
+
+            if (constructorCall.isConcrete()) {
+                for (Expression argument : constructorCall.arguments) {
+                    checkGuarded(fix, environment, ks, xs, i, v, argument);
+                }
+            }
+        } else if (expression instanceof Match) {
+            Match match = (Match) expression;
+            Expression matchExpression = Interpreter.evaluateExpression(match.expression, environment).expression();
+            ApplicationDecomposition applicationDecomposition = getApplicationDecomposition(matchExpression, environment);
+
+            if (applicationDecomposition.function instanceof Variable) {
+                Variable variable = (Variable) applicationDecomposition.function;
+                Symbol x = xs.get(i);
+
+                if (variable.symbol.equals(x) || v.contains(variable.symbol)) {
+                    checkGuarded(fix, environment, ks, xs, i, v, match.type);
+
+                    for (Expression argument : applicationDecomposition.arguments) {
+                        checkGuarded(fix, environment, ks, xs, i, v, argument);
+                    }
+
+                    for (Match.Clause clause : match.clauses) {
+                        List<Symbol> newV = new ArrayList<>(v);
+                        newV.addAll(clause.argumentSymbols);
+                        checkGuarded(fix, environment, ks, xs, i, newV, clause.expression);
+
+                        // TODO: figure this out
+                        // do we need to check whether i is a recursive position,
+                        // or does that just improve efficiency?
+                    }
+
+                    return;
                 }
             }
 
-            return new InductiveType(
-                    inductiveType.type,
-                    inductiveType.parameters,
-                    arguments
-            );
+            checkGuarded(fix, environment, ks, xs, i, v, match.type);
+            checkGuarded(fix, environment, ks, xs, i, v, match.expression);
+
+            for (Match.Clause clause : match.clauses) {
+                checkGuarded(fix, environment, ks, xs, i, v, clause.expression);
+            }
+        } else if (expression instanceof Application) {
+            ApplicationDecomposition applicationDecomposition = getApplicationDecomposition(expression, environment);
+
+            if (applicationDecomposition.function instanceof Variable) {
+                Variable variable = (Variable) applicationDecomposition.function;
+
+                for (Definition definition : fix.definitions) {
+                    if (variable.symbol.equals(definition.name)) {
+                        if (applicationDecomposition.arguments.size() < ks.get(i))
+                            throw new TypeException("must pass at least " + ks.get(i) + " arguments to " + fix.definitions.get(i).name);
+
+                        Expression recursive = applicationDecomposition.arguments.get(ks.get(i));
+                        ApplicationDecomposition recursiveDecomposition = getApplicationDecomposition(recursive, environment);
+
+                        if (!(recursiveDecomposition.function instanceof Variable))
+                            throw new TypeException("recursive argument must be application to variable");
+
+                        Variable call = (Variable) recursiveDecomposition.function;
+
+                        for (Expression argument : applicationDecomposition.arguments) {
+                            checkGuarded(fix, environment, ks, xs, i, v, argument);
+                        }
+
+                        if (!v.contains(call.symbol))
+                            throw new TypeException("v doesn't contain " + call.symbol);
+                    }
+                    return;
+                }
+            }
+
+            checkGuarded(fix, environment, ks, xs, i, v, applicationDecomposition.function);
+
+            for (Expression argument : applicationDecomposition.arguments) {
+                checkGuarded(fix, environment, ks, xs, i, v, argument);
+            }
         }
 
-        return base;
+        depth--;
+    }
+
+    /*private static boolean symbolAppearsIn(Symbol symbol, Expression expression) {
+        if (expression instanceof Variable) {
+            Variable variable = (Variable) expression;
+            return variable.symbol.equals(symbol);
+        } else if (expression instanceof Application) {
+            Application application = (Application) expression;
+            return symbolAppearsIn(symbol, application.function)
+                    || symbolAppearsIn(symbol, application.argument);
+        } else if (expression instanceof Abstraction) {
+            Abstraction abstraction = (Abstraction) expression;
+            return symbolAppearsIn(symbol, abstraction.type)
+                    || symbolAppearsIn(symbol, abstraction.body);
+        } else if (expression instanceof PiType) {
+            PiType piType = (PiType) expression;
+            return symbolAppearsIn(symbol, piType.type)
+                    || symbolAppearsIn(symbol, piType.body);
+        } else if (expression instanceof Match) {
+            Match match = (Match) expression;
+
+            for (Match.Clause clause : match.clauses) {
+                if (symbolAppearsIn(symbol, clause.expression))
+                    return true;
+            }
+
+            return symbolAppearsIn(symbol, match.type)
+                    || symbolAppearsIn(symbol, match.expression);
+        } else if (expression instanceof InductiveType) {
+            InductiveType inductiveType = (InductiveType) expression;
+
+            for (Expression parameter : inductiveType.parameters) {
+                if (symbolAppearsIn(symbol, parameter))
+                    return true;
+            }
+
+            if (inductiveType.isConcrete()) {
+                for (Expression argument : inductiveType.arguments) {
+                    if (symbolAppearsIn(symbol, argument))
+                        return true;
+                }
+            }
+
+            return false;
+        } else if (expression instanceof ConstructorCall) {
+            ConstructorCall constructorCall = (ConstructorCall) expression;
+
+            if (constructorCall.isConcrete()) {
+                for (Expression argument : constructorCall.arguments) {
+                    if (symbolAppearsIn(symbol, argument))
+                        return true;
+                }
+            }
+
+            return symbolAppearsIn(symbol, constructorCall.inductiveType);
+        } else if (expression instanceof Fix) {
+            Fix fix = (Fix) expression;
+
+            for (Definition definition : fix.definitions) {
+                if (symbolAppearsIn(symbol, definition.type))
+                    return true;
+
+                if (symbolAppearsIn(symbol, definition.definition))
+                    return true;
+            }
+
+            return false;
+        }
     }*/
 
     private static int umax(int level1, int level2) {
