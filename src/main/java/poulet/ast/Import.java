@@ -6,4 +6,9 @@ public class Import extends TopLevel {
     public Import(String fileName) {
         this.fileName = fileName;
     }
+
+    @Override
+    public String toString() {
+        return "#import \"" + fileName + "\"";
+    }
 }

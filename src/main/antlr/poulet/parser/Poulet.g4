@@ -22,7 +22,7 @@ type_declaration : 'type' symbol parameter* ':' expression '{' constructor* '}' 
 
 parameter : '(' symbol ':' expression ')' ;
 
-expression : <assoc=right> expression '->' expression | variable | abstraction | expression '(' (expression ',')* expression ')' | pi_type | match | inductive_type | constructor_call | fix | '(' expression ')';
+expression : variable | abstraction | expression '(' (expression ',')* expression ')' | pi_type | match | inductive_type | constructor_call | fix | '(' expression ')' | string | character | <assoc=right> expression '->' expression ;
 
 constructor_call : inductive_type '.' symbol ;
 
@@ -46,6 +46,10 @@ fix_definition : symbol ':' expression ':=' expression ;
 
 symbol : SYMBOL ;
 
+string : STRING ;
+
+character : CHAR ;
+
 REDUCE : '#reduce' ;
 
 CHECK : '#check' ;
@@ -54,7 +58,9 @@ SCHOLIUMS : '#scholiums' ;
 
 OUTPUT_COMMAND : '#print' ;
 
-STRING : ('"' .*? '"') | ('\'' .*? '\'') ;
+STRING : '"' (~'"')* '"' ;
+
+CHAR : '\'' (~'\'')* '\'' ;
 
 SYMBOL : [a-zA-Z_][a-zA-Z0-9_]* ;
 

@@ -20,6 +20,9 @@ public class ASTParser extends PouletBaseListener {
             List<TopLevel> topLevels = new ArrayList<>();
 
             for (Node child : children) {
+                if (child == null) // sketchy but easiest way to ignore EOF
+                    continue;
+
                 topLevels.add((TopLevel) child);
             }
 
@@ -213,6 +216,39 @@ public class ASTParser extends PouletBaseListener {
                     definition.type,
                     fix
             );
+        } else if (payload instanceof PouletParser.CharacterContext) {
+            PouletParser.CharacterContext context = (PouletParser.CharacterContext) payload;
+            char c = context.CHAR().getText().charAt(1);
+            return new Char(c);
+        } else if (payload instanceof PouletParser.StringContext) {
+            PouletParser.StringContext context = (PouletParser.StringContext) payload;
+            String withQuotes = context.STRING().getText();
+            String s = withQuotes.substring(1, withQuotes.length() - 1);
+            InductiveType listChar = new InductiveType(
+                    new Symbol("list"),
+                    Arrays.asList(
+                            new Variable(new Symbol("char"))
+                    )
+            );
+
+            Expression result = new ConstructorCall(
+                    listChar,
+                    new Symbol("nil"),
+                    Arrays.asList()
+            );
+
+            for (int i = s.length() - 1; i >= 0; i--) {
+                result = new ConstructorCall(
+                        listChar,
+                        new Symbol("cons"),
+                        Arrays.asList(
+                                new Char(s.charAt(i)),
+                                result
+                        )
+                );
+            }
+
+            return result;
         }
 
         return null;

@@ -50,6 +50,9 @@ public class Quoter {
         } else if (value instanceof VFix) {
             VFix fix = (VFix) value;
             return fix.fix;
+        } else if (value instanceof VChar) {
+            VChar c = (VChar) value;
+            return c.c;
         }
 
         return null;

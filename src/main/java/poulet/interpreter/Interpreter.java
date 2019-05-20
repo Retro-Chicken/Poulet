@@ -1,8 +1,6 @@
 package poulet.interpreter;
 
-import org.antlr.v4.runtime.CharStreams;
 import poulet.ast.*;
-import poulet.parser.ASTParser;
 import poulet.quote.Quoter;
 import poulet.typing.Checker;
 import poulet.typing.Environment;
@@ -271,7 +269,7 @@ public class Interpreter {
             Constructor constructor = environment.lookUpConstructor(constructorCall);
 
             if (constructor == null) {
-                System.err.println("constructor " + constructor.name + " doesn't exist");
+                System.err.println("constructor " + constructorCall.constructor + " doesn't exist");
                 return null;
             }
 
@@ -352,6 +350,9 @@ public class Interpreter {
         } else if (expression instanceof Fix) {
             Fix fix = (Fix) expression;
             return new VFix(fix);
+        } else if (expression instanceof Char) {
+            Char c = (Char) expression;
+            return new VChar(c);
         }
 
         return null;
@@ -481,6 +482,7 @@ public class Interpreter {
 
             if (constructorCall.isConcrete()) {
                 arguments = new ArrayList<>();
+
                 for (Expression argument : constructorCall.arguments) {
                     arguments.add(substitute(argument, symbol, substitution));
                 }
@@ -512,6 +514,7 @@ public class Interpreter {
 
     public static Program makeSymbolsUnique(Program program) {
         List<TopLevel> result = new ArrayList<>();
+
         for (TopLevel topLevel : program.program) {
             if (topLevel instanceof Definition) {
                 Definition definition = (Definition) topLevel;
@@ -623,7 +626,7 @@ public class Interpreter {
                 newMap.put(symbol, unique);
             }
 
-            Expression type = makeSymbolsUnique(map, match.type);
+            Expression type = makeSymbolsUnique(newMap, match.type);
 
             List<Match.Clause> clauses = new ArrayList<>();
 
@@ -707,7 +710,7 @@ public class Interpreter {
             if (constructorCall.isConcrete()) {
                 arguments = new ArrayList<>();
 
-                for (Expression argument : arguments) {
+                for (Expression argument : constructorCall.arguments) {
                     arguments.add(makeSymbolsUnique(map, argument));
                 }
             }

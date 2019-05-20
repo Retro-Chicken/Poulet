@@ -1,11 +1,3 @@
-type nat : Type1 {
-    Z : nat[]
-    S : nat[] -> nat[]
-}
+#import "std.poulet"
 
-fix pred : nat[] -> nat[] := \n : nat[] -> match n as n() in nat[] {
-    Z() => nat[].Z,
-    S(m) => m
-}
-
-#reduce pred(nat[].S(nat[].Z))
+#reduce list[char].cons('a', "test")
