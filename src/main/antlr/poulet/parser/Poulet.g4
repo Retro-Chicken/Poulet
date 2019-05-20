@@ -50,7 +50,7 @@ CHECK : '#check' ;
 
 SCHOLIUMS : '#scholiums' ;
 
-OUTPUT_COMMAND : 'print' ;
+OUTPUT_COMMAND : '#print' ;
 
 STRING : ('"' .*? '"') | ('\'' .*? '\'') ;
 
