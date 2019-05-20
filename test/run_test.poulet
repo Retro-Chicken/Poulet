@@ -5,8 +5,8 @@ false:bool:=\x:a->\y:a->x
 int:Type1
 add:{_:int}{_:int}int
 zero:int
-#check ((add) zero) zero
+#check add(zero, zero)
 id : {_:int}int := \x:int -> x
-id2 : {_:int}int := \x:int -> (id) x
-#reduce (id2) zero
+id2 : {_:int}int := \x:int -> id(x)
+#reduce id2(zero)
 #check true

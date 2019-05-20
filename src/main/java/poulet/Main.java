@@ -7,12 +7,10 @@ import poulet.interpreter.Interpreter;
 import poulet.parser.ASTParser;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.*;
 
 public class Main {
-
     public static void main(String[] args) throws Exception {
         if (args.length == 0)
             args = new String[]{"test/scratch.poulet", "poulet_std"};

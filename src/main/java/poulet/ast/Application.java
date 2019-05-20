@@ -11,7 +11,7 @@ public class Application extends Expression {
 
     @Override
     public String toString() {
-        return String.format("(%s) %s", function, argument);
+        return String.format("%s(%s)", function, argument);
     }
 
     @Override

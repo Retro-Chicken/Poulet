@@ -8,7 +8,7 @@ inductive {
     }
 }
 
-l1 : list[int] := ((list[int].cons) zero) list[int].nil
+l1 : list[int] := list[int].cons(zero, list[int].nil)
 l2 : list[int] := list[int].nil
 
 

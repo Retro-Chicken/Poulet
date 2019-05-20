@@ -1,1 +1,3 @@
-#import 'std.poulet'
+a : Type1
+b : a
+#reduce (\x : a -> x)(b)
