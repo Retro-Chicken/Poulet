@@ -4,12 +4,12 @@ plugins {
     eclipse
     antlr
     application
+    id("com.github.johnrengelman.shadow") version "5.0.0"
 }
 
 application {
     mainClassName = "poulet.Main"
 }
-
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8

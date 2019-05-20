@@ -1,0 +1,3 @@
+#import 'fib.poulet'
+
+#reduce (fib) (succ) (succ) (succ) n1

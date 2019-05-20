@@ -1,6 +1,8 @@
 package poulet.interpreter;
 
+import org.antlr.v4.runtime.CharStreams;
 import poulet.ast.*;
+import poulet.parser.ASTParser;
 import poulet.quote.Quoter;
 import poulet.typing.Checker;
 import poulet.typing.Environment;

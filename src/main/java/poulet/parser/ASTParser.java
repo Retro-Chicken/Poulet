@@ -153,6 +153,10 @@ public class ASTParser extends PouletBaseListener {
             Expression expression = (Expression) children.get(children.size() - 1);
 
             return new Match.Clause(expressionSymbol, argumentSymbols, expression);
+        } else if(payload instanceof PouletParser.Import_commandContext) {
+            PouletParser.Import_commandContext context = (PouletParser.Import_commandContext) payload;
+            String text = context.STRING().getText();
+            return new Import(text.substring(1, text.length() - 1));
         } else if (payload instanceof PouletParser.Fix_definitionContext) {
             Symbol name = (Symbol) children.get(0);
             Expression type = (Expression) children.get(2);
