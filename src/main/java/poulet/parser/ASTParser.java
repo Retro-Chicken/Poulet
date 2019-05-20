@@ -70,8 +70,17 @@ public class ASTParser extends PouletBaseListener {
 
             return new TypeDeclaration(name, parameters, type, constructors);
         } else if (payload instanceof PouletParser.ExpressionContext) {
+            PouletParser.ExpressionContext context = (PouletParser.ExpressionContext) payload;
             if (children.size() > 1) {
-                if (children.get(0) instanceof Expression) {
+                if (context.children.size() > 2 && context.children.get(1).getText().equals("->")) {
+                    Expression type = (Expression) children.get(0);
+                    Expression body = (Expression) children.get(2);
+                    return new PiType(
+                            new Symbol("_"),
+                            type,
+                            body
+                    );
+                } else if (children.get(0) instanceof Expression) {
                     Expression function = (Expression) children.get(0);
                     List<Expression> arguments = new ArrayList<>();
 

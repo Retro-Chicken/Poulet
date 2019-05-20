@@ -22,7 +22,7 @@ type_declaration : 'type' symbol parameter* ':' expression '{' constructor* '}' 
 
 parameter : '(' symbol ':' expression ')' ;
 
-expression : variable | abstraction | expression '(' (expression ',')* expression ')' | pi_type | match | inductive_type | constructor_call | fix | '(' expression ')';
+expression : <assoc=right> expression '->' expression | variable | abstraction | expression '(' (expression ',')* expression ')' | pi_type | match | inductive_type | constructor_call | fix | '(' expression ')';
 
 constructor_call : inductive_type '.' symbol ;
 
