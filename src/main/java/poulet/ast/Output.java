@@ -6,4 +6,9 @@ public class Output extends TopLevel {
     public Output(String text) {
         this.text = text;
     }
+
+    @Override
+    public String toString() {
+        return String.format("#print '%s'", text);
+    }
 }

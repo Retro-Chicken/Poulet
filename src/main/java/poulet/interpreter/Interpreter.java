@@ -49,8 +49,8 @@ public class Interpreter {
                             break;
                     }
                 } else if (topLevel instanceof Output) {
-                    Output ouput = (Output) topLevel;
-                    out.println(ouput.text);
+                    Output output = (Output) topLevel;
+                    out.println(output.text);
                 }
             } catch (Exception e) {
                 System.err.println("Error on Line: " + topLevel);
@@ -530,7 +530,8 @@ public class Interpreter {
 
                 InductiveDeclaration unique = new InductiveDeclaration(typeDeclarations);
                 result.add(unique);
-            }
+            } else
+                result.add(topLevel);
         }
 
         return new Program(result);
