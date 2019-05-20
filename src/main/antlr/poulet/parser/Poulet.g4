@@ -4,9 +4,11 @@ grammar Poulet;
     package poulet.parser;
 }
 
-program : (definition | print | inductive_types | output | import_command)+ EOF ;
+program : (definition | toplevel_fix | print | inductive_types | type_declaration | output | import_command)+ EOF ;
 
 definition : symbol ':' expression (':=' expression)? ;
+
+toplevel_fix : 'fix' definition ;
 
 print : (REDUCE | CHECK | SCHOLIUMS) expression ;
 

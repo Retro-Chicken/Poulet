@@ -14,9 +14,13 @@ public class InductiveDeclaration extends TopLevel {
 
     @Override
     public String toString() {
-        String items = typeDeclarations.stream()
-                .map(TypeDeclaration::toString)
-                .collect(Collectors.joining("\n"));
-        return "inductive {\n" + Util.indent(items, 2) + "\n}";
+        if (typeDeclarations.size() == 1) {
+            return typeDeclarations.get(0).toString();
+        } else {
+            String items = typeDeclarations.stream()
+                    .map(TypeDeclaration::toString)
+                    .collect(Collectors.joining("\n"));
+            return "inductive {\n" + Util.indent(items, 2) + "\n}";
+        }
     }
 }

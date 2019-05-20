@@ -1,3 +1,11 @@
-#import 'std.poulet'
+type nat : Type1 {
+    Z : nat[]
+    S : {_ : nat[]} nat[]
+}
 
-#print 'test'
+fix pred : {_ : nat[]} nat[] := \n : nat[] -> match n as n() in nat[] {
+    Z() => nat[].Z,
+    S(m) => m
+}
+
+#reduce pred(nat[].S(nat[].Z))

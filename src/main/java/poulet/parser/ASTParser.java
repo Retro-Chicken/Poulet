@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import poulet.ast.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ASTParser extends PouletBaseListener {
@@ -176,7 +177,7 @@ public class ASTParser extends PouletBaseListener {
             Expression expression = (Expression) children.get(children.size() - 1);
 
             return new Match.Clause(expressionSymbol, argumentSymbols, expression);
-        } else if(payload instanceof PouletParser.Import_commandContext) {
+        } else if (payload instanceof PouletParser.Import_commandContext) {
             PouletParser.Import_commandContext context = (PouletParser.Import_commandContext) payload;
             String text = context.STRING().getText();
             return new Import(text.substring(1, text.length() - 1));
@@ -192,6 +193,17 @@ public class ASTParser extends PouletBaseListener {
             }
             Symbol symbol = (Symbol) children.get(children.size() - 1);
             return new Fix(definitions, symbol);
+        } else if (payload instanceof PouletParser.Toplevel_fixContext) {
+            Definition definition = (Definition) children.get(1);
+            Fix fix = new Fix(
+                    Arrays.asList(definition),
+                    definition.name
+            );
+            return new Definition(
+                    definition.name,
+                    definition.type,
+                    fix
+            );
         }
 
         return null;

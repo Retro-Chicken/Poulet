@@ -26,6 +26,11 @@ public class Interpreter {
                 InductiveDeclaration inductiveDeclaration = (InductiveDeclaration) topLevel;
                 Checker.checkInductiveDeclarationWellFormed(inductiveDeclaration, environment);
                 environment = environment.appendInductive(inductiveDeclaration);
+            } else if (topLevel instanceof TypeDeclaration) {
+                TypeDeclaration typeDeclaration = (TypeDeclaration) topLevel;
+                InductiveDeclaration inductiveDeclaration = new InductiveDeclaration(Arrays.asList(typeDeclaration));
+                Checker.checkInductiveDeclarationWellFormed(inductiveDeclaration, environment);
+                environment = environment.appendInductive(inductiveDeclaration);
             }
         }
         for (TopLevel topLevel : program.program) {

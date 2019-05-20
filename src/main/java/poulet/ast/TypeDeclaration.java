@@ -5,7 +5,7 @@ import poulet.Util;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TypeDeclaration extends Node {
+public class TypeDeclaration extends TopLevel {
     public final Symbol name;
     public final List<Parameter> parameters;
     public final Expression type;
