@@ -35,32 +35,6 @@ public class Main {
         printWriter.close();
     }
 
-    private static Map<String, Program> getImports(Program program, List<String> directories, List<String> imported) throws IOException {
-        Map<String, Program> imports = new HashMap<>();
-        for(TopLevel topLevel : program.program) {
-            if(topLevel instanceof Import) {
-                String name = ((Import) topLevel).fileName;
-                for(String dir : directories) {
-                    File check = new File(dir + name);
-                    if(check.exists() && !imported.contains(dir + name)) {
-                        List<TopLevel> importedTops = ASTParser.parse(CharStreams.fromFileName(dir + name)).program;
-                        List<TopLevel> keep = new ArrayList<>();
-                        for(TopLevel top : importedTops) {
-                            if(!(top instanceof Print || top instanceof Print))
-                                keep.add(top);
-                        }
-                        imported.add(dir + name);
-                        Program importedProgram = new Program(keep);
-                        imports.put(name, importedProgram);
-                        imports.putAll(getImports(importedProgram, directories, imported));
-                        break;
-                    }
-                }
-            }
-        }
-        return imports;
-    }
-
     public static boolean test() {
         return true;
     }
