@@ -3,6 +3,7 @@ package poulet.parser;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import poulet.ast.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,26 +51,28 @@ public class ASTParser extends PouletBaseListener {
             return new Print(printCommand, expression);
         } else if (payload instanceof PouletParser.Type_declarationContext) {
             Symbol name = (Symbol) children.get(1);
-            Expression type = (Expression) children.get(3);
+            List<Parameter> parameters = new ArrayList<>();
             List<Constructor> constructors = new ArrayList<>();
 
-            for (int i = 5; i < children.size() - 1; i++)
+            int i = 2;
+            for (; children.get(i) instanceof Parameter; i++)
+                parameters.add((Parameter) children.get(i));
+
+            i++;
+
+            Expression type = (Expression) children.get(i);
+
+            i += 2;
+
+            for (; children.get(i) instanceof Constructor; i++)
                 constructors.add((Constructor) children.get(i));
 
-            return new TypeDeclaration(name, type, constructors);
+            return new TypeDeclaration(name, parameters, type, constructors);
         } else if (payload instanceof PouletParser.ExpressionContext) {
             return children.get(0);
         } else if (payload instanceof PouletParser.VariableContext) {
-            Symbol name;
-            switch (children.size()) {
-                case 1:
-                    name = (Symbol) children.get(0);
-                    return new Variable(name);
-                case 3:
-                    Symbol type = (Symbol) children.get(0);
-                    name = (Symbol) children.get(2);
-                    return new Variable(type, name);
-            }
+            Symbol name = (Symbol) children.get(0);
+            return new Variable(name);
         } else if (payload instanceof PouletParser.AbstractionContext) {
             Symbol variable = (Symbol) children.get(1);
             Expression type = (Expression) children.get(3);
@@ -92,10 +95,76 @@ public class ASTParser extends PouletBaseListener {
             PouletParser.SymbolContext context = (PouletParser.SymbolContext) payload;
             String symbol = context.SYMBOL().getText();
             return new Symbol(symbol);
-        } else if(payload instanceof PouletParser.OutputContext) {
+        } else if (payload instanceof PouletParser.OutputContext) {
             PouletParser.OutputContext context = (PouletParser.OutputContext) payload;
             String text = context.STRING().getText();
             return new Output(text.substring(1, text.length() - 1));
+        } else if (payload instanceof PouletParser.Inductive_typesContext) {
+            List<TypeDeclaration> typeDeclarations = new ArrayList<>();
+            for (int i = 2; i < children.size() - 1; i++) {
+                typeDeclarations.add((TypeDeclaration) children.get(i));
+            }
+            return new InductiveDeclaration(typeDeclarations);
+        } else if (payload instanceof PouletParser.ParameterContext) {
+            Symbol symbol = (Symbol) children.get(1);
+            Expression type = (Expression) children.get(3);
+            return new Parameter(symbol, type);
+        } else if (payload instanceof PouletParser.Inductive_typeContext) {
+            Symbol type = (Symbol) children.get(0);
+            List<Expression> parameters = new ArrayList<>();
+            for (int i = 1; i + 1 < children.size() && children.get(i + 1) instanceof Expression; i += 2) {
+                parameters.add((Expression) children.get(i + 1));
+            }
+            return new InductiveType(type, parameters);
+        } else if (payload instanceof PouletParser.Constructor_callContext) {
+            InductiveType inductiveType = (InductiveType) children.get(0);
+            Symbol constructor = (Symbol) children.get(2);
+            return new ConstructorCall(inductiveType, constructor);
+        } else if (payload instanceof PouletParser.MatchContext) {
+            Expression expression = (Expression) children.get(1);
+            Symbol expressionSymbol = (Symbol) children.get(3);
+            List<Symbol> argumentSymbols = new ArrayList<>();
+
+            int i = 5;
+
+            for (; children.get(i) instanceof Symbol; i++) {
+                argumentSymbols.add((Symbol) children.get(i));
+            }
+
+            i += 2;
+            Expression type = (Expression) children.get(i);
+            i += 2;
+
+            List<Match.Clause> clauses = new ArrayList<>();
+
+            for (; i < children.size() - 1 && children.get(i) instanceof Match.Clause; i += 2) {
+                clauses.add((Match.Clause) children.get(i));
+            }
+
+            return new Match(expression, expressionSymbol, argumentSymbols, type, clauses);
+        } else if (payload instanceof PouletParser.Match_clauseContext) {
+            Symbol expressionSymbol = (Symbol) children.get(0);
+            List<Symbol> argumentSymbols = new ArrayList<>();
+
+            for (int i = 1; i < children.size() - 3 && children.get(i + 1) instanceof Symbol; i += 2) {
+                argumentSymbols.add((Symbol) children.get(i + 1));
+            }
+
+            Expression expression = (Expression) children.get(children.size() - 1);
+
+            return new Match.Clause(expressionSymbol, argumentSymbols, expression);
+        } else if (payload instanceof PouletParser.Fix_definitionContext) {
+            Symbol name = (Symbol) children.get(0);
+            Expression type = (Expression) children.get(2);
+            Expression definition = (Expression) children.get(4);
+            return new Definition(name, type, definition);
+        } else if (payload instanceof PouletParser.FixContext) {
+            List<Definition> definitions = new ArrayList<>();
+            for (int i = 2; i < children.size() - 3; i++) {
+                definitions.add((Definition) children.get(i));
+            }
+            Symbol symbol = (Symbol) children.get(children.size() - 1);
+            return new Fix(definitions, symbol);
         }
 
         return null;

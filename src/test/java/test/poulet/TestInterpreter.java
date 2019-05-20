@@ -6,63 +6,48 @@ import poulet.ast.*;
 import poulet.interpreter.Interpreter;
 import poulet.parser.ASTParser;
 import poulet.quote.Quoter;
+import poulet.typing.Environment;
 import poulet.value.NFree;
 import poulet.value.VNeutral;
 import poulet.value.Value;
 
-import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class TestInterpreter {
-    @Test
-    void testSymbolIDs() {
-        Program actualProgram = ASTParser.parse(CharStreams.fromString("_ : _ := \\x : _ -> (x) \\x : _ -> x"));
-        Expression actualExpression = Interpreter.getExpressions(actualProgram).get(0);
-        Expression actualWthIDs = Interpreter.addIndices(actualExpression);
-        Expression expected = new Abstraction(
-                null,
-                new Variable(new Symbol("_")),
-                new Application(
-                        new Variable(new Symbol(0)),
-                        new Abstraction(
-                                null,
-                                new Variable(new Symbol("_")),
-                                new Variable(new Symbol(0))
-                        )
-                )
-        );
-        assertEquals(expected, actualWthIDs);
+    public static void assertOutputIs(String programSource, String expected) {
+        try {
+            Program program = ASTParser.parse(CharStreams.fromString(programSource));
+            StringWriter stringWriter = new StringWriter();
+            PrintWriter printWriter = new PrintWriter(stringWriter);
+            Interpreter.run(program, printWriter);
+            String actual = stringWriter.getBuffer().toString().trim();
+            assertEquals(expected, actual);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
     }
 
     @Test
-    void testSymbolIDs2() {
-        Program actualProgram = ASTParser.parse(CharStreams.fromString("_ : _ := \\x : _ -> (x) \\y : _ -> x"));
-        Expression actualExpression = Interpreter.getExpressions(actualProgram).get(0);
-        Expression actualWthIDs = Interpreter.addIndices(actualExpression);
-        Expression expected = new Abstraction(
-                null,
-                new Variable(new Symbol("_")),
-                new Application(
-                        new Variable(new Symbol( 0)),
-                        new Abstraction(
-                                null,
-                                new Variable(new Symbol("_")),
-                                new Variable(new Symbol(1))
-                        )
-                )
+    void testUniqueSymbols() {
+        assertOutputIs(
+                "#reduce ((\\x : _ -> \\x : _ -> x) a) b",
+                "b"
         );
-        assertEquals(expected, actualWthIDs);
     }
 
     @Test
     void testEvaluation2() {
         Program actualProgram = ASTParser.parse(CharStreams.fromString("_ : _ := (\\x : _ -> x) z"));
         Expression actualExpression = Interpreter.getExpressions(actualProgram).get(0);
-        actualExpression = Interpreter.addIndices(actualExpression);
-        Value actualResult = Interpreter.evaluateExpression(actualExpression);
+        actualExpression = Interpreter.makeSymbolsUnique(actualExpression);
+        System.out.println(actualExpression);
+        Value actualResult = Interpreter.evaluateExpression(actualExpression, new Environment());
         Value expected = new VNeutral(new NFree(new Symbol("z")));
         assertEquals(expected, actualResult);
     }
@@ -72,8 +57,8 @@ public class TestInterpreter {
         Program actualProgram = ASTParser.parse(CharStreams.fromString("id : _ := \\x : _ -> x\n#reduce \\x : _ -> x\nid2 : _ := \\x : _ -> id\n_ : _ := ((id2) w) z)"));
         Program actualSubstitutedProgram = Interpreter.substituteCalls(actualProgram);
         Expression actualExpression = Interpreter.getExpressions(actualSubstitutedProgram).get(2);
-        actualExpression = Interpreter.addIndices(actualExpression);
-        Value actualResult = Interpreter.evaluateExpression(actualExpression);
+        actualExpression = Interpreter.makeSymbolsUnique(actualExpression);
+        Value actualResult = Interpreter.evaluateExpression(actualExpression, new Environment());
         Value expected = new VNeutral(new NFree(new Symbol("z")));
         assertEquals(expected, actualResult);
     }
@@ -84,8 +69,8 @@ public class TestInterpreter {
         Program actualSubstitutedProgram = Interpreter.substituteCalls(actualProgram);
         List<Expression> actualExpressions = Interpreter.getExpressions(actualSubstitutedProgram);
         Expression actualExpression = actualExpressions.get(actualExpressions.size() - 1);
-        actualExpression = Interpreter.addIndices(actualExpression);
-        Value actualResult = Interpreter.evaluateExpression(actualExpression);
+        actualExpression = Interpreter.makeSymbolsUnique(actualExpression);
+        Value actualResult = Interpreter.evaluateExpression(actualExpression, new Environment());
         System.out.println(">>> " + actualResult);
     }
 
@@ -95,8 +80,8 @@ public class TestInterpreter {
         actualProgram = Interpreter.substituteCalls(actualProgram);
         List<Expression> expressions = Interpreter.getExpressions(actualProgram);
         Expression expression = expressions.get(expressions.size() - 1);
-        expression = Interpreter.addIndices(expression);
-        Value output = Interpreter.evaluateExpression(expression);
+        expression = Interpreter.makeSymbolsUnique(expression);
+        Value output = Interpreter.evaluateExpression(expression, new Environment());
         Value expected = new VNeutral(new NFree(new Symbol("a")));
         assertEquals(expected, output);
     }
@@ -105,10 +90,10 @@ public class TestInterpreter {
     void substituteFunctionCalls2() {
         try {
             Program actualProgram = ASTParser.parse(CharStreams.fromString("func : _ := \\x : _ -> z\nfunc2 : _ := \\z : _ -> (func) z\n_ : _ := (func2) w"));
-            Program actualSubstitutedProgram = Interpreter.substituteCalls(Interpreter.addIndices(actualProgram));
+            Program actualSubstitutedProgram = Interpreter.substituteCalls(Interpreter.makeSymbolsUnique(actualProgram));
             Expression actualExpression = Interpreter.getExpressions(actualSubstitutedProgram).get(2);
-            actualExpression = Interpreter.addIndices(actualExpression);
-            Value actualResult = Interpreter.evaluateExpression(actualExpression);
+            actualExpression = Interpreter.makeSymbolsUnique(actualExpression);
+            Value actualResult = Interpreter.evaluateExpression(actualExpression, new Environment());
 
             try {
                 Variable variable = (Variable) Quoter.quote(actualResult);
@@ -128,12 +113,27 @@ public class TestInterpreter {
             Program actualProgram = ASTParser.parse(CharStreams.fromString("func : _ := \\x : _ -> z\nfunc2 : _ := \\z : _ -> (func) z\n_ : _ := (func2) w"));
             Program transformed = Interpreter.transform(actualProgram);
             Expression transformedExpression = Interpreter.getExpressions(transformed).get(2);
-            Expression evaluated = Interpreter.evaluateExpression(transformedExpression).expression();
+            Expression evaluated = Interpreter.evaluateExpression(transformedExpression, new Environment()).expression();
             Variable variable = (Variable) evaluated;
             if(!variable.symbol.toString().equals("z"))
                 fail();
         } catch (Exception e) {
             e.printStackTrace();
+            fail();
+        }
+    }
+
+    @Test
+    void testDeclareOutOfOrder() {
+        try {
+            Program program = ASTParser.parse(CharStreams.fromString("c : Type1\na : Type1 := b\n b : Type1 := c\n#reduce a"));
+            StringWriter stringWriter = new StringWriter();
+            PrintWriter printWriter = new PrintWriter(stringWriter);
+            Interpreter.run(program, printWriter);
+            String expectedOutput = "c";
+            String actualOutput = stringWriter.getBuffer().toString().trim();
+            assertEquals(expectedOutput, actualOutput);
+        } catch (Exception e) {
             fail();
         }
     }

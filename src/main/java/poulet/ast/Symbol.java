@@ -1,61 +1,46 @@
 package poulet.ast;
 
-import poulet.value.Name;
+public class Symbol extends Node implements Comparable<Symbol> {
+    public static int nextId = 0;
 
-public class Symbol extends Node implements Name {
-    private final String name;
-    private final Integer index;
-
-    /*
-    private final String uniqueID;
-
-    public Symbol(String name, String uniqueID) {
-        this.name = name;
-        this.index = null;
-        this.uniqueID = uniqueID;
-    }*/
+    public final String name;
+    final Integer id;
 
     public Symbol(String name) {
         this.name = name;
-        this.index = null;
-        //this.uniqueID = null;
+        this.id = null;
     }
 
-    public Symbol(int index) {
-        this.name = null;
-        this.index = index;
-        //this.uniqueID = null;
+    private Symbol(String name, Integer id) {
+        this.name = name;
+        this.id = id;
     }
 
-    @Override
-    public Integer getIndex() {
-        return index;
+    public Symbol makeUnique() {
+        return new Symbol(name, nextId++);
     }
 
-    @Override
-    public String getName() {
-        return name;
+    public Symbol copy() {
+        return new Symbol(name, id);
     }
 
     @Override
     public String toString() {
-        if (index == null)
+        if (id == null)
             return name;
         else
-            return "" + index;
+            return String.format("%s@%d", name, id);
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Symbol) {
             Symbol other = (Symbol) obj;
-            if (index != null && other.index != null) {
-                return index.equals(other.index);
-            } else if (name != null && other.name != null) {
-                //if(uniqueID != null)
-                //    return uniqueID.equals(other.uniqueID) && name.equals(other.name);
-                //return other.uniqueID == null && name.equals(other.name);
+
+            if (id == null && other.id == null) {
                 return name.equals(other.name);
+            } else if (id != null && other.id != null){
+                return name.equals(other.name) && id.equals(other.id);
             }
         }
 
@@ -64,26 +49,19 @@ public class Symbol extends Node implements Name {
 
     @Override
     public int hashCode() {
-        if (name != null)
-            return 2 * name.hashCode();
-        if (index != null)
-            return 2 * index.hashCode() + 1;
-        return 0;
-    }
-
-    /**
-     * increment index if indexed, otherwise don't change
-     */
-    @Override
-    public Symbol increment() {
-        if(index != null)
-            return new Symbol(index + 1);
-        return this;
+        return toString().hashCode();
     }
 
     @Override
-    public boolean isFree() {
-        return index == null;
-    }
+    public int compareTo(Symbol symbol) {
+        int c = name.compareTo(symbol.name);
 
+        if (c == 0) {
+            Integer a = id == null ? -1 : id;
+            Integer b = symbol.id == null ? -1 : symbol.id;
+            return a.compareTo(b);
+        } else {
+            return c;
+        }
+    }
 }

@@ -2,8 +2,14 @@ a : b := (\c : d -> c) e
 
 int : Type1
 
-type prod : {_ : Prop} {_ : Prop} Prop {
-  mk : {p : Prop} {q : Prop} {_ : p} {_ : q} ((prod) p) q
+inductive {
+    type and (p : Prop) (q : Prop) : {_ : p} {_ : q} Prop {
+        mk : {_ : p} {_ : q} prod[p, q]
+    }
 }
 
-#reduce ((prod.mk) a) a
+f : {_ : int} int := fix {
+    f : {_ : int} int := \a : int -> a
+}.f
+
+#reduce ((and[int, int].mk) a) a

@@ -12,43 +12,44 @@ import poulet.interpreter.DefinitionException;
 import poulet.interpreter.Interpreter;
 import poulet.parser.ASTParser;
 import poulet.typing.Checker;
-import poulet.typing.Context;
+import poulet.typing.Environment;
 import poulet.typing.TypeException;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class TestChecker {
     private Expression parseExpression(String string) {
         Program program = ASTParser.parse(CharStreams.fromString("_:_:=" + string));
         Expression expression = Interpreter.getExpressions(program).get(0);
-        return Interpreter.addIndices(expression);
+        return Interpreter.makeSymbolsUnique(expression);
     }
     @Test
     void testCheckType() {
-        Context context = new Context(Map.of(
+        Environment environment = new Environment(Map.of(
                 new Symbol("int"), new Variable(new Symbol("Type1")),
                 new Symbol("bool"), new Variable(new Symbol("Type1"))
-        ));
+        ), new HashMap<>(), new HashMap<>());
         Expression term = parseExpression("\\x:int->x");
         Expression type = parseExpression("{_:int}bool");
 
         try {
-            Checker.checkType(context, term, type);
+            Checker.checkType(term, type, environment);
             fail();
         } catch (TypeException e) {}
     }
 
     @Test
     void testCheckType2() {
-        Context context = new Context(Map.of(
+        Environment environment = new Environment(Map.of(
                 new Symbol("int"), new Variable(new Symbol("Type1")),
                 new Symbol("bool"), new Variable(new Symbol("Type1"))
-        ));
+        ), new HashMap<>(), new HashMap<>());
         Expression term = parseExpression("\\x:int->x");
         Expression type = parseExpression("{_:int}int");
 
         try {
-            Checker.checkType(context, term, type);
+            Checker.checkType(term, type, environment);
         } catch (TypeException e) {
             e.printStackTrace();
             fail();
@@ -57,15 +58,15 @@ public class TestChecker {
 
     @Test
     void testCheckType3() {
-        Context context = new Context(Map.of(
+        Environment environment = new Environment(Map.of(
                 new Symbol("int"), new Variable(new Symbol("Type1")),
                 new Symbol("bool"), new Variable(new Symbol("Type1"))
-        ));
+        ), new HashMap<>(), new HashMap<>());
         Expression term = parseExpression("\\x:int->x");
         Expression type = parseExpression("{_:int}int");
 
         try {
-            Checker.checkType(context, term, type);
+            Checker.checkType(term, type, environment);
         } catch (TypeException e) {
             fail();
         }
@@ -73,15 +74,15 @@ public class TestChecker {
 
     @Test
     void testCheckType4() {
-        Context context = new Context(Map.of(
+        Environment environment = new Environment(Map.of(
                 new Symbol("int"), new Variable(new Symbol("Type1")),
                 new Symbol("bool"), new Variable(new Symbol("Type1"))
-        ));
+        ), new HashMap<>(), new HashMap<>());
         Expression term = parseExpression("\\x : int -> \\y : int -> y");
         Expression type = parseExpression("{_:int}{_:int}int");
 
         try {
-            Checker.checkType(context, term, type);
+            Checker.checkType(term, type, environment);
         } catch (TypeException e) {
             fail();
         }
@@ -89,30 +90,32 @@ public class TestChecker {
 
     @Test
     void testCheckKind() {
-        Context context = new Context();
+        Environment environment = new Environment();
         Expression term = parseExpression("\\x:int->x");
         Expression type = parseExpression("{_:int}int");
 
         try {
-            Checker.checkType(context, term, type);
+            Checker.checkType(term, type, environment);
+        } catch (TypeException e) {
+            e.printStackTrace();
             fail();
-        } catch (TypeException e) { }
+        }
     }
 
     @Test
     void testCheckTypeWithSubstitution() throws DefinitionException {
-        Context context = new Context(Map.of(
+        Environment environment = new Environment(Map.of(
                 new Symbol("int"), new Variable(new Symbol("Type1")),
                 new Symbol("bool"), new Variable(new Symbol("Type1"))
-        ));
+        ), new HashMap<>(), new HashMap<>());
         Program actualProgram = ASTParser.parse(CharStreams.fromString("id : _ := \\x : int -> x\n_ : _ := \\x : int -> (id) x"));
         Program actualSubstitutedProgram = Interpreter.substituteCalls(actualProgram);
-        Expression actualExpression = Interpreter.addIndices(Interpreter.getExpressions(actualSubstitutedProgram).get(1));
+        Expression actualExpression = Interpreter.makeSymbolsUnique(Interpreter.getExpressions(actualSubstitutedProgram).get(1));
         Expression type = parseExpression("{_:int}int");
-        type = Interpreter.addIndices(type);
+        type = Interpreter.makeSymbolsUnique(type);
 
         try {
-            Checker.checkType(context, actualExpression, type);
+            Checker.checkType(actualExpression, type, environment);
         } catch (TypeException e) {
             e.printStackTrace();
             fail();

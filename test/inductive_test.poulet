@@ -1,0 +1,22 @@
+int : Type1
+zero : int
+
+inductive {
+    type list (A : Type1) : Type1 {
+        nil : list[A]
+        cons : {_ : A} {_ : list[A]} list[A]
+    }
+}
+
+l1 : list[int] := ((list[int].cons) zero) list[int].nil
+l2 : list[int] := list[int].nil
+
+
+bool : Type1
+false : bool
+true : bool
+
+#check match l1 as l() in bool {
+    nil() => true,
+    cons(h, t) => false
+}

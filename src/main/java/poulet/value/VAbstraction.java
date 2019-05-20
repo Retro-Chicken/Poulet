@@ -7,7 +7,7 @@ public class VAbstraction extends Value {
 
     public final Value type;
 
-    public VAbstraction(Function<Value, Value> abstraction, Value type) {
+    public VAbstraction(Value type, Function<Value, Value> abstraction) {
         this.abstraction = abstraction;
         this.type = type;
     }

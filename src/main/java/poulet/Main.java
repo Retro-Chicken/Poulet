@@ -10,7 +10,7 @@ import java.io.PrintWriter;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        Program program = ASTParser.parse(CharStreams.fromFileName("test/scratch.poulet"));
+        Program program = ASTParser.parse(CharStreams.fromFileName("test/fix_test.poulet"));
         PrintWriter printWriter = new PrintWriter(System.out);
         Interpreter.run(program, printWriter);
         printWriter.flush();
