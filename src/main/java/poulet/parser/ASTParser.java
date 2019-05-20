@@ -69,7 +69,34 @@ public class ASTParser extends PouletBaseListener {
 
             return new TypeDeclaration(name, parameters, type, constructors);
         } else if (payload instanceof PouletParser.ExpressionContext) {
-            return children.get(0);
+            if (children.size() > 1) {
+                if (children.get(0) instanceof Expression) {
+                    Expression function = (Expression) children.get(0);
+                    List<Expression> arguments = new ArrayList<>();
+
+                    for (int i = 2; i < children.size() - 1; i += 2) {
+                        arguments.add((Expression) children.get(i));
+                    }
+
+                    Application application = new Application(
+                            function,
+                            arguments.get(0)
+                    );
+
+                    for (int i = 1; i < arguments.size(); i++) {
+                        application = new Application(
+                                application,
+                                arguments.get(i)
+                        );
+                    }
+
+                    return application;
+                } else {
+                    return children.get(1);
+                }
+            } else {
+                return children.get(0);
+            }
         } else if (payload instanceof PouletParser.VariableContext) {
             Symbol name = (Symbol) children.get(0);
             return new Variable(name);
@@ -78,10 +105,6 @@ public class ASTParser extends PouletBaseListener {
             Expression type = (Expression) children.get(3);
             Expression body = (Expression) children.get(5);
             return new Abstraction(variable, type, body);
-        } else if (payload instanceof PouletParser.ApplicationContext) {
-            Expression function = (Expression) children.get(1);
-            Expression argument = (Expression) children.get(3);
-            return new Application(function, argument);
         } else if (payload instanceof PouletParser.Pi_typeContext) {
             Symbol variable = (Symbol) children.get(1);
             Expression type = (Expression) children.get(3);

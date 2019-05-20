@@ -108,7 +108,7 @@ public class TestChecker {
                 new Symbol("int"), new Variable(new Symbol("Type1")),
                 new Symbol("bool"), new Variable(new Symbol("Type1"))
         ), new HashMap<>(), new HashMap<>());
-        Program actualProgram = ASTParser.parse(CharStreams.fromString("id : _ := \\x : int -> x\n_ : _ := \\x : int -> (id) x"));
+        Program actualProgram = ASTParser.parse(CharStreams.fromString("id : _ := \\x : int -> x\n_ : _ := \\x : int -> id(x)"));
         Program actualSubstitutedProgram = Interpreter.substituteCalls(actualProgram);
         Expression actualExpression = Interpreter.makeSymbolsUnique(Interpreter.getExpressions(actualSubstitutedProgram).get(1));
         Expression type = parseExpression("{_:int}int");

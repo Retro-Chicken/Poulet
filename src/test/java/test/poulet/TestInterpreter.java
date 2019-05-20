@@ -36,14 +36,14 @@ public class TestInterpreter {
     @Test
     void testUniqueSymbols() {
         assertOutputIs(
-                "#reduce ((\\x : _ -> \\x : _ -> x) a) b",
+                "#reduce (\\x : _ -> \\x : _ -> x)(a, b)",
                 "b"
         );
     }
 
     @Test
     void testEvaluation2() {
-        Program actualProgram = ASTParser.parse(CharStreams.fromString("_ : _ := (\\x : _ -> x) z"));
+        Program actualProgram = ASTParser.parse(CharStreams.fromString("_ : _ := (\\x : _ -> x)(z)"));
         Expression actualExpression = Interpreter.getExpressions(actualProgram).get(0);
         actualExpression = Interpreter.makeSymbolsUnique(actualExpression);
         System.out.println(actualExpression);
@@ -54,7 +54,7 @@ public class TestInterpreter {
 
     @Test
     void substituteFunctionCalls() throws Exception {
-        Program actualProgram = ASTParser.parse(CharStreams.fromString("id : _ := \\x : _ -> x\n#reduce \\x : _ -> x\nid2 : _ := \\x : _ -> id\n_ : _ := ((id2) w) z)"));
+        Program actualProgram = ASTParser.parse(CharStreams.fromString("id : _ := \\x : _ -> x\n#reduce \\x : _ -> x\nid2 : _ := \\x : _ -> id\n_ : _ := id2(w)(z)"));
         Program actualSubstitutedProgram = Interpreter.substituteCalls(actualProgram);
         Expression actualExpression = Interpreter.getExpressions(actualSubstitutedProgram).get(2);
         actualExpression = Interpreter.makeSymbolsUnique(actualExpression);
@@ -64,19 +64,24 @@ public class TestInterpreter {
     }
 
     @Test
-    void testRecursion() throws Exception {
-        Program actualProgram = ASTParser.parse(CharStreams.fromFileName("test/recursion_test.poulet"));
-        Program actualSubstitutedProgram = Interpreter.substituteCalls(actualProgram);
-        List<Expression> actualExpressions = Interpreter.getExpressions(actualSubstitutedProgram);
-        Expression actualExpression = actualExpressions.get(actualExpressions.size() - 1);
-        actualExpression = Interpreter.makeSymbolsUnique(actualExpression);
-        Value actualResult = Interpreter.evaluateExpression(actualExpression, new Environment());
-        System.out.println(">>> " + actualResult);
+    void testRecursion() {
+        try {
+            Program actualProgram = ASTParser.parse(CharStreams.fromFileName("test/recursion_test.poulet"));
+            Program actualSubstitutedProgram = Interpreter.substituteCalls(actualProgram);
+            List<Expression> actualExpressions = Interpreter.getExpressions(actualSubstitutedProgram);
+            Expression actualExpression = actualExpressions.get(actualExpressions.size() - 1);
+            actualExpression = Interpreter.makeSymbolsUnique(actualExpression);
+            Value actualResult = Interpreter.evaluateExpression(actualExpression, new Environment());
+            System.out.println(">>> " + actualResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
     }
 
     @Test
     void testEvalWithIndices() throws Exception {
-        Program actualProgram = ASTParser.parse(CharStreams.fromString("_:_:=((\\x:_->\\y:_->x)a)b"));
+        Program actualProgram = ASTParser.parse(CharStreams.fromString("_:_:=(\\x:_->\\y:_->x)(a, b)"));
         actualProgram = Interpreter.substituteCalls(actualProgram);
         List<Expression> expressions = Interpreter.getExpressions(actualProgram);
         Expression expression = expressions.get(expressions.size() - 1);
@@ -89,7 +94,7 @@ public class TestInterpreter {
     @Test
     void substituteFunctionCalls2() {
         try {
-            Program actualProgram = ASTParser.parse(CharStreams.fromString("func : _ := \\x : _ -> z\nfunc2 : _ := \\z : _ -> (func) z\n_ : _ := (func2) w"));
+            Program actualProgram = ASTParser.parse(CharStreams.fromString("func : _ := \\x : _ -> z\nfunc2 : _ := \\z : _ -> func(z)\n_ : _ := func2(w)"));
             Program actualSubstitutedProgram = Interpreter.substituteCalls(Interpreter.makeSymbolsUnique(actualProgram));
             Expression actualExpression = Interpreter.getExpressions(actualSubstitutedProgram).get(2);
             actualExpression = Interpreter.makeSymbolsUnique(actualExpression);
@@ -110,7 +115,7 @@ public class TestInterpreter {
     @Test
     void transformProgram() {
         try {
-            Program actualProgram = ASTParser.parse(CharStreams.fromString("func : _ := \\x : _ -> z\nfunc2 : _ := \\z : _ -> (func) z\n_ : _ := (func2) w"));
+            Program actualProgram = ASTParser.parse(CharStreams.fromString("func : _ := \\x : _ -> z\nfunc2 : _ := \\z : _ -> func(z)\n_ : _ := func2(w)"));
             Program transformed = Interpreter.transform(actualProgram);
             Expression transformedExpression = Interpreter.getExpressions(transformed).get(2);
             Expression evaluated = Interpreter.evaluateExpression(transformedExpression, new Environment()).expression();

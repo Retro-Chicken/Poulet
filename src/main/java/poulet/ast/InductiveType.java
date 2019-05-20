@@ -29,9 +29,9 @@ public class InductiveType extends Expression {
         s += ']';
 
         if (isConcrete()) {
-            s += '(';
+            s += '[';
             s += arguments.stream().map(Expression::toString).collect(Collectors.joining(", "));
-            s += ')';
+            s += ']';
         }
 
         return s;

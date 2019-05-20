@@ -4,7 +4,7 @@ grammar Poulet;
     package poulet.parser;
 }
 
-program : (definition | print | inductive_types | output | import_command)+ ;
+program : (definition | print | inductive_types | output | import_command)+ EOF ;
 
 definition : symbol ':' expression (':=' expression)? ;
 
@@ -20,7 +20,7 @@ type_declaration : 'type' symbol parameter* ':' expression '{' constructor* '}' 
 
 parameter : '(' symbol ':' expression ')' ;
 
-expression : (variable | abstraction | application | pi_type | match | inductive_type | constructor_call | fix) ;
+expression : variable | abstraction | expression '(' (expression ',')* expression ')' | pi_type | match | inductive_type | constructor_call | fix | '(' expression ')';
 
 constructor_call : inductive_type '.' symbol ;
 
@@ -29,8 +29,6 @@ inductive_type : symbol '[' ((expression ',')* expression)? ']' ;
 variable : symbol ;
 
 abstraction : '\\' symbol ':' expression '->' expression ;
-
-application : '(' expression ')' expression ;
 
 pi_type : '{' symbol ':' expression '}' expression ;
 

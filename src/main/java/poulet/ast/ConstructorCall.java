@@ -27,9 +27,9 @@ public class ConstructorCall extends Expression {
         String s = inductiveType.toString() + '.' + constructor;
 
         if (isConcrete()) {
-            s += '(';
+            s += '[';
             s += arguments.stream().map(Expression::toString).collect(Collectors.joining(", "));
-            s += ')';
+            s += ']';
         }
 
         return s;
