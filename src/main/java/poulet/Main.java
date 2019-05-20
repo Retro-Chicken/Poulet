@@ -14,14 +14,15 @@ import java.util.*;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        assert args.length >= 1;
+        if (args.length == 0)
+            args = new String[]{"test/scratch.poulet", "poulet_std"};
 
         // Get imports
         String fileName = new File(args[0]).getCanonicalPath();
         Map<File, Boolean> directories = new HashMap<>();
         boolean recursive = false;
-        for(int i = 1; i < args.length; i++)
-            if(args[i].equals("-r"))
+        for (int i = 1; i < args.length; i++)
+            if (args[i].equals("-r"))
                 recursive = true;
             else
                 directories.put(new File(args[i]), recursive);
@@ -33,9 +34,5 @@ public class Main {
         Interpreter.run(program, printWriter);
         printWriter.flush();
         printWriter.close();
-    }
-
-    public static boolean test() {
-        return true;
     }
 }

@@ -10,7 +10,7 @@ definition : symbol ':' expression (':=' expression)? ;
 
 print : (REDUCE | CHECK | SCHOLIUMS) expression ;
 
-import_command : IMPORT  STRING ;
+import_command : IMPORT STRING ;
 
 output : OUTPUT_COMMAND STRING ;
 
