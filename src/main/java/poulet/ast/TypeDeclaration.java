@@ -1,5 +1,7 @@
 package poulet.ast;
 
+import poulet.Util;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,12 +34,11 @@ public class TypeDeclaration extends Node {
 
     @Override
     public String toString() {
+        String items = constructors.stream().map(Constructor::toString).collect(Collectors.joining("\n"));
         String s = "type " + name + " ";
         s += parameters.stream().map(Parameter::toString).collect(Collectors.joining(" "));
         s += " : " + type + " {\n";
-        s += constructors.stream()
-                .map(c -> "  " + c.toString())
-                .collect(Collectors.joining("\n"));
+        s += Util.indent(items, 2);
         s += "\n}";
         return s;
     }

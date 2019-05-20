@@ -1,5 +1,6 @@
 package poulet.interpreter;
 
+import poulet.Util;
 import poulet.ast.*;
 import poulet.quote.Quoter;
 import poulet.typing.Checker;
@@ -13,6 +14,9 @@ import java.util.function.Function;
 public class Interpreter {
     public static void run(Program program, PrintWriter out) throws Exception {
         program = makeSymbolsUnique(program);
+        /*System.out.println("===============");
+        System.out.println(program);
+        System.out.println("===============");*/
         Environment environment = new Environment();
 
         for (TopLevel topLevel : program.program) {
@@ -333,7 +337,11 @@ public class Interpreter {
                 System.err.println("no clause found for constructor " + constructed.constructor.name);
                 return null;
             } else {
-                System.out.println("v = " + value);
+                /*System.out.println(Util.mapToStringWithNewlines(Map.of(
+                        "exp", expression,
+                        "env", environment,
+                        "val", value
+                )));*/
                 System.err.println("can only match on constructed value");
                 return null;
             }
@@ -616,7 +624,7 @@ public class Interpreter {
 
             for (Match.Clause clause : match.clauses) {
                 List<Symbol> clauseArgumentSymbols = new ArrayList<>();
-                Map<Symbol, Symbol> clauseNewMap = new HashMap<>(newMap);
+                Map<Symbol, Symbol> clauseNewMap = new HashMap<>(map);
 
                 for (Symbol symbol : clause.argumentSymbols) {
                     Symbol unique = symbol.makeUnique();

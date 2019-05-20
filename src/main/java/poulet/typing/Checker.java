@@ -234,7 +234,7 @@ public class Checker {
                 throw new TypeException("function " + fix.symbol + " not defined in " + fix);
             }
 
-            checkGuarded(fix, environment);
+            checkGuarded(fix, newEnvironment);
 
             return callingDefinition.type;
         }
@@ -317,11 +317,10 @@ public class Checker {
 
     private static ApplicationDecomposition getApplicationDecomposition(Expression expression, Environment environment, ApplicationDecomposition applicationDecomposition) {
         if (expression instanceof Application) {
+            // TODO: do we need to try to reduce function and arugment to make it more general?
             Application application = (Application) expression;
-            Expression argument = Interpreter.evaluateExpression(application.argument, environment).expression();
-            applicationDecomposition.arguments.add(0, argument);
-            Expression function = Interpreter.evaluateExpression(application.function, environment).expression();
-            return getApplicationDecomposition(function, environment, applicationDecomposition);
+            applicationDecomposition.arguments.add(0, application.argument);
+            return getApplicationDecomposition(application.function, environment, applicationDecomposition);
         } else {
             applicationDecomposition.function = Interpreter.evaluateExpression(expression, environment).expression();
             return applicationDecomposition;
@@ -452,7 +451,7 @@ public class Checker {
             }
         } else if (expression instanceof Match) {
             Match match = (Match) expression;
-            Expression matchExpression = Interpreter.evaluateExpression(match.expression, environment).expression();
+            Expression matchExpression = match.expression;
             ApplicationDecomposition applicationDecomposition = getApplicationDecomposition(matchExpression, environment);
 
             if (applicationDecomposition.function instanceof Variable) {
@@ -511,8 +510,9 @@ public class Checker {
 
                         if (!v.contains(call.symbol))
                             throw new TypeException("v doesn't contain " + call.symbol);
+
+                        return;
                     }
-                    return;
                 }
             }
 

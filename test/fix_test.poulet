@@ -30,4 +30,42 @@ length : {A : Type1} {_ : list[A]} nat[] := fix {
     }
 }.length
 
-#reduce ((length) int) l
+//#reduce ((length) int) l
+
+plus : {_ : nat[]} {_ : nat[]} nat[] := fix {
+    plus : {_ : nat[]} {_ : nat[]} nat[] := \n : nat[] -> \m : nat[] -> match n as n() in nat[] {
+        Z() => m,
+        S(n_pred) => (nat[].S) ((plus) n_pred) m
+    }
+}.plus
+
+mult : {_ : nat[]} {_ : nat[]} nat[] := fix {
+    mult : {_ : nat[]} {_ : nat[]} nat[] := \n : nat[] -> \m : nat[] -> match n as n() in nat[] {
+        Z() => nat[].Z,
+        S(n_pred) => ((plus) ((mult) n_pred) m) m
+    }
+}.mult
+
+n0 : nat[] := nat[].Z
+n1 : nat[] := (nat[].S) n0
+n2 : nat[] := (nat[].S) n1
+n3 : nat[] := (nat[].S) n2
+n4 : nat[] := (nat[].S) n3
+n5 : nat[] := (nat[].S) n4
+n6 : nat[] := (nat[].S) n5
+n7 : nat[] := (nat[].S) n6
+n8 : nat[] := (nat[].S) n7
+n9 : nat[] := (nat[].S) n8
+n10 : nat[] := (nat[].S) n9
+
+fib : {_ : nat[]} nat[] := fix {
+    fib : {_ : nat[]} nat[] := \n : nat[] -> match n as n() in nat[] {
+        Z() => n0,
+        S(m1) => match m1 as m1() in nat[] {
+            Z() => n1,
+            S(m2) => ((plus) (fib) m1) (fib) m2
+        }
+    }
+}.fib
+
+#reduce (fib) n6

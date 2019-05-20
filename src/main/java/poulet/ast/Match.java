@@ -1,5 +1,7 @@
 package poulet.ast;
 
+import poulet.Util;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,10 +22,12 @@ public class Match extends Expression {
 
     @Override
     public String toString() {
+        String items = clauses.stream().map(Clause::toString).collect(Collectors.joining(",\n"));
+
         String s = "match " + expression + " as " + expressionSymbol + "(";
         s += argumentSymbols.stream().map(Symbol::toString).collect(Collectors.joining(", "));
         s += ") in " + type + " {\n";
-        s += clauses.stream().map(Clause::toString).collect(Collectors.joining(",\n"));
+        s += Util.indent(items, 2);
         s += "\n}";
         return s;
     }

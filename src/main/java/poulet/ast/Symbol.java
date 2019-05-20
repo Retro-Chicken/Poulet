@@ -1,6 +1,6 @@
 package poulet.ast;
 
-public class Symbol extends Node {
+public class Symbol extends Node implements Comparable<Symbol> {
     public static int nextId = 0;
 
     public final String name;
@@ -50,5 +50,18 @@ public class Symbol extends Node {
     @Override
     public int hashCode() {
         return toString().hashCode();
+    }
+
+    @Override
+    public int compareTo(Symbol symbol) {
+        int c = name.compareTo(symbol.name);
+
+        if (c == 0) {
+            Integer a = id == null ? -1 : id;
+            Integer b = symbol.id == null ? -1 : symbol.id;
+            return a.compareTo(b);
+        } else {
+            return c;
+        }
     }
 }

@@ -1,5 +1,7 @@
 package poulet.ast;
 
+import poulet.Util;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,9 +16,7 @@ public class Fix extends Expression {
 
     @Override
     public String toString() {
-        String s = "fix {\n";
-        s += definitions.stream().map(Definition::toString).collect(Collectors.joining("\n"));
-        s += "\n}." + symbol;
-        return s;
+        String items = definitions.stream().map(Definition::toString).collect(Collectors.joining("\n"));
+        return "fix {\n" + Util.indent(items, 2) + "\n}." + symbol;
     }
 }
