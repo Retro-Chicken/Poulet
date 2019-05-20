@@ -14,17 +14,17 @@ import java.util.function.Function;
 
 public class Interpreter {
     public static void run(Program program, PrintWriter out) throws Exception {
-        //program = transform(program);
-        program = addIndices(program);
+        program = makeSymbolsUnique(program);
         Environment environment = new Environment();
 
         for (TopLevel topLevel : program.program) {
             if (topLevel instanceof Definition) {
                 Definition definition = (Definition) topLevel;
                 if (definition.definition != null)
-                    environment = environment.appendGlobal(definition.name, definition.definition);
+                    environment = environment.appendScope(definition.name, definition.definition);
             } else if (topLevel instanceof InductiveDeclaration) {
                 InductiveDeclaration inductiveDeclaration = (InductiveDeclaration) topLevel;
+                Checker.checkInductiveDeclarationWellFormed(inductiveDeclaration, environment);
                 environment = environment.appendInductive(inductiveDeclaration);
             }
         }
@@ -42,10 +42,10 @@ public class Interpreter {
                     Print print = (Print) topLevel;
                     switch (print.command) {
                         case reduce:
-                            out.println(evaluateExpression(print.expression, new ArrayList<>(), environment).readableString());
+                            out.println(evaluateExpression(print.expression, environment));
                             break;
                         case check:
-                            out.println(Checker.deduceType(print.expression, environment).readableString());//cleanCheck(Checker.deduceType(print.expression, context).expression(), 0));
+                            out.println(Checker.deduceType(print.expression, environment)); //cleanCheck(Checker.deduceType(print.expression, context).expression(), 0));
                             break;
                     }
                 } else if (topLevel instanceof Output) {
@@ -53,7 +53,7 @@ public class Interpreter {
                     out.println(ouput.text);
                 }
             } catch (Exception e) {
-                System.out.println("Error on Line: " + topLevel);
+                System.err.println("Error on Line: " + topLevel);
                 e.printStackTrace();
                 throw new Exception();
             }
@@ -62,7 +62,7 @@ public class Interpreter {
 
     public static Program transform(Program program) throws DefinitionException {
         Program result = new Program(program);
-        result = addIndices(result);
+        result = makeSymbolsUnique(result);
         result = substituteCalls(result);
         //result = annotate(result);
         return result;
@@ -152,33 +152,31 @@ public class Interpreter {
     }
 
     public static Value evaluateExpression(Expression expression, Environment environment) {
-        return evaluateExpression(expression, new ArrayList<>(), environment);
-    }
-    public static Value evaluateExpression(Expression expression, List<Value> bound, Environment environment) {
+        /*System.out.println("=============================");
+        System.out.println("eval -> " + expression);
+        System.out.println("-----------------------------");
+        System.out.println("env -> " + environment);
+        System.out.println("=============================");*/
+
         if (expression instanceof Variable) {
             Variable variable = (Variable) expression;
 
-            if (variable.symbol.isFree()) {
-                String name = variable.symbol.getName();
-                if (name.matches("Type\\d+")) {
-                    int level = Integer.parseInt(name.substring(4));
-                    return new VType(level);
-                } else {
-                    Expression definition = environment.lookUpGlobal(variable.symbol);
-                    if (definition == null) {
-                        return new VNeutral(new NFree(variable.symbol));
-                    } else {
-                        return evaluateExpression(definition, bound, environment);
-                    }
-                }
+            if (variable.isFree() && variable.symbol.name.matches("Type\\d+")) {
+                int level = Integer.parseInt(variable.symbol.name.substring(4));
+                return new VType(level);
             } else {
-                int index = variable.symbol.getIndex();
-                return bound.get(index);
+                Expression definition = environment.lookUpScope(variable.symbol);
+
+                if (definition == null) {
+                    return new VNeutral(new NFree(variable.symbol));
+                } else {
+                    return evaluateExpression(definition, environment);
+                }
             }
         } else if (expression instanceof Application) {
             Application application = (Application) expression;
-            Value function = evaluateExpression(application.function, bound, environment);
-            Value argument = evaluateExpression(application.argument, bound, environment);
+            Value function = evaluateExpression(application.function, environment);
+            Value argument = evaluateExpression(application.argument, environment);
 
             if (function instanceof VAbstraction) {
                 VAbstraction abstraction = (VAbstraction) function;
@@ -189,6 +187,27 @@ public class Interpreter {
             } else if (function instanceof VPi) { // TODO: Check if this is even sound
                 VPi vPi = (VPi) function;
                 return vPi.call(argument);
+            } else if (function instanceof VFix) {
+                // TODO: how the fuck does this work lmao
+                Fix fix = ((VFix) function).fix;
+                Definition callingDefinition = null;
+                Environment newEnvironment = environment;
+
+                for (Definition definition : fix.definitions) {
+                    if (definition.name.equals(fix.symbol)) {
+                        callingDefinition = definition;
+                    }
+                    Fix newFix = new Fix(fix.definitions, definition.name);
+                    newEnvironment = newEnvironment.appendScope(definition.name, newFix);
+                }
+
+                if (callingDefinition == null) {
+                    System.err.println("function " + fix.symbol + " not defined in " + fix);
+                    return null;
+                }
+
+                Expression newApplication = new Application(callingDefinition.definition, application.argument);
+                return evaluateExpression(newApplication, newEnvironment);
             } else {
                 System.err.println("can't apply to a " + function.getClass().getSimpleName());
                 return null;
@@ -196,23 +215,17 @@ public class Interpreter {
         } else if (expression instanceof Abstraction) {
             Abstraction abstraction = (Abstraction) expression;
 
-            assert abstraction.symbol == null;
-
-            return new VAbstraction(evaluateExpression(abstraction.type, bound, environment), argument -> {
-                List<Value> newBound = new ArrayList<>();
-                newBound.add(argument);
-                newBound.addAll(bound);
-                return evaluateExpression(abstraction.body, newBound, environment);
+            return new VAbstraction(evaluateExpression(abstraction.type, environment), argument -> {
+                Environment newEnvironment = environment.appendScope(abstraction.symbol, argument.expression());
+                return evaluateExpression(abstraction.body, newEnvironment);
             });
         } else if (expression instanceof PiType) {
             PiType piType = (PiType) expression;
-            Value type = evaluateExpression(piType.type, bound, environment);
+            Value type = evaluateExpression(piType.type, environment);
             Function<Value, Value> body = argument -> {
-                List<Value> newBound = new ArrayList<>();
-                newBound.add(argument);
-                newBound.addAll(bound);
+                Environment newEnvironment = environment.appendScope(piType.variable, argument.expression());
                 //System.out.println("pb = " + piType.body + ", nb = " + newBound);
-                return evaluateExpression(piType.body, newBound, environment);
+                return evaluateExpression(piType.body, newEnvironment);
             };
             return new VPi(type, body);
         } else if (expression instanceof InductiveType) {
@@ -232,7 +245,7 @@ public class Interpreter {
             }
 
             for (Expression parameter : inductiveType.parameters) {
-                parameters.add(evaluateExpression(parameter, bound, environment));
+                parameters.add(evaluateExpression(parameter, environment));
             }
 
             if (inductiveType.isConcrete()) {
@@ -241,11 +254,11 @@ public class Interpreter {
                 // do we need to change environment here?
                 // TODO think
                 for (Expression argument : inductiveType.arguments)
-                    arguments.add(evaluateExpression(argument, bound, environment));
+                    arguments.add(evaluateExpression(argument, environment));
 
                 return new VInductiveType(td, parameters, arguments);
             } else {
-                Value type = evaluateExpression(td.type, bound, environment);
+                Value type = evaluateExpression(td.type, environment);
                 return inductiveTypeToValue(type, td, parameters);
             }
         } else if (expression instanceof ConstructorCall) {
@@ -275,8 +288,8 @@ public class Interpreter {
             for (int i = 0; i < td.parameters.size(); i++) {
                 Parameter parameter = td.parameters.get(i);
                 Expression parameterExpression = constructorCall.inductiveType.parameters.get(i);
-                newEnvironment = newEnvironment.appendGlobal(parameter.symbol, parameterExpression);
-                parameters.add(evaluateExpression(parameterExpression, bound, environment));
+                newEnvironment = newEnvironment.appendScope(parameter.symbol, parameterExpression);
+                parameters.add(evaluateExpression(parameterExpression, environment));
             }
 
             if (constructorCall.isConcrete()) {
@@ -285,17 +298,17 @@ public class Interpreter {
                 // do we need to change environment here?
                 // TODO think
                 for (Expression argument : constructorCall.arguments)
-                    arguments.add(evaluateExpression(argument, bound, environment));
+                    arguments.add(evaluateExpression(argument, environment));
 
-                VInductiveType inductiveType = (VInductiveType) evaluateExpression(constructorCall.inductiveType, bound, environment);
+                VInductiveType inductiveType = (VInductiveType) evaluateExpression(constructorCall.inductiveType, environment);
                 return new VConstructed(inductiveType, parameters, constructor, arguments);
             } else {
-                Value type = evaluateExpression(constructor.definition, bound, newEnvironment);
+                Value type = evaluateExpression(constructor.definition, newEnvironment);
                 return constructorToValue(type, constructor, parameters);
             }
         } else if (expression instanceof Match) {
             Match match = (Match) expression;
-            Value value = evaluateExpression(match.expression, bound, environment);
+            Value value = evaluateExpression(match.expression, environment);
 
             if (value instanceof VConstructed) {
                 VConstructed constructed = (VConstructed) value;
@@ -313,26 +326,34 @@ public class Interpreter {
                             Symbol argumentSymbol = clause.argumentSymbols.get(i);
                             // skeeeeetch
                             Expression argument = Quoter.quote(constructed.arguments.get(i));
-                            newEnvironment = newEnvironment.appendGlobal(argumentSymbol, argument);
+                            newEnvironment = newEnvironment.appendScope(argumentSymbol, argument);
                         }
 
-                        return evaluateExpression(clause.expression, bound, newEnvironment);
+                        return evaluateExpression(clause.expression, newEnvironment);
                     }
                 }
 
                 System.err.println("no clause found for constructor " + constructed.constructor.name);
                 return null;
             } else {
+                /*System.out.println(Util.mapToStringWithNewlines(Map.of(
+                        "exp", expression,
+                        "env", environment,
+                        "val", value
+                )));*/
                 System.err.println("can only match on constructed value");
                 return null;
             }
+        } else if (expression instanceof Fix) {
+            Fix fix = (Fix) expression;
+            return new VFix(fix);
         }
 
         return null;
     }
 
     private static Value inductiveTypeToValue(Value type, TypeDeclaration typeDeclaration, List<Value> parameters) {
-        return inductiveTypeToValue(type, typeDeclaration, parameters, new ArrayList<>());
+        return inductiveTypeToValue(type, typeDeclaration, parameters, null);
     }
 
     private static Value inductiveTypeToValue(Value type, TypeDeclaration typeDeclaration, List<Value> parameters, List<Value> arguments) {
@@ -372,7 +393,7 @@ public class Interpreter {
         }
     }
 
-    private static Expression substitute(Expression expression, Symbol symbol, Expression substitution) {
+    public static Expression substitute(Expression expression, Symbol symbol, Expression substitution) {
         Expression result = null;
 
         if (expression instanceof Variable) {
@@ -393,125 +414,301 @@ public class Interpreter {
                 result = expression;
             } else {
                 Expression type = substitute(abstraction.type, symbol, substitution);
-                Expression body = substitute(abstraction.body, symbol.increment(), substitution);
+                Expression body = substitute(abstraction.body, symbol, substitution);
                 result = new Abstraction(abstraction.symbol, type, body);
             }
         } else if (expression instanceof PiType) {
             PiType piType = (PiType) expression;
             Expression type = substitute(piType.type, symbol, substitution);
-            Expression body = substitute(piType.body, symbol.increment(), substitution);
+            Expression body = substitute(piType.body, symbol, substitution);
+            assert piType.variable != null;
             result = new PiType(piType.variable, type, body);
+        } else if (expression instanceof Match) {
+            Match match = (Match) expression;
+            Expression matchExpression = substitute(match.expression, symbol, substitution);
+            Expression type = substitute(match.type, symbol, substitution);
+            List<Match.Clause> clauses = new ArrayList<>();
+
+            for (Match.Clause clause : match.clauses) {
+                Expression clauseExpression = substitute(clause.expression, symbol, expression);
+                Match.Clause newClause = new Match.Clause(
+                        clause.constructorSymbol,
+                        clause.argumentSymbols,
+                        clauseExpression
+                );
+                clauses.add(newClause);
+            }
+
+            result = new Match(
+                    matchExpression,
+                    match.expressionSymbol,
+                    match.argumentSymbols,
+                    type,
+                    clauses
+            );
+        } else if (expression instanceof InductiveType) {
+            InductiveType inductiveType = (InductiveType) expression;
+            List<Expression> parameters = new ArrayList<>();
+
+            for (Expression parameter : inductiveType.parameters) {
+                parameters.add(substitute(parameter, symbol, substitution));
+            }
+
+            List<Expression> arguments = null;
+
+            if (inductiveType.isConcrete()) {
+                arguments = new ArrayList<>();
+
+                for (Expression argument : inductiveType.arguments) {
+                    arguments.add(substitute(argument, symbol, substitution));
+                }
+            }
+
+            return new InductiveType(
+                    inductiveType.type,
+                    parameters,
+                    arguments
+            );
+        } else if (expression instanceof ConstructorCall) {
+            ConstructorCall constructorCall = (ConstructorCall) expression;
+
+            List<Expression> arguments = null;
+
+            if (constructorCall.isConcrete()) {
+                arguments = new ArrayList<>();
+                for (Expression argument : constructorCall.arguments) {
+                    arguments.add(substitute(argument, symbol, substitution));
+                }
+            }
+
+            return new ConstructorCall(
+                    (InductiveType) substitute(constructorCall.inductiveType, symbol, substitution),
+                    constructorCall.constructor,
+                    arguments
+            );
+        } else if (expression instanceof Fix) {
+            Fix fix = (Fix) expression;
+            List<Definition> definitions = new ArrayList<>();
+
+            for (Definition definition : fix.definitions) {
+                Definition newDefinition = new Definition(
+                        definition.name,
+                        substitute(definition.type, symbol, substitution),
+                        substitute(definition.definition, symbol, substitution)
+                );
+                definitions.add(newDefinition);
+            }
+
+            return new Fix(definitions, fix.symbol);
         }
 
         return result;
     }
 
-    public static Program addIndices(Program program) {
+    public static Program makeSymbolsUnique(Program program) {
         List<TopLevel> result = new ArrayList<>();
         for (TopLevel topLevel : program.program) {
             if (topLevel instanceof Definition) {
                 Definition definition = (Definition) topLevel;
                 Definition indexed = new Definition(
                         definition.name,
-                        addIndices(definition.type),
-                        addIndices(definition.definition)
+                        makeSymbolsUnique(definition.type),
+                        makeSymbolsUnique(definition.definition)
                 );
                 result.add(indexed);
             } else if (topLevel instanceof Print) {
                 Print print = (Print) topLevel;
-                Print indexed = new Print(print.command, addIndices(print.expression));
-                result.add(indexed);
+                Print unique = new Print(print.command, makeSymbolsUnique(print.expression));
+                result.add(unique);
             } else if (topLevel instanceof InductiveDeclaration) {
                 InductiveDeclaration inductiveDeclaration = (InductiveDeclaration) topLevel;
                 List<TypeDeclaration> typeDeclarations = new ArrayList<>();
 
                 for (TypeDeclaration typeDeclaration : inductiveDeclaration.typeDeclarations) {
-                    typeDeclarations.add(addIndices(typeDeclaration));
+                    typeDeclarations.add(makeSymbolsUnique(typeDeclaration));
                 }
 
-                InductiveDeclaration indexed = new InductiveDeclaration(typeDeclarations);
-                result.add(indexed);
+                InductiveDeclaration unique = new InductiveDeclaration(typeDeclarations);
+                result.add(unique);
             }
         }
+
         return new Program(result);
     }
 
-    public static TypeDeclaration addIndices(TypeDeclaration typeDeclaration) {
+    public static TypeDeclaration makeSymbolsUnique(TypeDeclaration typeDeclaration) {
+        List<Parameter> parameters = new ArrayList<>();
+        Map<Symbol, Symbol> map = new HashMap<>();
+
+        for (Parameter parameter : typeDeclaration.parameters) {
+            Symbol unique = parameter.symbol.makeUnique();
+            Parameter newParameter = new Parameter(unique, parameter.type);
+            parameters.add(newParameter);
+            map.put(parameter.symbol, unique);
+        }
+
         List<Constructor> constructors = new ArrayList<>();
 
         for (Constructor constructor : typeDeclaration.constructors) {
-            Constructor indexed = new Constructor(constructor.name, addIndices(constructor.definition));
-            constructors.add(indexed);
+            Constructor unique = new Constructor(constructor.name, makeSymbolsUnique(map, constructor.definition));
+            constructors.add(unique);
         }
 
         return new TypeDeclaration(
                 typeDeclaration.name,
-                typeDeclaration.parameters,
-                addIndices(typeDeclaration.type),
+                parameters,
+                makeSymbolsUnique(typeDeclaration.type),
                 constructors
         );
     }
 
-    public static Expression addIndices(Expression expression) {
-        return addIndices(new Stack<>(), expression);
+    public static Expression makeSymbolsUnique(Expression expression) {
+        return makeSymbolsUnique(new HashMap<>(), expression);
     }
 
-    private static Expression addIndices(Stack<Symbol> stack, Expression expression) {
+    private static Expression makeSymbolsUnique(Map<Symbol, Symbol> map, Expression expression) {
         if (expression instanceof Abstraction) {
             Abstraction abstraction = (Abstraction) expression;
             // need to number types later
-            Stack<Symbol> newStack = new Stack<>();
-            newStack.addAll(stack);
-            newStack.push(abstraction.symbol);
-            Expression type = addIndices(stack, abstraction.type);
-            Expression body = addIndices(newStack, abstraction.body);
-            return new Abstraction(null, type, body);
+            Map<Symbol, Symbol> newMap = new HashMap<>(map);
+            Symbol unique = abstraction.symbol.makeUnique();
+            newMap.put(abstraction.symbol, unique);
+            Expression type = makeSymbolsUnique(map, abstraction.type);
+            Expression body = makeSymbolsUnique(newMap, abstraction.body);
+            return new Abstraction(unique, type, body);
         } else if (expression instanceof Application) {
             Application application = (Application) expression;
-            Expression function = addIndices(stack, application.function);
-            Expression argument = addIndices(stack, application.argument);
+            Expression function = makeSymbolsUnique(map, application.function);
+            Expression argument = makeSymbolsUnique(map, application.argument);
             return new Application(function, argument);
         } else if (expression instanceof Variable) {
             Variable variable = (Variable) expression;
-            int index = stack.search(variable.symbol); // 1-based
+            Symbol symbol = map.get(variable.symbol);
 
-            if (index < 0) { // free
-                return variable;
-            } else { // bound
-                Symbol symbol = new Symbol(index - 1);
-                return new Variable(symbol);
+            if (symbol == null) {
+                if (variable.isFree()) {
+                    return variable;
+                } else {
+                    return new Variable(variable.symbol.makeUnique());
+                }
+            } else {
+                return new Variable(symbol.copy());
             }
         } else if (expression instanceof PiType) {
             PiType piType = (PiType) expression;
-            // need to number types later
-            Stack<Symbol> newStack = new Stack<>();
-            newStack.addAll(stack);
-            newStack.push(piType.variable);
-            Expression type = addIndices(stack, piType.type);
-            Expression body = addIndices(newStack, piType.body);
-            return new PiType(null, type, body);
+            Map<Symbol, Symbol> newMap = new HashMap<>(map);
+            Symbol unique = piType.variable.makeUnique();
+            newMap.put(piType.variable, unique);
+            Expression type = makeSymbolsUnique(map, piType.type);
+            Expression body = makeSymbolsUnique(newMap, piType.body);
+            return new PiType(unique, type, body);
+        } else if (expression instanceof Match) {
+            Match match = (Match) expression;
+            Expression matchExpression = makeSymbolsUnique(map, match.expression);
+
+            Map<Symbol, Symbol> newMap = new HashMap<>(map);
+            Symbol expressionSymbol = match.expressionSymbol.makeUnique();
+            newMap.put(match.expressionSymbol, expressionSymbol);
+            List<Symbol> argumentSymbols = new ArrayList<>();
+
+            for (Symbol symbol : match.argumentSymbols) {
+                Symbol unique = symbol.makeUnique();
+                argumentSymbols.add(unique);
+                newMap.put(symbol, unique);
+            }
+
+            Expression type = makeSymbolsUnique(map, match.type);
+
+            List<Match.Clause> clauses = new ArrayList<>();
+
+            for (Match.Clause clause : match.clauses) {
+                List<Symbol> clauseArgumentSymbols = new ArrayList<>();
+                Map<Symbol, Symbol> clauseNewMap = new HashMap<>(map);
+
+                for (Symbol symbol : clause.argumentSymbols) {
+                    Symbol unique = symbol.makeUnique();
+                    clauseArgumentSymbols.add(unique);
+                    clauseNewMap.put(symbol, unique);
+                }
+
+                Match.Clause newClause = new Match.Clause(
+                        clause.constructorSymbol,
+                        clauseArgumentSymbols,
+                        makeSymbolsUnique(clauseNewMap, clause.expression)
+                );
+                clauses.add(newClause);
+            }
+
+            return new Match(
+                    matchExpression,
+                    expressionSymbol,
+                    argumentSymbols,
+                    type,
+                    clauses
+            );
+        } else if (expression instanceof Fix) {
+            Fix fix = (Fix) expression;
+            List<Definition> definitions = new ArrayList<>();
+            Symbol symbol = null;
+
+            for (Definition definition : fix.definitions) {
+                Map<Symbol, Symbol> newMap = new HashMap<>(map);
+                Symbol name = definition.name.makeUnique();
+                newMap.put(definition.name, name);
+
+                if (definition.name.equals(fix.symbol)) {
+                    symbol = name;
+                }
+
+                Definition newDefinition = new Definition(
+                        name,
+                        makeSymbolsUnique(newMap, definition.type),
+                        makeSymbolsUnique(newMap, definition.definition)
+                );
+                definitions.add(newDefinition);
+            }
+
+            if (symbol == null) {
+                System.err.println("function " + fix.symbol + " not defined in " + fix);
+                return null;
+            }
+
+            return new Fix(definitions, symbol);
+        } else if (expression instanceof InductiveType) {
+            InductiveType inductiveType = (InductiveType) expression;
+            List<Expression> parameters = new ArrayList<>();
+
+            for (Expression parameter : inductiveType.parameters) {
+                parameters.add(makeSymbolsUnique(map, parameter));
+            }
+
+            List<Expression> arguments = null;
+
+            if (inductiveType.isConcrete()) {
+                arguments = new ArrayList<>();
+
+                for (Expression parameter : inductiveType.parameters) {
+                    parameters.add(makeSymbolsUnique(map, parameter));
+                }
+            }
+
+            return new InductiveType(inductiveType.type, parameters, arguments);
+        } else if (expression instanceof ConstructorCall) {
+            ConstructorCall constructorCall = (ConstructorCall) expression;
+            InductiveType inductiveType = (InductiveType) makeSymbolsUnique(map, constructorCall.inductiveType);
+            List<Expression> arguments = null;
+
+            if (constructorCall.isConcrete()) {
+                arguments = new ArrayList<>();
+
+                for (Expression argument : arguments) {
+                    arguments.add(makeSymbolsUnique(map, argument));
+                }
+            }
+
+            return new ConstructorCall(inductiveType, constructorCall.constructor, arguments);
         }
 
         return expression;
-    }
-
-    private static Set<Name> getFreeVariables(Expression expression) {
-        if (expression instanceof Variable) {
-            Variable variable = (Variable) expression;
-            return new HashSet<Name>(Arrays.asList(variable.symbol));
-        } else if (expression instanceof Abstraction) {
-            Abstraction abstraction = (Abstraction) expression;
-            Set<Name> bodyFree = getFreeVariables(abstraction.body);
-            bodyFree.remove(abstraction.symbol);
-            return bodyFree;
-        } else if (expression instanceof Application) {
-            Application application = (Application) expression;
-            Set<Name> functionFree = getFreeVariables(application.function);
-            Set<Name> argumentFree = getFreeVariables(application.argument);
-            functionFree.addAll(argumentFree);
-            return functionFree;
-        }
-
-        return null;
     }
 }

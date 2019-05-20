@@ -1,20 +1,39 @@
 package poulet;
 
-import poulet.ast.Symbol;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Util {
-    public static final String NULL_ABSTRACTION_SYMBOL = "_";
-    public static final String NULL_PITYPE_SYMBOL = "_";
+    public static String indent(String s, int n) {
+        String indent = "";
 
-    private static int UNIQUE_TAG = 0;
+        for (int i = 0; i < n; i++)
+            indent += " ";
 
-    public static Symbol getUniqueSymbol() {
-        UNIQUE_TAG++;
-        return new Symbol("!" + UNIQUE_TAG);
+        return indent + s.replaceAll("\n", "\n" + indent);
     }
 
-    public static  Symbol getReadableSymbol() {
-        UNIQUE_TAG++;
-        return new Symbol("" + (char)('a' + UNIQUE_TAG % 26));
+    public static <K extends Comparable, V> String mapToStringWithNewlines(Map<K, V> map) {
+        List<String> items = new ArrayList<>();
+        List<K> sortedKeys = new ArrayList<>(map.keySet());
+        Collections.sort(sortedKeys);
+
+        for (K key : sortedKeys) {
+            V value = map.get(key);
+            String item = "" + key + "=";
+            if (value instanceof Map) {
+                Map innerMap = (Map) value;
+                String innerString = mapToStringWithNewlines(innerMap);
+                item += innerString;
+            } else {
+                item += value;
+            }
+            items.add(item);
+        }
+
+        String itemsString = items.stream().collect(Collectors.joining(",\n"));
+
+        return "{\n" + indent(itemsString, 2) + "\n}";
     }
 }

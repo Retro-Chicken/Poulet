@@ -8,4 +8,8 @@ inductive {
     }
 }
 
+f : {_ : int} int := fix {
+    f : {_ : int} int := \a : int -> a
+}.f
+
 #reduce ((and[int, int].mk) a) a

@@ -1,5 +1,7 @@
 package poulet.ast;
 
+import poulet.Util;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,11 +14,9 @@ public class InductiveDeclaration extends TopLevel {
 
     @Override
     public String toString() {
-        String s = "inductive {\n";
-        s += typeDeclarations.stream()
+        String items = typeDeclarations.stream()
                 .map(TypeDeclaration::toString)
                 .collect(Collectors.joining("\n"));
-        s += "\n}";
-        return s;
+        return "inductive {\n" + Util.indent(items, 2) + "\n}";
     }
 }

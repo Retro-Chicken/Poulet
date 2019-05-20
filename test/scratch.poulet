@@ -43,7 +43,7 @@ n1 : nat := (succ) n0
 fibstep : {_ : (pair) nat} (pair) nat := \p : (pair) nat -> (((construct_pair) nat) (p) (second) nat) ((plus) (p) (first) nat) (p) (second) nat
 fibstart : (pair) nat := (((construct_pair) nat) n0) n1
 fib : {_ : nat} nat := \n : nat -> ((((n) (pair) nat) fibstep) fibstart) (first) nat
-
+clearly
 //nvar_func : Type1 := {n : nat} {X : Type1} (((n) Type1) \Y : Type1 -> {_ : X} Y) X
 //vec : Type1 := {n : nat} {X : Type1} {_ : ((nvar_func) n) X} X
 //proj : {n : nat} {m : nat} {X : Type1} :=

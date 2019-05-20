@@ -157,6 +157,18 @@ public class ASTParser extends PouletBaseListener {
             PouletParser.Import_commandContext context = (PouletParser.Import_commandContext) payload;
             String text = context.STRING().getText();
             return new Import(text.substring(1, text.length() - 1));
+        } else if (payload instanceof PouletParser.Fix_definitionContext) {
+            Symbol name = (Symbol) children.get(0);
+            Expression type = (Expression) children.get(2);
+            Expression definition = (Expression) children.get(4);
+            return new Definition(name, type, definition);
+        } else if (payload instanceof PouletParser.FixContext) {
+            List<Definition> definitions = new ArrayList<>();
+            for (int i = 2; i < children.size() - 3; i++) {
+                definitions.add((Definition) children.get(i));
+            }
+            Symbol symbol = (Symbol) children.get(children.size() - 1);
+            return new Fix(definitions, symbol);
         }
 
         return null;
