@@ -169,7 +169,7 @@ public class Checker {
                 if (typeDeclaration == null)
                     throw new TypeException("type declaration " + inductiveType.type + " not found");
 
-                List<Expression> typeArgumentsTypes = getPiTypes(typeDeclaration.type, environment);
+                List<Expression> typeArgumentsTypes = getPiTypes(typeDeclaration.type);
                 if (match.argumentSymbols.size() != typeArgumentsTypes.size())
                     throw new TypeException("wrong number of arguments");
 
@@ -197,7 +197,7 @@ public class Checker {
                     if (matchingClause == null)
                         throw new TypeException("no matching clause for constructor " + constructor.name);
 
-                    List<Expression> constructorArgumentTypes = getPiTypes(constructor.definition, environment);
+                    List<Expression> constructorArgumentTypes = getPiTypes(constructor.definition);
 
                     if (matchingClause.argumentSymbols.size() != constructorArgumentTypes.size())
                         throw new TypeException("wrong number of arguments");
@@ -252,17 +252,15 @@ public class Checker {
 
     // given an expression M = {a_1:A_1}...{a_n:A_n}N with N not being a pi type,
     // this function returns the list {A_1, ..., A_n}
-    private static List<Expression> getPiTypes(Expression expression, Environment environment) {
-        return getPiTypes(expression, environment, new ArrayList<>());
+    private static List<Expression> getPiTypes(Expression expression) {
+        return getPiTypes(expression, new ArrayList<>());
     }
 
-    private static List<Expression> getPiTypes(Expression expression, Environment environment, List<Expression> piTypes) {
+    private static List<Expression> getPiTypes(Expression expression, List<Expression> piTypes) {
         if (expression instanceof PiType) {
             PiType piType = (PiType) expression;
             piTypes.add(piType.type);
-            Environment newEnvironment = environment.appendType(piType.variable, piType.type);
-            Expression body = Interpreter.evaluateExpression(piType.body, newEnvironment).expression();
-            return getPiTypes(body, newEnvironment, piTypes);
+            return getPiTypes(piType.body, piTypes);
         } else {
             return piTypes;
         }
@@ -311,18 +309,18 @@ public class Checker {
         private List<Expression> arguments = new ArrayList<>();
     }
 
-    private static ApplicationDecomposition getApplicationDecomposition(Expression expression, Environment environment) {
-        return getApplicationDecomposition(expression, environment, new ApplicationDecomposition());
+    private static ApplicationDecomposition getApplicationDecomposition(Expression expression) {
+        return getApplicationDecomposition(expression, new ApplicationDecomposition());
     }
 
-    private static ApplicationDecomposition getApplicationDecomposition(Expression expression, Environment environment, ApplicationDecomposition applicationDecomposition) {
+    private static ApplicationDecomposition getApplicationDecomposition(Expression expression, ApplicationDecomposition applicationDecomposition) {
         if (expression instanceof Application) {
             // TODO: do we need to try to reduce function and arugment to make it more general?
             Application application = (Application) expression;
             applicationDecomposition.arguments.add(0, application.argument);
-            return getApplicationDecomposition(application.function, environment, applicationDecomposition);
+            return getApplicationDecomposition(application.function, applicationDecomposition);
         } else {
-            applicationDecomposition.function = Interpreter.evaluateExpression(expression, environment).expression();
+            applicationDecomposition.function = expression;
             return applicationDecomposition;
         }
     }
@@ -373,6 +371,7 @@ public class Checker {
     }
 
     static int depth = 0;
+
     private static void checkGuarded(Fix fix, Environment environment, List<Integer> ks, List<Symbol> xs, int i, List<Symbol> v, Expression expression) throws TypeException {
         depth++;
 
@@ -452,7 +451,7 @@ public class Checker {
         } else if (expression instanceof Match) {
             Match match = (Match) expression;
             Expression matchExpression = match.expression;
-            ApplicationDecomposition applicationDecomposition = getApplicationDecomposition(matchExpression, environment);
+            ApplicationDecomposition applicationDecomposition = getApplicationDecomposition(matchExpression);
 
             if (applicationDecomposition.function instanceof Variable) {
                 Variable variable = (Variable) applicationDecomposition.function;
@@ -486,7 +485,7 @@ public class Checker {
                 checkGuarded(fix, environment, ks, xs, i, v, clause.expression);
             }
         } else if (expression instanceof Application) {
-            ApplicationDecomposition applicationDecomposition = getApplicationDecomposition(expression, environment);
+            ApplicationDecomposition applicationDecomposition = getApplicationDecomposition(expression);
 
             if (applicationDecomposition.function instanceof Variable) {
                 Variable variable = (Variable) applicationDecomposition.function;
@@ -497,7 +496,7 @@ public class Checker {
                             throw new TypeException("must pass at least " + ks.get(i) + " arguments to " + fix.definitions.get(i).name);
 
                         Expression recursive = applicationDecomposition.arguments.get(ks.get(i));
-                        ApplicationDecomposition recursiveDecomposition = getApplicationDecomposition(recursive, environment);
+                        ApplicationDecomposition recursiveDecomposition = getApplicationDecomposition(recursive);
 
                         if (!(recursiveDecomposition.function instanceof Variable))
                             throw new TypeException("recursive argument must be application to variable");
@@ -611,14 +610,12 @@ public class Checker {
         return false;
     }
 
-    private static boolean isArity(Value value) {
-        if (value instanceof VType) {
+    private static boolean isArity(Expression type) {
+        if (isSort(type)) {
             return true;
-        } else if (value instanceof VPi) {
-            VPi vPi = (VPi) value;
-            Value dummyArgument = new VNeutral(new NFree(new Symbol("dummy")));
-            Value bodyType = vPi.call(dummyArgument);
-            return isArity(bodyType);
+        } else if (type instanceof PiType) {
+            PiType piType = (PiType) type;
+            return isArity(piType.body);
         }
         return false;
     }
@@ -635,39 +632,275 @@ public class Checker {
         return null;
     }
 
-    private static boolean isTypeOfConstructorOf(Value type, TypeDeclaration typeDeclaration) {
-        return false; // TODO
+    private static void checkTypeOfConstructorOf(Expression type, TypeDeclaration typeDeclaration) throws TypeException {
+        ApplicationDecomposition applicationDecomposition = getApplicationDecomposition(type);
+
+        if (applicationDecomposition.function instanceof InductiveType) {
+            InductiveType inductiveType = (InductiveType) applicationDecomposition.function;
+            // TODO: sketchy? maybe not sketchy because of unique symbols?
+            if (inductiveType.type.equals(typeDeclaration.name))
+                return;
+        } else if (type instanceof PiType) {
+            PiType piType = (PiType) applicationDecomposition.function;
+            checkTypeOfConstructorOf(piType.body, typeDeclaration);
+            return;
+        }
+
+        throw new TypeException("" + type + " not type of constructor of " + typeDeclaration);
     }
 
-    private static void inductiveDeclarationWellFormed(InductiveDeclaration inductiveDeclaration, Environment environment) throws TypeException {
-        List<TypeDeclaration> tds = inductiveDeclaration.typeDeclarations;
+    private static void checkPositivity(Expression expression, Symbol symbol, Environment environment) throws TypeException {
+        ApplicationDecomposition applicationDecomposition = getApplicationDecomposition(expression);
 
-        try {
-            // k > 0
-            assert tds.size() > 0;
+        if (applicationDecomposition.function instanceof Variable) {
+            Variable variable = (Variable) applicationDecomposition.function;
 
-            // I_j and c_j all distinct names
-            assert allDistinct(tds.stream().map(td -> td.name).collect(Collectors.toList()));
-            assert allDistinct(tds.stream().flatMap(td -> td.constructors.stream()).collect(Collectors.toList()));
+            if (variable.symbol.equals(symbol)) {
+                boolean all = true;
 
-            // A_j is an arity of sort s_j and I_j ∉ E
-            List<VType> arities = new ArrayList<>();
-            for (TypeDeclaration td : tds) {
-                Value type = Interpreter.evaluateExpression(td.type, environment);
-                assert isArity(type);
-                arities.add(getArity(type));
-                assert environment.lookUpScope(td.name) == null;
+                for (Expression argument : applicationDecomposition.arguments) {
+                    if (occursIn(symbol, argument))
+                        all = false;
+                }
+
+                if (all)
+                    return;
             }
+        } else if (applicationDecomposition.function instanceof InductiveType) {
+            InductiveType inductiveType = (InductiveType) applicationDecomposition.function;
 
-            // C_jk is a type of constructor I_j which satisfies the positivity
-            // condition for {I_j} and c_ij ∉ E ∪ {I_j}
-            for (TypeDeclaration td : tds) {
-                for (Constructor c : td.constructors) {
+            if (inductiveType.type.equals(symbol)) {
+                boolean all = true;
 
+                for (Expression argument : applicationDecomposition.arguments) {
+                    if (occursIn(symbol, argument))
+                        all = false;
+                }
+
+                if (all)
+                    return;
+            }
+        } else if (expression instanceof PiType) {
+            PiType piType = (PiType) expression;
+            checkStrictPositivity(piType.type, symbol, environment);
+            checkPositivity(piType.body, symbol, environment);
+            return;
+        }
+
+        throw new TypeException("" + expression + " doesn't satisfy positivity condition for " + symbol);
+    }
+
+    private static void checkStrictPositivity(Expression expression, Symbol symbol, Environment environment) throws TypeException {
+        if (!occursIn(symbol, expression))
+            return;
+
+        ApplicationDecomposition applicationDecomposition = getApplicationDecomposition(expression);
+
+        if (applicationDecomposition.function instanceof Variable) {
+            Variable variable = (Variable) applicationDecomposition.function;
+
+            if (variable.equals(symbol)) {
+                boolean all = true;
+
+                for (Expression argument : applicationDecomposition.arguments) {
+                    if (occursIn(symbol, argument))
+                        all = false;
+                }
+
+                if (all)
+                    return;
+            }
+        } else if (applicationDecomposition.function instanceof InductiveType) {
+            InductiveType inductiveType = (InductiveType) applicationDecomposition.function;
+
+            if (inductiveType.type.equals(symbol)) {
+                boolean all = true;
+
+                for (Expression argument : applicationDecomposition.arguments) {
+                    if (occursIn(symbol, argument))
+                        all = false;
+                }
+
+                if (all)
+                    return;
+            }
+        } else if (expression instanceof PiType) {
+            PiType piType = (PiType) expression;
+
+            if (!occursIn(symbol, piType.type)) {
+                checkStrictPositivity(piType.body, symbol, environment);
+                return;
+            }
+        } else if (expression instanceof InductiveType) {
+            InductiveType inductiveType = (InductiveType) expression;
+            TypeDeclaration typeDeclaration = environment.lookUpTypeDeclaration(inductiveType.type);
+
+            if (inductiveType.isConcrete() &&
+                    !typeDeclaration.isMutual() &&
+                    typeDeclaration.parameters.size() == inductiveType.parameters.size()) {
+
+                Environment newEnvironment = environment;
+
+                for (int i = 0; i < typeDeclaration.parameters.size(); i++) {
+                    Symbol name = typeDeclaration.parameters.get(i).symbol;
+                    Expression parameter = inductiveType.parameters.get(i);
+                    newEnvironment = newEnvironment.appendScope(name, parameter);
+                }
+
+                boolean all = true;
+
+                for (Expression argument : inductiveType.arguments) {
+                    if (occursIn(symbol, argument)) {
+                        all = false;
+                        break;
+                    }
+                }
+
+                for (Constructor constructor : typeDeclaration.constructors) {
+                    checkNestedPositivity(constructor.definition, symbol, newEnvironment);
+                }
+
+                if (all)
+                    return;
+            }
+        }
+
+        throw new TypeException("" + expression + " doesn't occur strictly positively in " + symbol);
+    }
+
+    private static void checkNestedPositivity(Expression expression, Symbol symbol, Environment environment) throws TypeException {
+        ApplicationDecomposition applicationDecomposition = getApplicationDecomposition(expression);
+
+        if (applicationDecomposition.function instanceof InductiveType) {
+            InductiveType inductiveType = (InductiveType) applicationDecomposition.function;
+            TypeDeclaration typeDeclaration = environment.lookUpTypeDeclaration(inductiveType.type);
+
+            if (inductiveType.parameters.size() != typeDeclaration.parameters.size())
+                throw new TypeException("" + expression + " doesn't satisfy nested positivity condition for " + symbol);
+
+            if (inductiveType.isConcrete()) {
+                for (Expression argument : inductiveType.arguments) {
+                    if (occursIn(symbol, argument)) {
+                        throw new TypeException("" + expression + " doesn't satisfy nested positivity condition for " + symbol);
+                    }
+                }
+
+                return;
+            }
+        } else if (expression instanceof PiType) {
+            PiType piType = (PiType) expression;
+            checkStrictPositivity(piType.type, symbol, environment);
+            checkNestedPositivity(piType.body, symbol, environment);
+        }
+
+        throw new TypeException("" + expression + " doesn't satisfy nested positivity condition for " + symbol);
+    }
+
+    private static boolean occursIn(Symbol symbol, Expression expression) {
+        if (expression instanceof Abstraction) {
+            Abstraction abstraction = (Abstraction) expression;
+            return occursIn(symbol, abstraction.type)
+                    || occursIn(symbol, abstraction.body);
+        } else if (expression instanceof Application) {
+            Application application = (Application) expression;
+            return occursIn(symbol, application.function)
+                    || occursIn(symbol, application.argument);
+        } else if (expression instanceof ConstructorCall) {
+            ConstructorCall constructorCall = (ConstructorCall) expression;
+
+            if (constructorCall.isConcrete()) {
+                for (Expression argument : constructorCall.arguments) {
+                    if (occursIn(symbol, argument))
+                        return true;
                 }
             }
-        } catch (AssertionError e) {
-            throw new TypeException("typeDeclarations type not well-formed");
+
+            return occursIn(symbol, constructorCall.inductiveType);
+        } else if (expression instanceof Fix) {
+            Fix fix = (Fix) expression;
+
+            for (Definition definition : fix.definitions) {
+                if (occursIn(symbol, definition.type))
+                    return true;
+                if (occursIn(symbol, definition.definition))
+                    return true;
+            }
+
+            return false;
+        } else if (expression instanceof InductiveType) {
+            // TODO: this is probably sketchy and wrong
+
+            InductiveType inductiveType = (InductiveType) expression;
+
+            if (inductiveType.type.equals(symbol))
+                return true;
+
+            for (Expression parameter : inductiveType.parameters) {
+                if (occursIn(symbol, parameter))
+                    return true;
+            }
+
+            if (inductiveType.isConcrete()) {
+                for (Expression argument : inductiveType.arguments) {
+                    if (occursIn(symbol, argument))
+                        return true;
+                }
+            }
+
+            return false;
+        } else if (expression instanceof Match) {
+            Match match = (Match) expression;
+
+            for (Match.Clause clause : match.clauses) {
+                if (occursIn(symbol, clause.expression))
+                    return true;
+            }
+
+            return occursIn(symbol, match.expression)
+                    || occursIn(symbol, match.type);
+        } else if (expression instanceof PiType) {
+            PiType piType = (PiType) expression;
+            return occursIn(symbol, piType.type) ||
+                    occursIn(symbol, piType.body);
+        } else if (expression instanceof Variable) {
+            Variable variable = (Variable) expression;
+            return variable.symbol.equals(symbol);
+        }
+
+        return false;
+    }
+
+    public static void checkInductiveDeclarationWellFormed(InductiveDeclaration inductiveDeclaration, Environment environment) throws TypeException {
+        List<TypeDeclaration> tds = inductiveDeclaration.typeDeclarations;
+
+        // k > 0
+        if (tds.isEmpty())
+            throw new TypeException("" + inductiveDeclaration + " isn't well-formed");
+
+        // I_j and c_j all distinct names
+        if (!allDistinct(tds.stream().map(td -> td.name).collect(Collectors.toList())))
+            throw new TypeException("" + inductiveDeclaration + " isn't well-formed");
+
+        if (!allDistinct(tds.stream().flatMap(td -> td.constructors.stream()).collect(Collectors.toList())))
+            throw new TypeException("" + inductiveDeclaration + " isn't well-formed");
+
+        // A_j is an arity of sort s_j and I_j ∉ E
+        List<VType> arities = new ArrayList<>();
+        for (TypeDeclaration td : tds) {
+            if (!isArity(td.type))
+                throw new TypeException("" + inductiveDeclaration + " isn't well-formed");
+        }
+
+        // C_jk is a type of constructor I_j which satisfies the positivity
+        // condition for {I_j}
+        for (TypeDeclaration td : tds) {
+            for (Constructor c : td.constructors) {
+                checkTypeOfConstructorOf(c.definition, td);
+
+                for (TypeDeclaration td2 : tds) {
+                    checkPositivity(c.definition, td2.name, environment);
+                }
+            }
         }
     }
 }

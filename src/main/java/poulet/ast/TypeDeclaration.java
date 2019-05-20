@@ -32,6 +32,10 @@ public class TypeDeclaration extends Node {
         return new TypeDeclaration(name, parameters, type, constructors, inductiveDeclaration);
     }
 
+    public boolean isMutual() {
+        return inductiveDeclaration.typeDeclarations.size() > 1;
+    }
+
     @Override
     public String toString() {
         String items = constructors.stream().map(Constructor::toString).collect(Collectors.joining("\n"));

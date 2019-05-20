@@ -1,6 +1,5 @@
 package poulet.interpreter;
 
-import poulet.Util;
 import poulet.ast.*;
 import poulet.quote.Quoter;
 import poulet.typing.Checker;
@@ -14,9 +13,6 @@ import java.util.function.Function;
 public class Interpreter {
     public static void run(Program program, PrintWriter out) throws Exception {
         program = makeSymbolsUnique(program);
-        /*System.out.println("===============");
-        System.out.println(program);
-        System.out.println("===============");*/
         Environment environment = new Environment();
 
         for (TopLevel topLevel : program.program) {
@@ -26,6 +22,7 @@ public class Interpreter {
                     environment = environment.appendScope(definition.name, definition.definition);
             } else if (topLevel instanceof InductiveDeclaration) {
                 InductiveDeclaration inductiveDeclaration = (InductiveDeclaration) topLevel;
+                Checker.checkInductiveDeclarationWellFormed(inductiveDeclaration, environment);
                 environment = environment.appendInductive(inductiveDeclaration);
             }
         }
