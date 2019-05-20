@@ -207,6 +207,12 @@ public class ASTParser extends PouletBaseListener {
             return new Fix(definitions, symbol);
         } else if (payload instanceof PouletParser.Toplevel_fixContext) {
             Definition definition = (Definition) children.get(1);
+
+            if (definition.definition == null) {
+                System.err.println("top level fix can't have null definition");
+                return null;
+            }
+
             Fix fix = new Fix(
                     Arrays.asList(definition),
                     definition.name

@@ -1,3 +1,8 @@
 #import "std.poulet"
 
-#reduce list[char].cons('a', "test")
+/*nat_to_string : nat[] -> string := \n : nat -> match n as n() in string {
+
+}*/
+
+s : string := "hello"
+#reduce s

@@ -1,3 +1,8 @@
+type bool : Type1 {
+    true : bool[]
+    false : bool[]
+}
+
 type nat : Type1 {
     Z : nat[]
     S : nat[] -> nat[]
@@ -27,3 +32,6 @@ type list (A : Type1) : Type1 {
     nil : list[A]
     cons : A -> list[A] -> list[A]
 }
+
+char : Type1
+string : Type1 := list[char]

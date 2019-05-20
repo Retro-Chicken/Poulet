@@ -1,5 +1,6 @@
 package poulet.typing;
 
+import poulet.Util;
 import poulet.ast.*;
 import poulet.interpreter.Interpreter;
 import poulet.value.*;
@@ -45,6 +46,7 @@ public class Checker {
 
     public static Expression deduceType(Expression term, Environment environment) throws TypeException {
         Expression result = null;
+
         if (term instanceof Abstraction) {
             Abstraction abstraction = (Abstraction) term;
             Expression abstractionType = Interpreter.evaluateExpression(abstraction.type, environment).expression();
@@ -157,7 +159,23 @@ public class Checker {
                 newEnvironment = newEnvironment.appendScope(typeDeclaration.parameters.get(i).symbol, parameter);
             }
 
-            result = Interpreter.evaluateExpression(constructor.definition, newEnvironment).expression();
+            if (constructorCall.isConcrete()) {
+                // TODO: using this environment is sketchy, but eh
+                List<Expression> arguments = getPiTypes(constructor.definition);
+
+                if (arguments.size() != constructorCall.arguments.size())
+                    throw new TypeException("wrong number of arguments");
+
+                for (int i = 0; i < arguments.size(); i++) {
+                    Expression argumentType = arguments.get(i);
+                    Expression argument = constructorCall.arguments.get(i);
+                    checkType(argument, argumentType, newEnvironment);
+                }
+
+                result = constructorCall.inductiveType;
+            } else {
+                result = Interpreter.evaluateExpression(constructor.definition, newEnvironment).expression();
+            }
         } else if (term instanceof Match) {
             Match match = (Match) term;
             Expression expressionType = deduceType(match.expression, environment);
@@ -236,12 +254,16 @@ public class Checker {
 
             checkGuarded(fix, newEnvironment);
 
-            return callingDefinition.type;
+            result = callingDefinition.type;
+        } else if (term instanceof Char) {
+            result = new Variable(new Symbol("char"));
         }
 
         if (result == null) {
-            System.out.println("term =" + term);
-            System.out.println("env = " + environment);
+            System.out.println(Util.mapToStringWithNewlines(Map.of(
+                    "term", term == null ? "null" : term,
+                    "environment", environment
+            )));
             throw new TypeException("Type Could not be Deduced");
         }
 

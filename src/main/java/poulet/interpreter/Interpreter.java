@@ -36,6 +36,7 @@ public class Interpreter {
                 Definition definition = (Definition) topLevel;
                 if (definition.definition != null)
                     Checker.checkType(definition.definition, definition.type, environment);
+
                 environment = environment.appendType(definition.name, definition.type);
             }
         }
