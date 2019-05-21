@@ -31,6 +31,7 @@ public class Interpreter {
                 environment = environment.appendInductive(inductiveDeclaration);
             }
         }
+
         for (TopLevel topLevel : program.program) {
             if (topLevel instanceof Definition) {
                 Definition definition = (Definition) topLevel;
@@ -266,7 +267,7 @@ public class Interpreter {
                 for (Expression argument : inductiveType.arguments)
                     arguments.add(evaluateExpression(argument, environment));
 
-                return new VInductiveType(td, parameters, arguments);
+                return new VInductiveType(td, inductiveType.isConcrete(), parameters, arguments);
             } else {
                 Value type = evaluateExpression(td.type, environment);
                 return inductiveTypeToValue(type, td, parameters);
@@ -366,7 +367,7 @@ public class Interpreter {
     }
 
     private static Value inductiveTypeToValue(Value type, TypeDeclaration typeDeclaration, List<Value> parameters) {
-        return inductiveTypeToValue(type, typeDeclaration, parameters, null);
+        return inductiveTypeToValue(type, typeDeclaration, parameters, new ArrayList<>());
     }
 
     private static Value inductiveTypeToValue(Value type, TypeDeclaration typeDeclaration, List<Value> parameters, List<Value> arguments) {
@@ -378,7 +379,7 @@ public class Interpreter {
                 return inductiveTypeToValue(vPi.call(argument), typeDeclaration, parameters, newArgs);
             });
         } else if (type instanceof VType) {
-            return new VInductiveType(typeDeclaration, parameters, arguments);
+            return new VInductiveType(typeDeclaration, true, parameters, arguments);
         } else {
             System.err.println("type declaration " + typeDeclaration + " invalid");
             return null;
@@ -479,6 +480,7 @@ public class Interpreter {
 
             return new InductiveType(
                     inductiveType.type,
+                    inductiveType.isConcrete(),
                     parameters,
                     arguments
             );
@@ -712,7 +714,7 @@ public class Interpreter {
                 }
             }
 
-            return new InductiveType(inductiveType.type, parameters, arguments);
+            return new InductiveType(inductiveType.type, inductiveType.isConcrete(), parameters, arguments);
         } else if (expression instanceof ConstructorCall) {
             ConstructorCall constructorCall = (ConstructorCall) expression;
             InductiveType inductiveType = (InductiveType) makeSymbolsUnique(map, constructorCall.inductiveType);
