@@ -131,10 +131,10 @@ public class ASTParser extends PouletBaseListener {
             PouletParser.SymbolContext context = (PouletParser.SymbolContext) payload;
             String symbol = context.SYMBOL().getText();
             return new Symbol(symbol);
-        } else if (payload instanceof PouletParser.OutputContext) {
-            PouletParser.OutputContext context = (PouletParser.OutputContext) payload;
-            String text = context.STRING().getText();
-            return new Output(text.substring(1, text.length() - 1));
+        } else if (payload instanceof PouletParser.Assert_eqContext) {
+            Expression a = (Expression) children.get(1);
+            Expression b = (Expression) children.get(3);
+            return new Assert(a, b);
         } else if (payload instanceof PouletParser.Inductive_typesContext) {
             List<TypeDeclaration> typeDeclarations = new ArrayList<>();
             for (int i = 2; i < children.size() - 1; i++) {

@@ -31,6 +31,17 @@ public class Checker {
         checkEquivalent(term, deduced, type, environment);
     }
 
+    public static boolean isEquivalent(Expression actual, Expression expected, Environment environment) throws TypeException {
+        // skeeeeeetchy
+        int oldNextId = Symbol.nextId;
+        Symbol.nextId = 0;
+        Expression newActual = Interpreter.makeSymbolsUnique(actual);
+        Symbol.nextId = 0;
+        Expression newExpected = Interpreter.makeSymbolsUnique(expected);
+        Symbol.nextId = oldNextId;
+        return newActual.toString().equals(newExpected.toString());
+    }
+
     private static void checkEquivalent(Expression term, Expression actual, Expression expected, Environment environment) throws TypeException {
         // skeeeeeetchy
         int oldNextId = Symbol.nextId;

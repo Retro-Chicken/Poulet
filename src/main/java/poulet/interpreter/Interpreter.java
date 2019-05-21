@@ -52,9 +52,14 @@ public class Interpreter {
                             out.println(Checker.deduceType(print.expression, environment)); //cleanCheck(Checker.deduceType(print.expression, context).expression(), 0));
                             break;
                     }
-                } else if (topLevel instanceof Output) {
-                    Output output = (Output) topLevel;
-                    out.println(output.text);
+                } else if (topLevel instanceof Assert) {
+                    Assert assertion = (Assert) topLevel;
+                    Expression a = evaluateExpression(assertion.a, environment).expression();
+                    Expression b = evaluateExpression(assertion.b, environment).expression();
+
+                    if (!Checker.isEquivalent(a, b, environment)) {
+                        throw new Exception("" + assertion + " failed");
+                    }
                 }
             } catch (Exception e) {
                 System.err.println("Error on Line: " + topLevel);
@@ -658,29 +663,33 @@ public class Interpreter {
             );
         } else if (expression instanceof Fix) {
             Fix fix = (Fix) expression;
-            List<Definition> definitions = new ArrayList<>();
             Symbol symbol = null;
+            Map<Symbol, Symbol> newMap = new HashMap<>(map);
 
             for (Definition definition : fix.definitions) {
-                Map<Symbol, Symbol> newMap = new HashMap<>(map);
+
                 Symbol name = definition.name.makeUnique();
                 newMap.put(definition.name, name);
 
                 if (definition.name.equals(fix.symbol)) {
                     symbol = name;
                 }
-
-                Definition newDefinition = new Definition(
-                        name,
-                        makeSymbolsUnique(newMap, definition.type),
-                        makeSymbolsUnique(newMap, definition.definition)
-                );
-                definitions.add(newDefinition);
             }
 
             if (symbol == null) {
                 System.err.println("function " + fix.symbol + " not defined in " + fix);
                 return null;
+            }
+
+            List<Definition> definitions = new ArrayList<>();
+
+            for (Definition definition : fix.definitions) {
+                Definition newDefinition = new Definition(
+                        newMap.get(definition.name),
+                        makeSymbolsUnique(newMap, definition.type),
+                        makeSymbolsUnique(newMap, definition.definition)
+                );
+                definitions.add(newDefinition);
             }
 
             return new Fix(definitions, symbol);
