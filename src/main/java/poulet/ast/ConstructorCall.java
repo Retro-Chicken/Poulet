@@ -19,7 +19,7 @@ public class ConstructorCall extends Expression {
     }
 
     public boolean isConcrete() {
-        return this.arguments != null;
+        return arguments != null;
     }
 
     private boolean isCharList() {

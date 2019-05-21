@@ -78,7 +78,49 @@ public class Checker {
             }
         } else if (term instanceof Application) {
             Application application = (Application) term;
+
+            /*if (applicationDecomposition.function instanceof ConstructorCall) {
+                ConstructorCall constructorCall = (ConstructorCall) applicationDecomposition.function;
+                deduceType(constructorCall, environment);
+
+                Constructor constructor = environment.lookUpConstructor(constructorCall);
+                TypeDeclaration typeDeclaration = environment.lookUpTypeDeclaration(constructorCall.inductiveType.type);
+                Environment newEnvironment = environment;
+
+                for (int i = 0; i < constructorCall.inductiveType.parameters.size(); i++) {
+                    Expression parameterType = typeDeclaration.parameters.get(i).type;
+                    Expression parameter = constructorCall.inductiveType.parameters.get(i);
+                    checkType(parameter, parameterType, environment);
+                    newEnvironment = newEnvironment.appendScope(typeDeclaration.parameters.get(i).symbol, parameter);
+                }
+
+                PiTypeDecomposition piTypeDecomposition = getPiTypeDecomposition(constructor.definition);
+                System.out.println(">>>");
+                System.out.println(constructor.definition);
+                System.out.println(piTypeDecomposition.argumentTypes);
+                System.out.println(piTypeDecomposition.bodyType);
+                System.out.println(">>>");
+
+                if (piTypeDecomposition.argumentTypes.size() != applicationDecomposition.arguments.size()) {
+                    System.out.println(piTypeDecomposition.arguments);
+                    System.out.println(applicationDecomposition.arguments);
+                    throw new TypeException("wrong number of arguments");
+                }
+
+                for (int i = 0; i < piTypeDecomposition.argumentTypes.size(); i++) {
+                    Expression argumentType = piTypeDecomposition.argumentTypes.get(i);
+                    Expression argument = applicationDecomposition.arguments.get(i);
+                    checkType(argument, argumentType, newEnvironment);
+                    Symbol symbol = piTypeDecomposition.arguments.get(i);
+                    newEnvironment = newEnvironment.appendScope(symbol, argument);
+                }
+
+                // TODO: fix
+                // result = constructorCall.inductiveType;
+                result = Interpreter.evaluateExpression(piTypeDecomposition.bodyType, newEnvironment).expression();
+            } else {*/
             Expression functionType = deduceType(application.function, environment);
+
             if (functionType instanceof PiType) {
                 PiType piType = (PiType) functionType;
                 // TODO: Fix this
@@ -107,7 +149,7 @@ public class Checker {
                     }
                 }
             } else {
-                throw new TypeException("Application Function is not a Function");
+                throw new TypeException("can't apply to " + application.function);
             }
         } else if (term instanceof PiType) {
             PiType piType = (PiType) term;
@@ -170,23 +212,27 @@ public class Checker {
                 newEnvironment = newEnvironment.appendScope(typeDeclaration.parameters.get(i).symbol, parameter);
             }
 
-            if (constructorCall.isConcrete()) {
+            /*if (constructorCall.isConcrete()) {
                 // TODO: using this environment is sketchy, but eh
-                List<Expression> arguments = getPiTypes(constructor.definition);
+                PiTypeDecomposition piTypeDecomposition = getPiTypeDecomposition(constructor.definition);
 
-                if (arguments.size() != constructorCall.arguments.size())
+                if (piTypeDecomposition.argumentTypes.size() != constructorCall.arguments.size())
                     throw new TypeException("wrong number of arguments");
 
-                for (int i = 0; i < arguments.size(); i++) {
-                    Expression argumentType = arguments.get(i);
+                for (int i = 0; i < piTypeDecomposition.argumentTypes.size(); i++) {
+                    Expression argumentType = piTypeDecomposition.argumentTypes.get(i);
                     Expression argument = constructorCall.arguments.get(i);
                     checkType(argument, argumentType, newEnvironment);
+                    Symbol symbol = piTypeDecomposition.arguments.get(i);
+                    newEnvironment = newEnvironment.appendScope(symbol, argument);
                 }
 
-                result = constructorCall.inductiveType;
-            } else {
-                result = Interpreter.evaluateExpression(constructor.definition, newEnvironment).expression();
-            }
+                // TODO: fix
+                // result = constructorCall.inductiveType;
+                result = Interpreter.evaluateExpression(piTypeDecomposition.bodyType, newEnvironment).expression();
+            } else {*/
+            result = Interpreter.evaluateExpression(constructor.definition, newEnvironment).expression();
+            //}
         } else if (term instanceof Match) {
             Match match = (Match) term;
             Expression expressionType = deduceType(match.expression, environment);
@@ -198,15 +244,15 @@ public class Checker {
                 if (typeDeclaration == null)
                     throw new TypeException("type declaration " + inductiveType.type + " not found");
 
-                List<Expression> typeArgumentsTypes = getPiTypes(typeDeclaration.type);
-                if (match.argumentSymbols.size() != typeArgumentsTypes.size())
+                PiTypeDecomposition piTypeDecomposition = getPiTypeDecomposition(typeDeclaration.type);
+                if (match.argumentSymbols.size() != piTypeDecomposition.argumentTypes.size())
                     throw new TypeException("wrong number of arguments");
 
                 Environment newEnvironment = environment.appendScope(match.expressionSymbol, match.expression);
 
-                for (int i = 0; i < typeArgumentsTypes.size(); i++) {
+                for (int i = 0; i < piTypeDecomposition.argumentTypes.size(); i++) {
                     Symbol symbol = match.argumentSymbols.get(i);
-                    Expression argument = typeArgumentsTypes.get(i);
+                    Expression argument = piTypeDecomposition.argumentTypes.get(i);
                     newEnvironment = newEnvironment.appendType(symbol, argument);
                 }
 
@@ -226,14 +272,14 @@ public class Checker {
                     if (matchingClause == null)
                         throw new TypeException("no matching clause for constructor " + constructor.name);
 
-                    List<Expression> constructorArgumentTypes = getPiTypes(constructor.definition);
+                    PiTypeDecomposition constructorPiTypeDecomposition = getPiTypeDecomposition(constructor.definition);
 
-                    if (matchingClause.argumentSymbols.size() != constructorArgumentTypes.size())
+                    if (matchingClause.argumentSymbols.size() != constructorPiTypeDecomposition.argumentTypes.size())
                         throw new TypeException("wrong number of arguments");
 
-                    for (int i = 0; i < constructorArgumentTypes.size(); i++) {
+                    for (int i = 0; i < constructorPiTypeDecomposition.argumentTypes.size(); i++) {
                         Symbol symbol = matchingClause.argumentSymbols.get(i);
-                        Expression argumentType = constructorArgumentTypes.get(i);
+                        Expression argumentType = constructorPiTypeDecomposition.argumentTypes.get(i);
                         newEnvironment = newEnvironment.appendType(symbol, argumentType);
                     }
 
@@ -283,19 +329,32 @@ public class Checker {
         return Interpreter.evaluateExpression(result, environment).expression();
     }
 
-    // given an expression M = {a_1:A_1}...{a_n:A_n}N with N not being a pi type,
-    // this function returns the list {A_1, ..., A_n}
-    private static List<Expression> getPiTypes(Expression expression) {
-        return getPiTypes(expression, new ArrayList<>());
+    private static class PiTypeDecomposition {
+        private List<Symbol> arguments;
+        private List<Expression> argumentTypes;
+        private Expression bodyType;
+
+        private PiTypeDecomposition() {
+            this.arguments = new ArrayList<>();
+            this.argumentTypes = new ArrayList<>();
+            this.bodyType = null;
+        }
     }
 
-    private static List<Expression> getPiTypes(Expression expression, List<Expression> piTypes) {
+    // decomposes into M = {a_1:A_1}...{a_n:A_n}N with N not being a pi type,
+    private static PiTypeDecomposition getPiTypeDecomposition(Expression expression) {
+        return getPiTypeDecomposition(expression, new PiTypeDecomposition());
+    }
+
+    private static PiTypeDecomposition getPiTypeDecomposition(Expression expression, PiTypeDecomposition piTypeDecomposition) {
         if (expression instanceof PiType) {
             PiType piType = (PiType) expression;
-            piTypes.add(piType.type);
-            return getPiTypes(piType.body, piTypes);
+            piTypeDecomposition.arguments.add(piType.variable);
+            piTypeDecomposition.argumentTypes.add(piType.type);
+            return getPiTypeDecomposition(piType.body, piTypeDecomposition);
         } else {
-            return piTypes;
+            piTypeDecomposition.bodyType = expression;
+            return piTypeDecomposition;
         }
     }
 
@@ -313,24 +372,17 @@ public class Checker {
 
     // given an expression M = \a_1:A_1->...\a_n:A_n->N with N not being an abstraction,
     // this function returns the list {a_1=A_1, ..., a_n=A_n}
-    private static ArgumentDecomposition getArgumentDecomposition(Expression expression, Environment environment) {
-        return getArgumentDecomposition(expression, environment, new ArgumentDecomposition());
+    private static ArgumentDecomposition getArgumentDecomposition(Expression expression) {
+        return getArgumentDecomposition(expression, new ArgumentDecomposition());
     }
 
-    private static ArgumentDecomposition getArgumentDecomposition(Expression expression, Environment environment, ArgumentDecomposition argumentDecomposition) {
+    private static ArgumentDecomposition getArgumentDecomposition(Expression expression, ArgumentDecomposition argumentDecomposition) {
         if (expression instanceof Abstraction) {
             Abstraction abstraction = (Abstraction) expression;
             argumentDecomposition.arguments.add(abstraction.symbol);
             argumentDecomposition.argumentTypes.add(abstraction.type);
-            Environment newEnvironment = environment.appendType(abstraction.symbol, abstraction.type);
-
-            try {
-                Expression body = abstraction.body;
-                return getArgumentDecomposition(body, newEnvironment, argumentDecomposition);
-            } catch (NullPointerException e) {
-                System.err.println("body = " + abstraction.body);
-                throw e;
-            }
+            Expression body = abstraction.body;
+            return getArgumentDecomposition(body, argumentDecomposition);
         } else {
             argumentDecomposition.body = expression;
             return argumentDecomposition;
@@ -363,7 +415,7 @@ public class Checker {
         List<Symbol> xs = new ArrayList<>();
 
         for (Definition definition : fix.definitions) {
-            ArgumentDecomposition argumentDecomposition = getArgumentDecomposition(definition.definition, environment);
+            ArgumentDecomposition argumentDecomposition = getArgumentDecomposition(definition.definition);
 
             if (!(argumentDecomposition.body instanceof Match))
                 throw new TypeException("body of fix definition must be a match, not a " + argumentDecomposition.body.getClass().getSimpleName());
@@ -665,17 +717,39 @@ public class Checker {
         return null;
     }
 
-    private static void checkTypeOfConstructorOf(Expression type, TypeDeclaration typeDeclaration) throws TypeException {
-        ApplicationDecomposition applicationDecomposition = getApplicationDecomposition(type);
+    private static void checkTypeOfConstructorOf(Expression type, TypeDeclaration typeDeclaration, Environment environment) throws TypeException {
+        Expression eval = Interpreter.evaluateExpression(type, environment).expression();
 
-        if (applicationDecomposition.function instanceof InductiveType) {
-            InductiveType inductiveType = (InductiveType) applicationDecomposition.function;
-            // TODO: sketchy? maybe not sketchy because of unique symbols?
-            if (inductiveType.type.equals(typeDeclaration.name))
-                return;
-        } else if (type instanceof PiType) {
-            PiType piType = (PiType) applicationDecomposition.function;
-            checkTypeOfConstructorOf(piType.body, typeDeclaration);
+        if (eval instanceof InductiveType) {
+            InductiveType inductiveType = (InductiveType) eval;
+
+            if (inductiveType.isConcrete()) {
+                if (inductiveType.parameters.size() != typeDeclaration.parameters.size())
+                    throw new TypeException("" + type + " has wrong number of parameters to " + typeDeclaration);
+
+                for (int i = 0; i < inductiveType.parameters.size(); i++) {
+                    Parameter parameter = typeDeclaration.parameters.get(i);
+                    Expression expression = (Expression) inductiveType.parameters.get(i);
+
+                    if (!(expression instanceof Variable))
+                        throw new TypeException("" + type + " not type of constructor of " + typeDeclaration);
+
+                    Variable variable = (Variable) expression;
+
+                    if (!(variable.symbol.equals(parameter.symbol)))
+                        throw new TypeException("" + type + " parameters don't match " + typeDeclaration);
+                }
+
+                // TODO: sketchy? maybe not sketchy because of unique symbols?
+                if (inductiveType.type.equals(typeDeclaration.name))
+                    return;
+            } else {
+                System.out.println("not concrete");
+            }
+        } else if (eval instanceof PiType) {
+            PiType piType = (PiType) eval;
+            Environment newEnvironment = environment.appendType(piType.variable, piType.type);
+            checkTypeOfConstructorOf(piType.body, typeDeclaration, newEnvironment);
             return;
         }
 
@@ -928,11 +1002,14 @@ public class Checker {
         // condition for {I_j}
         for (TypeDeclaration td : tds) {
             for (Constructor c : td.constructors) {
-                checkTypeOfConstructorOf(c.definition, td);
+                Environment newEnvironment = environment.appendInductive(inductiveDeclaration);
+                checkTypeOfConstructorOf(c.definition, td, newEnvironment);
 
-                for (TypeDeclaration td2 : tds) {
-                    checkPositivity(c.definition, td2.name, environment);
-                }
+                // TODO: wtf
+                /*for (TypeDeclaration td2 : tds) {
+                    checkPositivity(c.definition, td2.name, newEnvironment);
+                }*/
+                checkPositivity(c.definition, td.name, newEnvironment);
             }
         }
     }

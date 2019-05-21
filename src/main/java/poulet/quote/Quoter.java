@@ -29,11 +29,12 @@ public class Quoter {
             List<Expression> parameters = inductiveType.parameters.stream().map(Quoter::quote).collect(Collectors.toList());
             List<Expression> arguments = null;
 
-            if (inductiveType.arguments != null)
+            if (inductiveType.concrete)
                 arguments = inductiveType.arguments.stream().map(Quoter::quote).collect(Collectors.toList());
 
             return new InductiveType(
                     inductiveType.typeDeclaration.name,
+                    inductiveType.concrete,
                     parameters,
                     arguments
             );

@@ -312,10 +312,14 @@ public class Interpreter {
                     arguments.add(evaluateExpression(argument, environment));
 
                 VInductiveType inductiveType = (VInductiveType) evaluateExpression(constructorCall.inductiveType, environment);
-                return new VConstructed(inductiveType, parameters, constructor, arguments);
+                Value result = new VConstructed(inductiveType, parameters, constructor, arguments);
+                // System.out.println("" + expression + " -> " + result);
+                return result;
             } else {
                 Value type = evaluateExpression(constructor.definition, newEnvironment);
-                return constructorToValue(type, constructor, parameters);
+                Value result = constructorToValue(type, constructor, parameters);
+                // System.out.println("" + expression + " -> " + result);
+                return result;
             }
         } else if (expression instanceof Match) {
             Match match = (Match) expression;
@@ -709,8 +713,8 @@ public class Interpreter {
             if (inductiveType.isConcrete()) {
                 arguments = new ArrayList<>();
 
-                for (Expression parameter : inductiveType.parameters) {
-                    parameters.add(makeSymbolsUnique(map, parameter));
+                for (Expression argument : inductiveType.arguments) {
+                    arguments.add(makeSymbolsUnique(map, argument));
                 }
             }
 

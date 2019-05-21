@@ -151,7 +151,7 @@ public class ASTParser extends PouletBaseListener {
             for (int i = 1; i + 1 < children.size() && children.get(i + 1) instanceof Expression; i += 2) {
                 parameters.add((Expression) children.get(i + 1));
             }
-            return new InductiveType(type, parameters);
+            return new InductiveType(type, false, parameters);
         } else if (payload instanceof PouletParser.Constructor_callContext) {
             InductiveType inductiveType = (InductiveType) children.get(0);
             Symbol constructor = (Symbol) children.get(2);
@@ -232,6 +232,7 @@ public class ASTParser extends PouletBaseListener {
             String s = withQuotes.substring(1, withQuotes.length() - 1);
             InductiveType listChar = new InductiveType(
                     new Symbol("list"),
+                    false,
                     Arrays.asList(
                             new Variable(new Symbol("char"))
                     )

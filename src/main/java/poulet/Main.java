@@ -29,8 +29,14 @@ public class Main {
         program = ImportHandler.includeImports(program, directories, fileName);
 
         PrintWriter printWriter = new PrintWriter(System.out);
-        Interpreter.run(program, printWriter);
-        printWriter.flush();
-        printWriter.close();
+
+        try {
+            Interpreter.run(program, printWriter);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            printWriter.flush();
+            printWriter.close();
+        }
     }
 }

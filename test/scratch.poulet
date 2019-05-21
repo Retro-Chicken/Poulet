@@ -1,8 +1,19 @@
 #import "std.poulet"
 
-/*nat_to_string : nat[] -> string := \n : nat -> match n as n() in string {
+n0 : nat[] := nat[].Z
+n1 : nat[] := nat[].S(nat[].Z)
+n2 : nat[] := nat[].S(nat[].S(nat[].Z))
+n3 : nat[] := nat[].S(nat[].S(nat[].S(nat[].Z)))
 
-}*/
+inductive {
+    type even : nat[] -> Type1 {
+        even_z : even[](nat[].Z)
+        even_s : {n : nat[]} odd[](n) -> even[](nat[].S(n))
+    }
+    type odd : nat[] -> Type1 {
+        odd_s : {n : nat[]} even[](n) -> odd[](nat[].S(n))
+    }
+}
 
-s : string := "hello"
-#reduce s
+a : even[](n2) := even[].even_s(nat[].S(nat[].Z), odd[].odd_s(nat[].Z, even[].even_z))
+b : even[](n0) := even[].even_z
