@@ -17,3 +17,10 @@ inductive {
 
 a : even[](n2) := even[].even_s(nat[].S(nat[].Z), odd[].odd_s(nat[].Z, even[].even_z))
 b : even[](n0) := even[].even_z
+
+fix nat_ind : {P : nat[] -> Type1} P(nat[].Z) -> ({n : nat[]} P(n) -> P(nat[].S(n))) -> ({n : nat[]} P(n))
+    := \P : (nat[] -> Type1) -> \pz : P(nat[].Z) -> \ps : ({n : nat[]} P(n) -> P(nat[].S(n))) -> \n : nat[] ->
+        match n as m() in P(m) {
+            Z() => pz,
+            S(n_pred) => ps(n_pred, nat_ind(P, pz, ps, n_pred))
+        }

@@ -254,6 +254,7 @@ public class Checker {
                     Symbol symbol = match.argumentSymbols.get(i);
                     Expression argument = piTypeDecomposition.argumentTypes.get(i);
                     newEnvironment = newEnvironment.appendType(symbol, argument);
+                    // TODO: need to add to scope too?
                 }
 
                 Expression returnType = Interpreter.evaluateExpression(match.type, newEnvironment).expression();
@@ -283,7 +284,21 @@ public class Checker {
                         newEnvironment = newEnvironment.appendType(symbol, argumentType);
                     }
 
-                    checkType(matchingClause.expression, returnType, newEnvironment);
+                    List<Expression> arguments = new ArrayList<>();
+
+                    for (Symbol symbol : matchingClause.argumentSymbols) {
+                        // TODO: is uniqueness working here?
+                        arguments.add(new Variable(symbol));
+                    }
+
+                    Expression newExpression = new ConstructorCall(
+                            inductiveType,
+                            constructor.name,
+                            arguments
+                    );
+                    newEnvironment = newEnvironment.appendScope(match.expressionSymbol, newExpression);
+                    Expression specificReturnType = Interpreter.evaluateExpression(match.type, newEnvironment).expression();
+                    checkType(matchingClause.expression, specificReturnType, newEnvironment);
                 }
 
                 result = returnType;
