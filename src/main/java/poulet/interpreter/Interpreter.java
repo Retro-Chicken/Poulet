@@ -46,6 +46,7 @@ public class Interpreter {
                     Print print = (Print) topLevel;
                     switch (print.command) {
                         case reduce:
+                            Checker.deduceType(print.expression, environment);
                             out.println(evaluateExpression(print.expression, environment));
                             break;
                         case check:
