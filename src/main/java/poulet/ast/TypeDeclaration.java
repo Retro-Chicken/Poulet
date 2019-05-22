@@ -1,11 +1,15 @@
 package poulet.ast;
 
 import poulet.Util;
+import poulet.exceptions.PouletException;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
-public class TypeDeclaration extends TopLevel {
+public class TypeDeclaration extends Node {
     public final Symbol name;
     public final List<Parameter> parameters;
     public final Expression type;
@@ -32,18 +36,40 @@ public class TypeDeclaration extends TopLevel {
         return new TypeDeclaration(name, parameters, type, constructors, inductiveDeclaration);
     }
 
-    public boolean isMutual() {
-        return inductiveDeclaration.typeDeclarations.size() > 1;
-    }
-
     @Override
     public String toString() {
         String items = constructors.stream().map(Constructor::toString).collect(Collectors.joining("\n"));
-        String s = "type " + name + " ";
+        String s = "type " + name + (parameters.size() > 0 ? " " : "");
         s += parameters.stream().map(Parameter::toString).collect(Collectors.joining(" "));
         s += " : " + type + " {\n";
         s += Util.indent(items, 2);
         s += "\n}";
         return s;
+    }
+
+    TypeDeclaration makeSymbolsUnique() throws PouletException {
+        List<Parameter> newParameters = new ArrayList<>();
+        Map<Symbol, Symbol> map = new HashMap<>();
+
+        for (Parameter parameter : parameters) {
+            Symbol unique = parameter.symbol.makeUnique();
+            Parameter newParameter = new Parameter(unique, parameter.type);
+            newParameters.add(newParameter);
+            map.put(parameter.symbol, unique);
+        }
+
+        List<Constructor> newConstructors = new ArrayList<>();
+
+        for (Constructor constructor : constructors) {
+            Constructor unique = new Constructor(constructor.name, constructor.definition.makeSymbolsUnique(map));
+            constructors.add(unique);
+        }
+
+        return new TypeDeclaration(
+                name,
+                newParameters,
+                type.makeSymbolsUnique(map),
+                newConstructors
+        );
     }
 }

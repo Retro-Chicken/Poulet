@@ -23,7 +23,14 @@ public class ASTParser extends PouletBaseListener {
                 if (child == null) // sketchy but easiest way to ignore EOF
                     continue;
 
-                topLevels.add((TopLevel) child);
+                if (child instanceof TypeDeclaration) {
+                    InductiveDeclaration inductiveDeclaration = new InductiveDeclaration(
+                            Arrays.asList((TypeDeclaration) child)
+                    );
+                    topLevels.add(inductiveDeclaration);
+                } else {
+                    topLevels.add((TopLevel) child);
+                }
             }
 
             return new Program(topLevels);
@@ -134,7 +141,7 @@ public class ASTParser extends PouletBaseListener {
         } else if (payload instanceof PouletParser.Assert_eqContext) {
             Expression a = (Expression) children.get(1);
             Expression b = (Expression) children.get(3);
-            return new Assert(a, b);
+            return new Assertion(a, b);
         } else if (payload instanceof PouletParser.Inductive_typesContext) {
             List<TypeDeclaration> typeDeclarations = new ArrayList<>();
             for (int i = 2; i < children.size() - 1; i++) {
@@ -225,7 +232,7 @@ public class ASTParser extends PouletBaseListener {
         } else if (payload instanceof PouletParser.CharacterContext) {
             PouletParser.CharacterContext context = (PouletParser.CharacterContext) payload;
             char c = context.CHAR().getText().charAt(1);
-            return new Char(c);
+            return new CharLiteral(c);
         } else if (payload instanceof PouletParser.StringContext) {
             PouletParser.StringContext context = (PouletParser.StringContext) payload;
             String withQuotes = context.STRING().getText();
@@ -249,7 +256,7 @@ public class ASTParser extends PouletBaseListener {
                         listChar,
                         new Symbol("cons"),
                         Arrays.asList(
-                                new Char(s.charAt(i)),
+                                new CharLiteral(s.charAt(i)),
                                 result
                         )
                 );

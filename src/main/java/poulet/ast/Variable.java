@@ -1,5 +1,9 @@
 package poulet.ast;
 
+import poulet.exceptions.PouletException;
+
+import java.util.Map;
+
 public class Variable extends Expression {
     public final Symbol symbol;
 
@@ -24,5 +28,24 @@ public class Variable extends Expression {
         }
 
         return false;
+    }
+
+    @Override
+    Variable makeSymbolsUnique(Map<Symbol, Symbol> map) {
+        if (isFree()) {
+            return this;
+        } else {
+            Symbol unique = map.get(symbol);
+
+            if (unique == null) {
+                return new Variable(symbol.makeUnique());
+            } else {
+                return new Variable(unique.copy());
+            }
+        }
+    }
+
+    public <T> T accept(ExpressionVisitor<T> visitor) throws PouletException {
+        return visitor.visit(this);
     }
 }

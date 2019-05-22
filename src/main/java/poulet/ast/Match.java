@@ -1,8 +1,12 @@
 package poulet.ast;
 
 import poulet.Util;
+import poulet.exceptions.PouletException;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Match extends Expression {
@@ -50,5 +54,53 @@ public class Match extends Expression {
             s += ") => " + expression;
             return s;
         }
+    }
+
+    @Override
+    Match makeSymbolsUnique(Map<Symbol, Symbol> map) throws PouletException {
+        Map<Symbol, Symbol> newMap = new HashMap<>(map);
+        Symbol newExpressionSymbol = expressionSymbol.makeUnique();
+        newMap.put(expressionSymbol, newExpressionSymbol);
+
+        List<Symbol> newArgumentSymbols = new ArrayList<>();
+        for (Symbol symbol : argumentSymbols) {
+            Symbol unique = symbol.makeUnique();
+            newArgumentSymbols.add(unique);
+            newMap.put(symbol, unique);
+        }
+
+        Expression newType = type.makeSymbolsUnique(newMap);
+
+        List<Match.Clause> newClauses = new ArrayList<>();
+
+        for (Match.Clause clause : clauses) {
+            Map<Symbol, Symbol> clauseNewMap = new HashMap<>(map);
+
+            List<Symbol> clauseArgumentSymbols = new ArrayList<>();
+            for (Symbol symbol : clause.argumentSymbols) {
+                Symbol unique = symbol.makeUnique();
+                clauseArgumentSymbols.add(unique);
+                clauseNewMap.put(symbol, unique);
+            }
+
+            Match.Clause newClause = new Match.Clause(
+                    clause.constructorSymbol,
+                    clauseArgumentSymbols,
+                    clause.expression.makeSymbolsUnique(clauseNewMap)
+            );
+            newClauses.add(newClause);
+        }
+
+        return new Match(
+                expression.makeSymbolsUnique(map),
+                newExpressionSymbol,
+                newArgumentSymbols,
+                newType,
+                newClauses
+        );
+    }
+
+    public <T> T accept(ExpressionVisitor<T> visitor) throws PouletException {
+        return visitor.visit(this);
     }
 }

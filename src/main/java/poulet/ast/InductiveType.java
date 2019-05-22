@@ -1,7 +1,10 @@
 package poulet.ast;
 
+import poulet.exceptions.PouletException;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class InductiveType extends Expression {
@@ -47,5 +50,34 @@ public class InductiveType extends Expression {
         }
 
         return s;
+    }
+
+    @Override
+    InductiveType makeSymbolsUnique(Map<Symbol, Symbol> map) throws PouletException {
+        List<Expression> newParameters = new ArrayList<>();
+
+        for (Expression parameter : parameters) {
+            newParameters.add(parameter.makeSymbolsUnique(map));
+        }
+
+        List<Expression> newArguments = null;
+        if (isConcrete()) {
+            newArguments = new ArrayList<>();
+
+            for (Expression argument : arguments) {
+                newArguments.add(argument.makeSymbolsUnique(map));
+            }
+        }
+
+        return new InductiveType(
+                type,
+                concrete,
+                newParameters,
+                newArguments
+        );
+    }
+
+    public <T> T accept(ExpressionVisitor<T> visitor) throws PouletException {
+        return visitor.visit(this);
     }
 }
