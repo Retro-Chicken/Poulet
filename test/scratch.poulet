@@ -1,4 +1,4 @@
-/*#import "std.poulet
+#import "std.poulet"
 
 n0 : nat[] := nat[].Z
 n1 : nat[] := nat[].S(nat[].Z)
@@ -24,6 +24,10 @@ fix nat_ind : {P : nat[] -> Type1} P(nat[].Z) -> ({n : nat[]} P(n) -> P(nat[].S(
             Z() => pz,
             S(n_pred) => ps(n_pred, nat_ind(P, pz, ps, n_pred))
         }
-*/
+
 a : _ := (\x : _ -> c(x))
 #assert a ~ (\x : _ -> c(x))
+#reduce match nat[].S(nat[].Z) as _() in bool[] {
+    S(n_pred) => bool[].true,
+    Z() => bool[].false
+}

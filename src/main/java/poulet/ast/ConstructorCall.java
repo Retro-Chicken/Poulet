@@ -5,6 +5,7 @@ import poulet.exceptions.PouletException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ConstructorCall extends Expression {
@@ -69,18 +70,18 @@ public class ConstructorCall extends Expression {
     }
 
     @Override
-    ConstructorCall makeSymbolsUnique(Map<Symbol, Symbol> map) throws PouletException {
+    ConstructorCall transformSymbols(Function<Symbol, Symbol> transformer, Map<Symbol, Symbol> map) throws PouletException {
         List<Expression> newArguments = null;
         if (isConcrete()) {
             newArguments = new ArrayList<>();
 
             for (Expression argument : arguments) {
-                newArguments.add(argument.makeSymbolsUnique(map));
+                newArguments.add(argument.transformSymbols(transformer, map));
             }
         }
 
         return new ConstructorCall(
-                inductiveType.makeSymbolsUnique(map),
+                inductiveType.transformSymbols(transformer, map),
                 constructor,
                 newArguments
         );

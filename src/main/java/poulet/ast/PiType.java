@@ -4,6 +4,7 @@ import poulet.exceptions.PouletException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 public class PiType extends Expression {
     public final Symbol variable;
@@ -22,15 +23,15 @@ public class PiType extends Expression {
     }
 
     @Override
-    PiType makeSymbolsUnique(Map<Symbol, Symbol> map) throws PouletException {
+    PiType transformSymbols(Function<Symbol, Symbol> transformer, Map<Symbol, Symbol> map) throws PouletException {
         Map<Symbol, Symbol> newMap = new HashMap<>(map);
-        Symbol newVariable = variable.makeUnique();
+        Symbol newVariable = transformer.apply(variable);
         newMap.put(variable, newVariable);
 
         return new PiType(
                 newVariable,
-                type.makeSymbolsUnique(map),
-                body.makeSymbolsUnique(newMap)
+                type.transformSymbols(transformer, map),
+                body.transformSymbols(transformer, newMap)
         );
     }
 

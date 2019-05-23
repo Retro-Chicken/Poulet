@@ -78,6 +78,13 @@ public class Environment {
         return null;
     }
 
+    public Environment copy() {
+        return new Environment(
+                new HashMap<>(types),
+                new HashMap<>(scope),
+                new HashMap<>(typeDeclarations)
+        );
+    }
 
     @Override
     public String toString() {

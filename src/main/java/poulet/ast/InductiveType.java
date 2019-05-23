@@ -5,6 +5,7 @@ import poulet.exceptions.PouletException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class InductiveType extends Expression {
@@ -53,11 +54,11 @@ public class InductiveType extends Expression {
     }
 
     @Override
-    InductiveType makeSymbolsUnique(Map<Symbol, Symbol> map) throws PouletException {
+    InductiveType transformSymbols(Function<Symbol, Symbol> transformer, Map<Symbol, Symbol> map) throws PouletException {
         List<Expression> newParameters = new ArrayList<>();
 
         for (Expression parameter : parameters) {
-            newParameters.add(parameter.makeSymbolsUnique(map));
+            newParameters.add(parameter.transformSymbols(transformer, map));
         }
 
         List<Expression> newArguments = null;
@@ -65,7 +66,7 @@ public class InductiveType extends Expression {
             newArguments = new ArrayList<>();
 
             for (Expression argument : arguments) {
-                newArguments.add(argument.makeSymbolsUnique(map));
+                newArguments.add(argument.transformSymbols(transformer, map));
             }
         }
 

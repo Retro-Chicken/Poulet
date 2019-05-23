@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 public abstract class Expression extends Node {
     public Expression substitute(Symbol symbol, Expression substitution) throws PouletException {
@@ -119,11 +120,26 @@ public abstract class Expression extends Node {
         }
     }
 
-    public Expression makeSymbolsUnique() throws PouletException {
+    public final Expression makeSymbolsUnique() throws PouletException {
         return makeSymbolsUnique(new HashMap<>());
     }
 
-    abstract Expression makeSymbolsUnique(Map<Symbol, Symbol> map) throws PouletException;
+    final Expression makeSymbolsUnique(Map<Symbol, Symbol> map) throws PouletException {
+        return transformSymbols(Symbol::makeUnique, map);
+    }
+
+    public final Expression normalizeSymbolNames() throws PouletException {
+        int oldNextId = Symbol.nextId;
+        Symbol.nextId = 0;
+        Expression normalized = transformSymbols(
+                symbol -> symbol.rename("").makeUnique(),
+                new HashMap<>()
+        );
+        Symbol.nextId = oldNextId;
+        return normalized;
+    }
+
+    abstract Expression transformSymbols(Function<Symbol, Symbol> transformer, Map<Symbol, Symbol> map) throws PouletException;
 
     public abstract <T> T accept(ExpressionVisitor<T> visitor) throws PouletException;
 }

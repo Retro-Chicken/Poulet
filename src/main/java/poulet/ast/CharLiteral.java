@@ -3,6 +3,7 @@ package poulet.ast;
 import poulet.exceptions.PouletException;
 
 import java.util.Map;
+import java.util.function.Function;
 
 public class CharLiteral extends Expression {
     public final char c;
@@ -17,7 +18,7 @@ public class CharLiteral extends Expression {
     }
 
     @Override
-    CharLiteral makeSymbolsUnique(Map<Symbol, Symbol> map) {
+    CharLiteral transformSymbols(Function<Symbol, Symbol> transformer, Map<Symbol, Symbol> map) {
         return this;
     }
 

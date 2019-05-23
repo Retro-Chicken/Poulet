@@ -170,11 +170,11 @@ public class ASTParser extends PouletBaseListener {
 
             int i = 5;
 
-            for (; children.get(i) instanceof Symbol; i++) {
+            for (; children.get(i) instanceof Symbol; i += 2) {
                 argumentSymbols.add((Symbol) children.get(i));
             }
 
-            i += 2;
+            i += i == 5 ? 2 : 1;
             Expression type = (Expression) children.get(i);
             i += 2;
 

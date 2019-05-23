@@ -1,7 +1,7 @@
 package poulet.ast;
 
 public class Symbol extends Node implements Comparable<Symbol> {
-    public static int nextId = 0;
+    static int nextId = 0;
 
     public final String name;
     final Integer id;
@@ -16,7 +16,7 @@ public class Symbol extends Node implements Comparable<Symbol> {
         this.id = id;
     }
 
-    public Symbol makeUnique() {
+    Symbol makeUnique() {
         return new Symbol(name, nextId++);
     }
 
@@ -63,5 +63,9 @@ public class Symbol extends Node implements Comparable<Symbol> {
         } else {
             return c;
         }
+    }
+
+    Symbol rename(String newName) {
+        return new Symbol(newName, id);
     }
 }

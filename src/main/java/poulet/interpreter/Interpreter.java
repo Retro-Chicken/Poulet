@@ -1,6 +1,7 @@
 package poulet.interpreter;
 
 import poulet.ast.*;
+import poulet.exceptions.PouletException;
 import poulet.typing.Checker;
 import poulet.typing.Environment;
 
@@ -21,7 +22,6 @@ public class Interpreter {
                 Checker.checkInductiveDeclarationWellFormed(inductiveDeclaration, environment);
                 environment = environment.appendInductive(inductiveDeclaration);
             }
-
         }
 
         for (TopLevel topLevel : program.program) {
@@ -44,16 +44,17 @@ public class Interpreter {
                             out.println(Evaluator.reduce(print.expression, environment));
                             break;
                         case check:
-                            out.println(Checker.deduceType(print.expression, environment)); //cleanCheck(Checker.deduceType(print.expression, context).expression(), 0));
+                            out.println(Checker.deduceType(print.expression, environment));
                             break;
                     }
                 } else if (topLevel instanceof Assertion) {
                     Assertion assertion = (Assertion) topLevel;
                     if (!Evaluator.convertible(assertion.a, assertion.b, environment)) {
-                        throw new Exception("" + assertion + " failed");
+                        throw new PouletException("" + assertion + " failed");
                     }
                 }
-            } catch (Exception e) {
+            } catch (PouletException e) {
+                // TODO: improve this
                 System.err.println("Error on Line: " + topLevel);
                 e.printStackTrace();
                 throw new Exception();

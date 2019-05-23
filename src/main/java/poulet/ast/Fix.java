@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Fix extends Expression {
@@ -25,16 +26,16 @@ public class Fix extends Expression {
     }
 
     @Override
-    Fix makeSymbolsUnique(Map<Symbol, Symbol> map) throws PouletException {
+    Fix transformSymbols(Function<Symbol, Symbol> transformer, Map<Symbol, Symbol> map) throws PouletException {
         Symbol newExport = null;
         Map<Symbol, Symbol> newMap = new HashMap<>(map);
 
         for (Definition definition : definitions) {
-            Symbol name = definition.name.makeUnique();
-            newMap.put(definition.name, name);
+            Symbol newName = transformer.apply(definition.name);
+            newMap.put(definition.name, newName);
 
             if (definition.name.equals(export)) {
-                newExport = name;
+                newExport = newName;
             }
         }
 
@@ -47,8 +48,8 @@ public class Fix extends Expression {
         for (Definition definition : definitions) {
             Definition newDefinition = new Definition(
                     newMap.get(definition.name),
-                    definition.type.makeSymbolsUnique(newMap),
-                    definition.definition.makeSymbolsUnique(newMap)
+                    definition.type.transformSymbols(transformer, map),
+                    definition.definition.transformSymbols(transformer, newMap)
             );
             newDefinitions.add(newDefinition);
         }

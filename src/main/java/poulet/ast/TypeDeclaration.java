@@ -62,7 +62,7 @@ public class TypeDeclaration extends Node {
 
         for (Constructor constructor : constructors) {
             Constructor unique = new Constructor(constructor.name, constructor.definition.makeSymbolsUnique(map));
-            constructors.add(unique);
+            newConstructors.add(unique);
         }
 
         return new TypeDeclaration(

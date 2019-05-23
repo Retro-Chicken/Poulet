@@ -3,6 +3,7 @@ package poulet.ast;
 import poulet.exceptions.PouletException;
 
 import java.util.Map;
+import java.util.function.Function;
 
 public class Application extends Expression {
     public final Expression function;
@@ -29,10 +30,10 @@ public class Application extends Expression {
     }
 
     @Override
-    Application makeSymbolsUnique(Map<Symbol, Symbol> map) throws PouletException {
+    Application transformSymbols(Function<Symbol, Symbol> transformer, Map<Symbol, Symbol> map) throws PouletException {
         return new Application(
-                function.makeSymbolsUnique(map),
-                argument.makeSymbolsUnique(map)
+                function.transformSymbols(transformer, map),
+                argument.transformSymbols(transformer, map)
         );
     }
 

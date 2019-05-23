@@ -4,6 +4,7 @@ import poulet.exceptions.PouletException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 public class Abstraction extends Expression {
     public final Symbol symbol;
@@ -36,15 +37,15 @@ public class Abstraction extends Expression {
     }
 
     @Override
-    Abstraction makeSymbolsUnique(Map<Symbol, Symbol> map) throws PouletException {
+    Abstraction transformSymbols(Function<Symbol, Symbol> transformer, Map<Symbol, Symbol> map) throws PouletException {
         Map<Symbol, Symbol> newMap = new HashMap<>(map);
-        Symbol unique = symbol.makeUnique();
-        newMap.put(symbol, unique);
+        Symbol newSymbol = transformer.apply(symbol);
+        newMap.put(symbol, newSymbol);
 
         return new Abstraction(
-                unique,
-                type.makeSymbolsUnique(map),
-                body.makeSymbolsUnique(newMap)
+                newSymbol,
+                type.transformSymbols(transformer, map),
+                body.transformSymbols(transformer, newMap)
         );
     }
 

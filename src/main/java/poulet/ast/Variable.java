@@ -3,6 +3,7 @@ package poulet.ast;
 import poulet.exceptions.PouletException;
 
 import java.util.Map;
+import java.util.function.Function;
 
 public class Variable extends Expression {
     public final Symbol symbol;
@@ -31,17 +32,13 @@ public class Variable extends Expression {
     }
 
     @Override
-    Variable makeSymbolsUnique(Map<Symbol, Symbol> map) {
-        if (isFree()) {
+    Variable transformSymbols(Function<Symbol, Symbol> transformer, Map<Symbol, Symbol> map) {
+        Symbol newSymbol = map.get(symbol);
+
+        if (newSymbol == null) {
             return this;
         } else {
-            Symbol unique = map.get(symbol);
-
-            if (unique == null) {
-                return new Variable(symbol.makeUnique());
-            } else {
-                return new Variable(unique.copy());
-            }
+            return new Variable(newSymbol);
         }
     }
 
