@@ -1,6 +1,7 @@
 package poulet.ast;
 
 import poulet.exceptions.PouletException;
+import poulet.util.TopLevelVisitor;
 
 import java.util.Map;
 

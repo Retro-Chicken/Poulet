@@ -1,10 +1,10 @@
-package poulet;
+package poulet.util;
 
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Util {
+public class StringUtil {
     public static String indent(String s, int n) {
         String indent = "";
 

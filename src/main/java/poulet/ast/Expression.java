@@ -1,6 +1,7 @@
 package poulet.ast;
 
 import poulet.exceptions.PouletException;
+import poulet.util.ExpressionVisitor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,7 +44,7 @@ public abstract class Expression extends Node {
             List<Match.Clause> clauses = new ArrayList<>();
 
             for (Match.Clause clause : match.clauses) {
-                Expression clauseExpression = clause.expression.substitute(symbol, this);
+                Expression clauseExpression = clause.expression.substitute(symbol, substitution);
                 Match.Clause newClause = new Match.Clause(
                         clause.constructorSymbol,
                         clause.argumentSymbols,

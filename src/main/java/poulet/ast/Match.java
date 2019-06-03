@@ -1,7 +1,8 @@
 package poulet.ast;
 
-import poulet.Util;
+import poulet.util.StringUtil;
 import poulet.exceptions.PouletException;
+import poulet.util.ExpressionVisitor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,10 +13,10 @@ import java.util.stream.Collectors;
 
 public class Match extends Expression {
     public final Expression expression;
-    public final Symbol expressionSymbol;
-    public final List<Symbol> argumentSymbols;
+    final Symbol expressionSymbol;
+    final List<Symbol> argumentSymbols;
     public final Expression type;
-    public final List<Clause> clauses;
+    final List<Clause> clauses;
 
     public Match(Expression expression, Symbol expressionSymbol, List<Symbol> argumentSymbols, Expression type, List<Clause> clauses) {
         this.expression = expression;
@@ -25,6 +26,16 @@ public class Match extends Expression {
         this.clauses = clauses;
     }
 
+    public Clause getClause(Symbol constructor) throws PouletException {
+        for (Clause clause : clauses) {
+            if (clause.constructorSymbol.equals(constructor)) {
+                return clause;
+            }
+        }
+
+        throw new PouletException("no clause for " + constructor + " in " + this);
+    }
+
     @Override
     public String toString() {
         String items = clauses.stream().map(Clause::toString).collect(Collectors.joining(",\n"));
@@ -32,7 +43,7 @@ public class Match extends Expression {
         String s = "match " + expression + " as " + expressionSymbol + "(";
         s += argumentSymbols.stream().map(Symbol::toString).collect(Collectors.joining(", "));
         s += ") in " + type + " {\n";
-        s += Util.indent(items, 2);
+        s += StringUtil.indent(items, 2);
         s += "\n}";
         return s;
     }

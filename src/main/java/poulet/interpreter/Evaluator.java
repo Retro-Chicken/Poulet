@@ -3,122 +3,149 @@ package poulet.interpreter;
 import poulet.ast.*;
 import poulet.exceptions.PouletException;
 import poulet.typing.Environment;
+import poulet.util.ExpressionVisitor;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class Evaluator {
-    public static Expression reduce(Expression expression, Environment environment) throws PouletException {
-        return expression.accept(new ExpressionVisitor<Expression>() {
-            @Override
-            public Expression visit(Application application) throws PouletException {
-                return beta_reduce(application, environment);
-            }
+    private static class Reducable {
+        private Expression expression;
+        private Environment environment;
 
-            @Override
-            public Expression visit(Variable variable) throws PouletException {
-                return delta_reduce(variable, environment);
-            }
-
-            @Override
-            public Expression visit(Match match) throws PouletException {
-                return iota_reduce(match, environment);
-            }
-
-            @Override
-            public Expression other(Expression expression) {
-                return expression;
-            }
-        });
-    }
-
-    private static Expression beta_reduce(Application application, Environment environment) throws PouletException {
-        ApplicationDecomposition applicationDecomposition = getApplicationDecomposition(application);
-
-        return applicationDecomposition.function.accept(new ExpressionVisitor<Expression>() {
-            @Override
-            public Expression visit(Abstraction abstraction) throws PouletException {
-                return abstraction.body.substitute(abstraction.symbol, application.argument);
-            }
-
-            @Override
-            public Expression visit(ConstructorCall constructorCall) throws PouletException {
-                if (constructorCall.isConcrete()) {
-                    throw new PouletException("can't apply to a concrete ConstructorCall");
-                }
-
-                Constructor constructor = environment.lookUpConstructor(constructorCall);
-                if (constructor == null) {
-                    throw new PouletException("constructor for " + constructorCall + " doesn't exist");
-                }
-
-                List<Expression> arguments = new ArrayList<>();
-                for (Expression argument : applicationDecomposition.arguments) {
-                    arguments.add(reduce(argument, environment));
-                }
-
-                return new ConstructorCall(
-                        (InductiveType) reduce(constructorCall.inductiveType, environment),
-                        constructorCall.constructor,
-                        arguments
-                );
-            }
-
-            @Override
-            public Expression other(Expression expression) {
-                return expression;
-            }
-        });
-    }
-
-    private static Expression delta_reduce(Variable variable, Environment environment) throws PouletException {
-        Expression value = environment.lookUpScope(variable.symbol);
-
-        if (value == null) {
-            if (variable.isFree()) {
-                return variable;
-            } else {
-                throw new PouletException("undefined reference to non-free variable " + variable);
-            }
-        } else {
-            return value;
+        private Reducable(Expression expression, Environment environment) {
+            this.expression = expression;
+            this.environment = environment;
         }
     }
 
-    private static Expression iota_reduce(Match match, Environment environment) throws PouletException {
-        Expression expressionReduced = reduce(match.expression, environment);
-        return expressionReduced.accept(new ExpressionVisitor<Expression>() {
+    public static Expression reduce(Expression expression, Environment environment) throws PouletException {
+        return reduce(new Reducable(expression, environment)).expression;
+    }
+
+    private static Reducable reduce(Reducable reducable) throws PouletException {
+        Expression expression = reducable.expression;
+        Environment environment = reducable.environment;
+
+        return expression.accept(new ExpressionVisitor<>() {
             @Override
-            public Expression visit(ConstructorCall constructorCall) throws PouletException {
-                if (!constructorCall.isConcrete()) {
-                    throw new PouletException("can't match on non-concrete constructor call");
-                }
+            public Reducable visit(Application application) throws PouletException {
+                Reducable function = reduce(new Reducable(application.function, environment));
+                Expression argument = reduce(new Reducable(application.argument, environment)).expression;
 
-                for (Match.Clause clause : match.clauses) {
-                    if (clause.constructorSymbol.equals(constructorCall.constructor)) {
-                        Environment newEnvironment = environment.copy();
-
-                        if (constructorCall.arguments.size() != clause.argumentSymbols.size()) {
-                            throw new PouletException("wrong number of arguments for constructor " + constructorCall.constructor + " in match " + match);
-                        }
-
-                        for (int i = 0; i < clause.argumentSymbols.size(); i++) {
-                            newEnvironment.appendScope(
-                                    clause.argumentSymbols.get(i),
-                                    constructorCall.arguments.get(i)
-                            );
-                        }
-
-                        return reduce(clause.expression, newEnvironment);
+                return function.expression.accept(new ExpressionVisitor<>() {
+                    @Override
+                    public Reducable visit(Abstraction abstraction) throws PouletException {
+                        // TODO: figure out if this makes sense
+                        // do we need to store an Environment with everything in scope?
+                        return reduce(new Reducable(
+                                abstraction.body,
+                                function.environment.appendScope(abstraction.symbol, argument)
+                        ));
                     }
-                }
 
-                throw new PouletException("no branch for constructor " + constructorCall.constructor + " in match " + match);
+                    @Override
+                    public Reducable visit(ConstructorCall constructorCall) {
+                        ArrayList<Expression> newArguments = new ArrayList<>(constructorCall.arguments);
+                        newArguments.add(argument);
+
+                        return new Reducable(
+                                new ConstructorCall(
+                                        constructorCall.inductiveType,
+                                        constructorCall.constructor,
+                                        newArguments
+                                ),
+                                environment
+                        );
+                    }
+                });
             }
 
             @Override
-            public Expression other(Expression expression) throws PouletException {
-                return expression;
+            public Reducable visit(ConstructorCall constructorCall) {
+                if (constructorCall.isConcrete()) {
+                    return reducable;
+                } else {
+                    return new Reducable(
+                            new ConstructorCall(
+                                    constructorCall.inductiveType,
+                                    constructorCall.constructor,
+                                    new ArrayList<>()
+                            ),
+                            environment
+                    );
+                }
+            }
+
+            @Override
+            public Reducable visit(Fix fix) throws PouletException {
+                Definition exported = fix.getExported();
+                Environment newEnvironment = environment;
+
+                for (Definition definition : fix.definitions) {
+                    Fix newFix = new Fix(
+                            fix.definitions,
+                            definition.name
+                    );
+                    newEnvironment = newEnvironment.appendScope(
+                            definition.name,
+                            newFix
+                    );
+                }
+
+                return reduce(new Reducable(
+                        exported.definition,
+                        newEnvironment
+                ));
+            }
+
+            @Override
+            public Reducable visit(Match match) throws PouletException {
+                Reducable matchExpression = reduce(new Reducable(
+                        match.expression,
+                        environment
+                ));
+
+                return matchExpression.expression.accept(new ExpressionVisitor<>() {
+                    @Override
+                    public Reducable visit(ConstructorCall constructorCall) throws PouletException {
+                        if (!constructorCall.isConcrete()) {
+                            throw new PouletException("can't match on non-concrete constructor call");
+                        }
+
+                        Match.Clause matchingClause = match.getClause(constructorCall.constructor);
+                        Environment newEnvironment = environment;
+
+                        for (int i = 0; i < matchingClause.argumentSymbols.size(); i++) {
+                            Symbol symbol = matchingClause.argumentSymbols.get(i);
+                            Expression argument = constructorCall.arguments.get(i);
+                            newEnvironment = newEnvironment.appendScope(symbol, argument);
+                        }
+
+                        return reduce(new Reducable(
+                                matchingClause.expression,
+                                newEnvironment
+                        ));
+                    }
+                });
+            }
+
+            @Override
+            public Reducable visit(Variable variable) throws PouletException {
+                Expression value = reducable.environment.lookUpScope(variable.symbol);
+
+                if (value == null) {
+                    return reducable;
+                } else {
+                    return reduce(new Reducable(
+                            value,
+                            reducable.environment
+                    ));
+                }
+            }
+
+            @Override
+            public Reducable other(Expression expression) {
+                return reducable;
             }
         });
     }
@@ -127,26 +154,26 @@ public class Evaluator {
         Expression aReduced = reduce(a, environment);
         Expression bReduced = reduce(b, environment);
 
-        return alpha_convertible(aReduced, bReduced) ||
-                eta_convertible(aReduced, bReduced, environment);
+        return alphaConvertible(aReduced, bReduced) ||
+                etaConvertible(aReduced, bReduced, environment);
     }
 
-    private static boolean alpha_convertible(Expression a, Expression b) throws PouletException {
+    private static boolean alphaConvertible(Expression a, Expression b) throws PouletException {
         Expression aUnique = a.normalizeSymbolNames();
         Expression bUnique = b.normalizeSymbolNames();
         return aUnique.toString().equals(bUnique.toString());
     }
 
-    private static boolean eta_convertible(Expression a, Expression b, Environment environment) throws PouletException {
-        if (eta_convertible_directional(a, b, environment)) {
+    private static boolean etaConvertible(Expression a, Expression b, Environment environment) throws PouletException {
+        if (etaConvertibleDirectional(a, b, environment)) {
             return true;
         } else {
-            return eta_convertible_directional(b, a, environment);
+            return etaConvertibleDirectional(b, a, environment);
         }
     }
 
-    private static boolean eta_convertible_directional(Expression a, Expression b, Environment environment) throws PouletException {
-        return a.accept(new ExpressionVisitor<Boolean>() {
+    private static boolean etaConvertibleDirectional(Expression a, Expression b, Environment environment) throws PouletException {
+        return a.accept(new ExpressionVisitor<>() {
             @Override
             public Boolean visit(Abstraction abstraction) throws PouletException {
                 Application application = new Application(
@@ -161,55 +188,5 @@ public class Evaluator {
                 return false;
             }
         });
-    }
-
-    private static class ApplicationDecomposition {
-        private Expression function = null;
-        private List<Expression> arguments = new ArrayList<>();
-    }
-
-    // decomposes into M = f(a_1, ..., a_n) with f not being an application
-    private static ApplicationDecomposition getApplicationDecomposition(Expression expression) {
-        return getApplicationDecomposition(expression, new ApplicationDecomposition());
-    }
-
-    private static ApplicationDecomposition getApplicationDecomposition(Expression expression, ApplicationDecomposition applicationDecomposition) {
-        if (expression instanceof Application) {
-            Application application = (Application) expression;
-            applicationDecomposition.arguments.add(0, application.argument);
-            return getApplicationDecomposition(application.function, applicationDecomposition);
-        } else {
-            applicationDecomposition.function = expression;
-            return applicationDecomposition;
-        }
-    }
-
-    private static class PiTypeDecomposition {
-        private List<Symbol> arguments;
-        private List<Expression> argumentTypes;
-        private Expression bodyType;
-
-        private PiTypeDecomposition() {
-            this.arguments = new ArrayList<>();
-            this.argumentTypes = new ArrayList<>();
-            this.bodyType = null;
-        }
-    }
-
-    // decomposes into M = {a_1 : A_1} ... {a_n : A_n} N with N not being a pi type
-    private static PiTypeDecomposition getPiTypeDecomposition(Expression expression) {
-        return getPiTypeDecomposition(expression, new PiTypeDecomposition());
-    }
-
-    private static PiTypeDecomposition getPiTypeDecomposition(Expression expression, PiTypeDecomposition piTypeDecomposition) {
-        if (expression instanceof PiType) {
-            PiType piType = (PiType) expression;
-            piTypeDecomposition.arguments.add(piType.variable);
-            piTypeDecomposition.argumentTypes.add(piType.type);
-            return getPiTypeDecomposition(piType.body, piTypeDecomposition);
-        } else {
-            piTypeDecomposition.bodyType = expression;
-            return piTypeDecomposition;
-        }
     }
 }

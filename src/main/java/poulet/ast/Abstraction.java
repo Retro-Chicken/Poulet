@@ -1,6 +1,7 @@
 package poulet.ast;
 
 import poulet.exceptions.PouletException;
+import poulet.util.ExpressionVisitor;
 
 import java.util.HashMap;
 import java.util.Map;

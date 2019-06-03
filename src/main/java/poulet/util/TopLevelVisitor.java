@@ -1,5 +1,6 @@
-package poulet.ast;
+package poulet.util;
 
+import poulet.ast.*;
 import poulet.exceptions.PouletException;
 
 public interface TopLevelVisitor<T> {

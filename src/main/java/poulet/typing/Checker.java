@@ -1,11 +1,6 @@
 package poulet.typing;
 
-import poulet.Util;
 import poulet.ast.*;
-import poulet.interpreter.Interpreter;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 public class Checker {
     public static void checkType(Expression term, Expression type, Environment environment) throws TypeException {

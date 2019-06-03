@@ -1,6 +1,6 @@
 package poulet.ast;
 
-import poulet.Util;
+import poulet.util.StringUtil;
 import poulet.exceptions.PouletException;
 
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ public class TypeDeclaration extends Node {
         String s = "type " + name + (parameters.size() > 0 ? " " : "");
         s += parameters.stream().map(Parameter::toString).collect(Collectors.joining(" "));
         s += " : " + type + " {\n";
-        s += Util.indent(items, 2);
+        s += StringUtil.indent(items, 2);
         s += "\n}";
         return s;
     }

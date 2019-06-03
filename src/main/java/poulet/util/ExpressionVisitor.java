@@ -1,5 +1,6 @@
-package poulet.ast;
+package poulet.util;
 
+import poulet.ast.*;
 import poulet.exceptions.PouletException;
 
 public interface ExpressionVisitor<T> {
@@ -40,6 +41,6 @@ public interface ExpressionVisitor<T> {
     }
 
     default T other(Expression expression) throws PouletException {
-        throw new PouletException(expression.getClass().getSimpleName() + " not handled by visitor");
+        throw new PouletException(expression.getClass().getSimpleName() + " not handled by visitor, expression = " + expression);
     }
 }
