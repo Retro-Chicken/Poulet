@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 public class Fix extends Expression {
     public final List<Definition> definitions;
-    final Symbol export;
+    public final Symbol export;
 
     public Fix(List<Definition> definitions, Symbol export) {
         this.definitions = definitions;

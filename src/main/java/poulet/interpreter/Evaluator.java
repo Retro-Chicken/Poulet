@@ -6,6 +6,7 @@ import poulet.typing.Environment;
 import poulet.util.ExpressionVisitor;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Evaluator {
     private static class Reducable {
@@ -57,23 +58,51 @@ public class Evaluator {
                                 environment
                         );
                     }
+
+                    @Override
+                    public Reducable visit(InductiveType inductiveType) throws PouletException {
+                        ArrayList<Expression> newArguments = new ArrayList<>(inductiveType.arguments);
+                        newArguments.add(reduce(argument, environment));
+
+                        return new Reducable(
+                                new InductiveType(
+                                        inductiveType.type,
+                                        inductiveType.isConcrete(),
+                                        inductiveType.parameters,
+                                        newArguments
+                                ),
+                                environment
+                        );
+                    }
+
+                    @Override
+                    public Reducable other(Expression expression) {
+                        return new Reducable(
+                                new Application(function.expression, argument),
+                                environment
+                        );
+                    }
                 });
             }
 
             @Override
-            public Reducable visit(ConstructorCall constructorCall) {
+            public Reducable visit(ConstructorCall constructorCall) throws PouletException {
+                List<Expression> arguments = new ArrayList<>();
+
                 if (constructorCall.isConcrete()) {
-                    return reducable;
-                } else {
-                    return new Reducable(
-                            new ConstructorCall(
-                                    constructorCall.inductiveType,
-                                    constructorCall.constructor,
-                                    new ArrayList<>()
-                            ),
-                            environment
-                    );
+                    for (Expression argument : constructorCall.arguments) {
+                        arguments.add(reduce(argument, environment));
+                    }
                 }
+
+                return new Reducable(
+                        new ConstructorCall(
+                                constructorCall.inductiveType,
+                                constructorCall.constructor,
+                                arguments
+                        ),
+                        environment
+                );
             }
 
             @Override
@@ -96,6 +125,41 @@ public class Evaluator {
                         exported.definition,
                         newEnvironment
                 ));
+            }
+
+            @Override
+            public Reducable visit(InductiveType inductiveType) throws PouletException {
+                if (inductiveType.isConcrete()) {
+                    List<Expression> parameters = new ArrayList<>();
+                    for (Expression parameter : inductiveType.parameters) {
+                        parameters.add(reduce(parameter, environment));
+                    }
+
+                    List<Expression> arguments = new ArrayList<>();
+                    for (Expression argument : inductiveType.arguments) {
+                        arguments.add(reduce(argument, environment));
+                    }
+
+                    return new Reducable(
+                            new InductiveType(
+                                    inductiveType.type,
+                                    true,
+                                    parameters,
+                                    arguments
+                            ),
+                            environment
+                    );
+                } else {
+                    return new Reducable(
+                            new InductiveType(
+                                    inductiveType.type,
+                                    true,
+                                    inductiveType.parameters,
+                                    new ArrayList<>()
+                            ),
+                            environment
+                    );
+                }
             }
 
             @Override
@@ -127,6 +191,18 @@ public class Evaluator {
                         ));
                     }
                 });
+            }
+
+            @Override
+            public Reducable visit(PiType piType) throws PouletException {
+                return new Reducable(
+                        new PiType(
+                                piType.variable,
+                                reduce(piType.type, environment),
+                                reduce(piType.body, environment)
+                        ),
+                        environment
+                );
             }
 
             @Override
@@ -164,7 +240,8 @@ public class Evaluator {
         return aUnique.toString().equals(bUnique.toString());
     }
 
-    private static boolean etaConvertible(Expression a, Expression b, Environment environment) throws PouletException {
+    private static boolean etaConvertible(Expression a, Expression b, Environment environment) throws
+            PouletException {
         if (etaConvertibleDirectional(a, b, environment)) {
             return true;
         } else {
@@ -172,7 +249,8 @@ public class Evaluator {
         }
     }
 
-    private static boolean etaConvertibleDirectional(Expression a, Expression b, Environment environment) throws PouletException {
+    private static boolean etaConvertibleDirectional(Expression a, Expression b, Environment environment) throws
+            PouletException {
         return a.accept(new ExpressionVisitor<>() {
             @Override
             public Boolean visit(Abstraction abstraction) throws PouletException {

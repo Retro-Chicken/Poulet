@@ -16,7 +16,7 @@ public class Symbol extends Node implements Comparable<Symbol> {
         this.id = id;
     }
 
-    Symbol makeUnique() {
+    public Symbol makeUnique() {
         return new Symbol(name, nextId++);
     }
 

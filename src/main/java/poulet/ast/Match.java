@@ -13,10 +13,10 @@ import java.util.stream.Collectors;
 
 public class Match extends Expression {
     public final Expression expression;
-    final Symbol expressionSymbol;
-    final List<Symbol> argumentSymbols;
+    public final Symbol expressionSymbol;
+    public final List<Symbol> argumentSymbols;
     public final Expression type;
-    final List<Clause> clauses;
+    public final List<Clause> clauses;
 
     public Match(Expression expression, Symbol expressionSymbol, List<Symbol> argumentSymbols, Expression type, List<Clause> clauses) {
         this.expression = expression;
