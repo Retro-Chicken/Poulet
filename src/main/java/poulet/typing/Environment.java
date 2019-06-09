@@ -1,12 +1,10 @@
 package poulet.typing;
 
-import poulet.Util;
+import poulet.util.StringUtil;
 import poulet.ast.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class Environment {
     public final Map<Symbol, Expression> types;
@@ -78,13 +76,20 @@ public class Environment {
         return null;
     }
 
+    public Environment copy() {
+        return new Environment(
+                new HashMap<>(types),
+                new HashMap<>(scope),
+                new HashMap<>(typeDeclarations)
+        );
+    }
 
     @Override
     public String toString() {
-        return Util.mapToStringWithNewlines(Map.of(
-                "types", types,
-                "scope", scope,
-                "typeDeclarations", typeDeclarations
+        return StringUtil.mapToStringWithNewlines(Map.ofEntries(
+                Map.entry("types", types),
+                Map.entry("scope", scope),
+                Map.entry("typeDeclarations", typeDeclarations)
         ));
     }
 }

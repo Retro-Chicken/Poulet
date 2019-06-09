@@ -12,15 +12,14 @@
       <entry name="!?*.java" />
     </wildcardResourcePatterns>
     <bytecodeTargetLevel target="1.8">
-      <module name="Poulet.main" target="1.8" />
-      <module name="Poulet.test" target="1.8" />
+      <module name="Poulet.main" target="11" />
+      <module name="Poulet.test" target="11" />
     </bytecodeTargetLevel>
   </component>
   <component name="CopyrightManager" default="" />
   <component name="DependencyValidationManager">
     <option name="SKIP_IMPORT_STATEMENTS" value="false" />
   </component>
-  <component name="Encoding" addBOMForNewFiles="with NO BOM" />
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>

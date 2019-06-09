@@ -1,6 +1,12 @@
 package poulet.ast;
 
+import poulet.exceptions.PouletException;
+import poulet.util.ExpressionVisitor;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ConstructorCall extends Expression {
@@ -41,7 +47,7 @@ public class ConstructorCall extends Expression {
         if (constructor.equals(new Symbol("nil"))) {
             return "";
         } else {
-            Char head = (Char) arguments.get(0);
+            CharLiteral head = (CharLiteral) arguments.get(0);
             ConstructorCall tail = (ConstructorCall) arguments.get(1);
             return head.c + tail.charListToString();
         }
@@ -62,5 +68,27 @@ public class ConstructorCall extends Expression {
 
             return s;
         }
+    }
+
+    @Override
+    ConstructorCall transformSymbols(Function<Symbol, Symbol> transformer, Map<Symbol, Symbol> map) throws PouletException {
+        List<Expression> newArguments = null;
+        if (isConcrete()) {
+            newArguments = new ArrayList<>();
+
+            for (Expression argument : arguments) {
+                newArguments.add(argument.transformSymbols(transformer, map));
+            }
+        }
+
+        return new ConstructorCall(
+                inductiveType.transformSymbols(transformer, map),
+                constructor,
+                newArguments
+        );
+    }
+
+    public <T> T accept(ExpressionVisitor<T> visitor) throws PouletException {
+        return visitor.visit(this);
     }
 }

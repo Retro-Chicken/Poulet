@@ -1,4 +1,4 @@
-#import "std.poulet"
+#import "std_test.poulet"
 
 n0 : nat[] := nat[].Z
 n1 : nat[] := nat[].S(nat[].Z)
@@ -24,3 +24,23 @@ fix nat_ind : {P : nat[] -> Type1} P(nat[].Z) -> ({n : nat[]} P(n) -> P(nat[].S(
             Z() => pz,
             S(n_pred) => ps(n_pred, nat_ind(P, pz, ps, n_pred))
         }
+
+fix fib : nat[] -> nat[] := \n : nat[] -> match n as _() in nat[] {
+    Z() => nat[].Z,
+    S(n_pred) => match n_pred as _() in nat[] {
+        Z() => nat[].S(nat[].Z),
+        S(n_pred_pred) => plus(fib(n_pred_pred), fib(n_pred))
+    }
+}
+
+fix to_zero : nat[] -> nat[] := \n : nat[] -> match n as _() in nat[] {
+    Z() => nat[].Z,
+    S(n_pred) => to_zero(n_pred)
+}
+
+#assert (\x : _ -> x(n0))(fix {
+    t : nat[] -> nat[] := \n : nat[] -> match n as _() in nat[] {
+        Z() => nat[].Z,
+        S(n_pred) => t(n_pred)
+    }
+}.t) ~ nat[].Z

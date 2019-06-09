@@ -1,5 +1,10 @@
 package poulet.ast;
 
+import poulet.exceptions.PouletException;
+import poulet.util.TopLevelVisitor;
+
+import java.util.Map;
+
 public class Definition extends TopLevel {
     public final Symbol name;
     public final Expression type;
@@ -21,5 +26,26 @@ public class Definition extends TopLevel {
             return String.format("%s : %s", name, type);
         else
             return String.format("%s : %s := %s", name, type, definition);
+    }
+
+    @Override
+    Definition makeSymbolsUnique(Map<Symbol, Symbol> map) throws PouletException {
+        if (definition == null) {
+            return new Definition(
+                    name,
+                    type.makeSymbolsUnique()
+            );
+        } else {
+            return new Definition(
+                    name,
+                    type.makeSymbolsUnique(),
+                    definition.makeSymbolsUnique()
+            );
+        }
+    }
+
+    @Override
+    public <T> T accept(TopLevelVisitor<T> visitor) throws PouletException {
+        return visitor.visit(this);
     }
 }

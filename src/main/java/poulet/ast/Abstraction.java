@@ -1,8 +1,11 @@
 package poulet.ast;
 
-import poulet.Util;
-import poulet.interpreter.Interpreter;
-import poulet.typing.Checker;
+import poulet.exceptions.PouletException;
+import poulet.util.ExpressionVisitor;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
 
 public class Abstraction extends Expression {
     public final Symbol symbol;
@@ -32,5 +35,22 @@ public class Abstraction extends Expression {
         }
 
         return false;
+    }
+
+    @Override
+    Abstraction transformSymbols(Function<Symbol, Symbol> transformer, Map<Symbol, Symbol> map) throws PouletException {
+        Map<Symbol, Symbol> newMap = new HashMap<>(map);
+        Symbol newSymbol = transformer.apply(symbol);
+        newMap.put(symbol, newSymbol);
+
+        return new Abstraction(
+                newSymbol,
+                type.transformSymbols(transformer, map),
+                body.transformSymbols(transformer, newMap)
+        );
+    }
+
+    public <T> T accept(ExpressionVisitor<T> visitor) throws PouletException {
+        return visitor.visit(this);
     }
 }
