@@ -3,6 +3,7 @@ package poulet.parser;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import poulet.ast.*;
+import poulet.interpreter.Interpreter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -263,6 +264,18 @@ public class ASTParser extends PouletBaseListener {
             }
 
             return result;
+        } else if (payload instanceof PouletParser.SortContext) {
+            PouletParser.SortContext context = (PouletParser.SortContext) payload;
+            String text = context.children.get(0).getText();
+
+            if (text.equals("Prop")) {
+                return new Prop();
+            } else if (text.equals("Set")) {
+                return new Set();
+            } else if (text.matches("Type\\d+")) {
+                int level = Integer.parseInt(text.substring(4));
+                return new Type(level);
+            }
         }
 
         return null;

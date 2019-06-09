@@ -3,410 +3,262 @@ package poulet.typing;
 import poulet.ast.*;
 import poulet.exceptions.PouletException;
 import poulet.interpreter.Evaluator;
-import poulet.interpreter.Interpreter;
-import poulet.util.ExpressionVisitor;
-import poulet.util.StringUtil;
+import poulet.util.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Checker {
     public static void checkType(Expression term, Expression type, Environment environment) throws PouletException {
-
         Expression deduced = deduceType(term, environment);
-        // TODO: See if this is sound, check if they're checkEquivalent by beta reduction
         deduced = Evaluator.reduce(deduced, environment);
-        Expression oldType = type;
         type = Evaluator.reduce(type, environment);
 
         // Subtyping check first
-        // TODO: Make sure this is allowed
-        if (deduced instanceof Variable && type instanceof Variable) {
-            String nameDeduced = ((Variable) deduced).symbol.name;
-            String nameType = ((Variable) type).symbol.name;
-            if (nameDeduced.matches("Type\\d+") && nameType.matches("Type\\d+")) {
-                int level1 = Integer.parseInt(nameDeduced.substring(4));
-                int level2 = Integer.parseInt(nameType.substring(4));
-                if (level1 < level2)
-                    return;
+        if (deduced instanceof Type && type instanceof Type) {
+            int deducedLevel = ((Type) deduced).level;
+            int typeLevel = ((Type) type).level;
+
+            if (deducedLevel <= typeLevel) {
+                return;
             }
         }
 
         if (!Evaluator.convertible(deduced, type, environment)) {
-            //throw new PouletException("deduced type of " + term + " is " + deduced + ", doesn't match actual type " + type);
-            throw new PouletException(StringUtil.mapToStringWithNewlines(Map.of(
-                    "term", term,
-                    "deduced", deduced.normalizeSymbolNames(),
-                    "type", type.normalizeSymbolNames()
-            )));
+            throw new PouletException("deduced type of " + term + " is " + deduced + ", doesn't match actual type " + type);
         }
     }
 
     public static Expression deduceType(Expression term, Environment environment) throws PouletException {
-
-        Expression result = null;
-
-        if (term instanceof Abstraction) {
-            Abstraction abstraction = (Abstraction) term;
-            Expression abstractionType = Evaluator.reduce(abstraction.type, environment);
-            Environment newEnvironment = environment.appendType(abstraction.symbol, abstractionType);
-            Expression bodyType = deduceType(abstraction.body, newEnvironment);
-            result = new PiType(abstraction.symbol, abstractionType, bodyType);
-        } else if (term instanceof Variable) {
-            Variable variable = (Variable) term;
-            Expression variableType = environment.lookUpType(variable.symbol);
-            Expression definition = environment.lookUpScope(variable.symbol);
-
-            if (variableType != null) {
-                result = variableType;
-            } else if (definition != null) {
-                result = deduceType(definition, environment);
-            } else {
-                throw new PouletException("unknown identifier " + variable);
+        Expression result = term.accept(new ExpressionVisitor<>() {
+            @Override
+            public Expression visit(Abstraction abstraction) throws PouletException {
+                Expression abstractionType = Evaluator.reduce(abstraction.type, environment);
+                Environment newEnvironment = environment.appendType(abstraction.symbol, abstractionType);
+                Expression bodyType = deduceType(abstraction.body, newEnvironment);
+                return new PiType(abstraction.symbol, abstractionType, bodyType);
             }
-        } else if (term instanceof Application) {
-            Application application = (Application) term;
 
-            /*if (applicationDecomposition.function instanceof ConstructorCall) {
-                ConstructorCall constructorCall = (ConstructorCall) applicationDecomposition.function;
-                deduceType(constructorCall, environment);
+            @Override
+            public Expression visit(Application application) throws PouletException {
+                Expression functionType = deduceType(application.function, environment);
 
+                if (functionType instanceof PiType) {
+                    PiType piType = (PiType) functionType;
+                    // TODO: Fix this
+                    checkType(application.argument, piType.type, environment);
+                    return piType.body.substitute(piType.variable, application.argument);
+                } else {
+                    throw new PouletException("can't apply to " + application.function);
+                }
+            }
+
+            @Override
+            public Expression visit(CharLiteral charLiteral) throws PouletException {
+                return new Variable(new Symbol("char"));
+            }
+
+            @Override
+            public Expression visit(ConstructorCall constructorCall) throws PouletException {
                 Constructor constructor = environment.lookUpConstructor(constructorCall);
+
+                if (constructor == null) {
+                    throw new PouletException("constructor not found");
+                }
+
                 TypeDeclaration typeDeclaration = environment.lookUpTypeDeclaration(constructorCall.inductiveType.type);
+
+                if (typeDeclaration == null) {
+                    throw new PouletException("type declaration not found");
+                }
+
+                if (constructorCall.inductiveType.parameters.size() != typeDeclaration.parameters.size()) {
+                    throw new PouletException("wrong number of parameters");
+                }
+
                 Environment newEnvironment = environment;
 
                 for (int i = 0; i < constructorCall.inductiveType.parameters.size(); i++) {
                     Expression parameterType = typeDeclaration.parameters.get(i).type;
                     Expression parameter = constructorCall.inductiveType.parameters.get(i);
                     checkType(parameter, parameterType, environment);
-                    newEnvironment = newEnvironment.appendScope(typeDeclaration.parameters.get(i).export, parameter);
+                    newEnvironment = newEnvironment.appendScope(typeDeclaration.parameters.get(i).symbol, parameter);
                 }
 
-                PiTypeDecomposition piTypeDecomposition = getPiTypeDecomposition(constructor.definition);
-                System.out.println(">>>");
-                System.out.println(constructor.definition);
-                System.out.println(piTypeDecomposition.argumentTypes);
-                System.out.println(piTypeDecomposition.bodyType);
-                System.out.println(">>>");
-
-                if (piTypeDecomposition.argumentTypes.size() != applicationDecomposition.arguments.size()) {
-                    System.out.println(piTypeDecomposition.arguments);
-                    System.out.println(applicationDecomposition.arguments);
-                    throw new PouletException("wrong number of arguments");
-                }
-
-                for (int i = 0; i < piTypeDecomposition.argumentTypes.size(); i++) {
-                    Expression argumentType = piTypeDecomposition.argumentTypes.get(i);
-                    Expression argument = applicationDecomposition.arguments.get(i);
-                    checkType(argument, argumentType, newEnvironment);
-                    Symbol export = piTypeDecomposition.arguments.get(i);
-                    newEnvironment = newEnvironment.appendScope(export, argument);
-                }
-
-                // TODO: fix
-                // result = constructorCall.inductiveType;
-                result = Interpreter.evaluateExpression(piTypeDecomposition.bodyType, newEnvironment).expression();
-            } else {*/
-            Expression functionType = deduceType(application.function, environment);
-
-            if (functionType instanceof PiType) {
-                PiType piType = (PiType) functionType;
-                // TODO: Fix this
-                checkType(application.argument, piType.type, environment);
-                result = piType.body.substitute(piType.variable, application.argument);
-            } else if (functionType instanceof Variable) { // TODO: Double check this sketchy-ness
-                Variable variable = (Variable) functionType;
-                String name = variable.symbol.name;
-
-                if (name.matches("Type\\d+")) {
-                    if (application.function instanceof PiType) {
-                        PiType piType = (PiType) application.function;
-                        checkType(application.argument, piType.type, environment);
-                        result = new Variable(new Symbol(name));
-                    } else if (application.function instanceof Variable) {
-                        Variable free = (Variable) application.function;
-                        Expression definition = environment.lookUpScope(free.symbol);
-
-                        if (definition instanceof PiType) {
-                            PiType piType = (PiType) definition;
-                            checkType(application.argument, piType.type, environment);
-                            result = new Variable(new Symbol(name));
-                        }
-                    }
-                }
-            } else {
-                throw new PouletException("can't apply to " + application.function);
-            }
-        } else if (term instanceof PiType) {
-            PiType piType = (PiType) term;
-            Expression typeLevel = deduceType(piType.type, environment);
-            Symbol tempSymbol = new Symbol("temp").makeUnique();
-            Environment newEnvironment = environment.appendType(tempSymbol, Evaluator.reduce(piType.type, environment));
-            Expression bodyLevel = deduceType(piType.body.substitute(piType.variable, new Variable(tempSymbol)), newEnvironment);
-            if (typeLevel instanceof Variable && bodyLevel instanceof Variable) {
-                Variable typeVar = (Variable) typeLevel;
-                Variable bodyVar = (Variable) bodyLevel;
-                String typeName = typeVar.symbol.name;
-                String bodyName = bodyVar.symbol.name;
-                if (typeName.matches("Type\\d+") && bodyName.matches("Type\\d+")) {
-                    int level1 = Integer.parseInt(typeName.substring(4));
-                    int level2 = Integer.parseInt(bodyName.substring(4));
-                    // result = new Variable(new Symbol("Type" + umax(level1, level2)));
-                    // TODO: why haven't we always been doing this? what am I missing?
-                    result = new Variable(new Symbol("Type" + Math.max(level1, level2)));
-                }
-            }
-        } else if (term instanceof InductiveType) {
-            InductiveType inductiveType = (InductiveType) term;
-            TypeDeclaration typeDeclaration = environment.lookUpTypeDeclaration(inductiveType.type);
-
-            if (typeDeclaration == null)
-                throw new PouletException("type declaration not found");
-
-            if (inductiveType.parameters.size() != typeDeclaration.parameters.size())
-                throw new PouletException("wrong number of parameters");
-
-            Environment newEnvironment = environment;
-
-            for (int i = 0; i < inductiveType.parameters.size(); i++) {
-                Expression parameterType = typeDeclaration.parameters.get(i).type;
-                Expression parameter = inductiveType.parameters.get(i);
-                checkType(parameter, parameterType, environment);
-                newEnvironment = newEnvironment.appendScope(typeDeclaration.parameters.get(i).symbol, parameter);
+                return Evaluator.reduce(constructor.definition, newEnvironment);
             }
 
-            result = Evaluator.reduce(typeDeclaration.type, newEnvironment);
-        } else if (term instanceof ConstructorCall) {
-            ConstructorCall constructorCall = (ConstructorCall) term;
-            Constructor constructor = environment.lookUpConstructor(constructorCall);
+            @Override
+            public Expression visit(Fix fix) throws PouletException {
+                Definition callingDefinition = fix.getExported();
+                Environment newEnvironment = environment;
 
-            if (constructor == null)
-                throw new PouletException("constructor not found");
-
-            TypeDeclaration typeDeclaration = environment.lookUpTypeDeclaration(constructorCall.inductiveType.type);
-
-            if (typeDeclaration == null)
-                throw new PouletException("type declaration not found");
-
-            if (constructorCall.inductiveType.parameters.size() != typeDeclaration.parameters.size())
-                throw new PouletException("wrong number of parameters");
-
-            Environment newEnvironment = environment;
-
-            for (int i = 0; i < constructorCall.inductiveType.parameters.size(); i++) {
-                Expression parameterType = typeDeclaration.parameters.get(i).type;
-                Expression parameter = constructorCall.inductiveType.parameters.get(i);
-                checkType(parameter, parameterType, environment);
-                newEnvironment = newEnvironment.appendScope(typeDeclaration.parameters.get(i).symbol, parameter);
-            }
-
-            /*if (constructorCall.isConcrete()) {
-                // TODO: using this environment is sketchy, but eh
-                PiTypeDecomposition piTypeDecomposition = getPiTypeDecomposition(constructor.definition);
-
-                if (piTypeDecomposition.argumentTypes.size() != constructorCall.arguments.size())
-                    throw new PouletException("wrong number of arguments");
-
-                for (int i = 0; i < piTypeDecomposition.argumentTypes.size(); i++) {
-                    Expression argumentType = piTypeDecomposition.argumentTypes.get(i);
-                    Expression argument = constructorCall.arguments.get(i);
-                    checkType(argument, argumentType, newEnvironment);
-                    Symbol export = piTypeDecomposition.arguments.get(i);
-                    newEnvironment = newEnvironment.appendScope(export, argument);
+                for (Definition definition : fix.definitions) {
+                    newEnvironment = newEnvironment.appendType(definition.name, definition.type);
                 }
 
-                // TODO: fix
-                // result = constructorCall.inductiveType;
-                result = Interpreter.evaluateExpression(piTypeDecomposition.bodyType, newEnvironment).expression();
-            } else {*/
-            result = Evaluator.reduce(constructor.definition, newEnvironment);
-            //}
-        } else if (term instanceof Match) {
-            Match match = (Match) term;
-            Expression expressionType = deduceType(match.expression, environment);
+                for (Definition definition : fix.definitions) {
+                    checkType(definition.definition, definition.type, newEnvironment);
+                }
 
-            if (expressionType instanceof InductiveType) {
-                InductiveType inductiveType = (InductiveType) expressionType;
+                checkGuarded(fix, newEnvironment);
+
+                return callingDefinition.type;
+            }
+
+            @Override
+            public Expression visit(InductiveType inductiveType) throws PouletException {
                 TypeDeclaration typeDeclaration = environment.lookUpTypeDeclaration(inductiveType.type);
 
-                if (typeDeclaration == null)
-                    throw new PouletException("type declaration " + inductiveType.type + " not found");
-
-                PiTypeDecomposition piTypeDecomposition = getPiTypeDecomposition(typeDeclaration.type);
-                if (match.argumentSymbols.size() != piTypeDecomposition.argumentTypes.size())
-                    throw new PouletException("wrong number of arguments");
-
-                Environment newEnvironment = environment.appendScope(match.expressionSymbol, match.expression);
-
-                for (int i = 0; i < piTypeDecomposition.argumentTypes.size(); i++) {
-                    Symbol symbol = match.argumentSymbols.get(i);
-                    Expression argument = piTypeDecomposition.argumentTypes.get(i);
-                    newEnvironment = newEnvironment.appendType(symbol, argument);
-                    // TODO: need to add to scope too?
+                if (typeDeclaration == null) {
+                    throw new PouletException("type declaration not found");
                 }
 
-                Expression returnType = Evaluator.reduce(match.type, newEnvironment);
+                if (inductiveType.parameters.size() != typeDeclaration.parameters.size()) {
+                    throw new PouletException("wrong number of parameters");
+                }
 
-                for (Constructor constructor : typeDeclaration.constructors) {
-                    Match.Clause matchingClause = null;
-                    for (Match.Clause clause : match.clauses) {
-                        newEnvironment = environment;
+                Environment newEnvironment = environment;
 
-                        if (clause.constructorSymbol.equals(constructor.name)) {
-                            matchingClause = clause;
-                            break;
-                        }
+                for (int i = 0; i < inductiveType.parameters.size(); i++) {
+                    Expression parameterType = typeDeclaration.parameters.get(i).type;
+                    Expression parameter = inductiveType.parameters.get(i);
+                    checkType(parameter, parameterType, environment);
+                    newEnvironment = newEnvironment.appendScope(typeDeclaration.parameters.get(i).symbol, parameter);
+                }
+
+                return Evaluator.reduce(typeDeclaration.type, newEnvironment);
+            }
+
+            @Override
+            public Expression visit(Match match) throws PouletException {
+                Expression expressionType = deduceType(match.expression, environment);
+
+                if (expressionType instanceof InductiveType) {
+                    InductiveType inductiveType = (InductiveType) expressionType;
+                    TypeDeclaration typeDeclaration = environment.lookUpTypeDeclaration(inductiveType.type);
+
+                    if (typeDeclaration == null) {
+                        throw new PouletException("type declaration " + inductiveType.type + " not found");
                     }
 
-                    if (matchingClause == null)
-                        throw new PouletException("no matching clause for constructor " + constructor.name);
-
-                    PiTypeDecomposition constructorPiTypeDecomposition = getPiTypeDecomposition(constructor.definition);
-
-                    if (matchingClause.argumentSymbols.size() != constructorPiTypeDecomposition.argumentTypes.size())
+                    PiTypeDecomposition piTypeDecomposition = new PiTypeDecomposition(typeDeclaration.type);
+                    if (match.argumentSymbols.size() != piTypeDecomposition.argumentTypes.size()) {
                         throw new PouletException("wrong number of arguments");
-
-                    for (int i = 0; i < constructorPiTypeDecomposition.argumentTypes.size(); i++) {
-                        Symbol symbol = matchingClause.argumentSymbols.get(i);
-                        Expression argumentType = constructorPiTypeDecomposition.argumentTypes.get(i);
-                        newEnvironment = newEnvironment.appendType(symbol, argumentType);
                     }
 
-                    List<Expression> arguments = new ArrayList<>();
+                    Environment newEnvironment = environment.appendScope(match.expressionSymbol, match.expression);
 
-                    for (Symbol symbol : matchingClause.argumentSymbols) {
-                        // TODO: is uniqueness working here?
-                        arguments.add(new Variable(symbol));
+                    for (int i = 0; i < piTypeDecomposition.argumentTypes.size(); i++) {
+                        Symbol symbol = match.argumentSymbols.get(i);
+                        Expression argument = piTypeDecomposition.argumentTypes.get(i);
+                        newEnvironment = newEnvironment.appendType(symbol, argument);
+                        // TODO: need to add to scope too?
                     }
 
-                    Expression newExpression = new ConstructorCall(
-                            inductiveType,
-                            constructor.name,
-                            arguments
-                    );
-                    newEnvironment = newEnvironment.appendScope(match.expressionSymbol, newExpression);
-                    Expression specificReturnType = Evaluator.reduce(match.type, newEnvironment);
-                    checkType(matchingClause.expression, specificReturnType, newEnvironment);
+                    Expression returnType = Evaluator.reduce(match.type, newEnvironment);
+
+                    for (Constructor constructor : typeDeclaration.constructors) {
+                        Match.Clause matchingClause = null;
+                        for (Match.Clause clause : match.clauses) {
+                            newEnvironment = environment;
+
+                            if (clause.constructorSymbol.equals(constructor.name)) {
+                                matchingClause = clause;
+                                break;
+                            }
+                        }
+
+                        if (matchingClause == null)
+                            throw new PouletException("no matching clause for constructor " + constructor.name);
+
+                        PiTypeDecomposition constructorPiTypeDecomposition = new PiTypeDecomposition(constructor.definition);
+
+                        if (matchingClause.argumentSymbols.size() != constructorPiTypeDecomposition.argumentTypes.size())
+                            throw new PouletException("wrong number of arguments");
+
+                        for (int i = 0; i < constructorPiTypeDecomposition.argumentTypes.size(); i++) {
+                            Symbol symbol = matchingClause.argumentSymbols.get(i);
+                            Expression argumentType = constructorPiTypeDecomposition.argumentTypes.get(i);
+                            newEnvironment = newEnvironment.appendType(symbol, argumentType);
+                        }
+
+                        List<Expression> arguments = new ArrayList<>();
+
+                        for (Symbol symbol : matchingClause.argumentSymbols) {
+                            // TODO: is uniqueness working here?
+                            arguments.add(new Variable(symbol));
+                        }
+
+                        Expression newExpression = new ConstructorCall(
+                                inductiveType,
+                                constructor.name,
+                                arguments
+                        );
+                        newEnvironment = newEnvironment.appendScope(match.expressionSymbol, newExpression);
+                        Expression specificReturnType = Evaluator.reduce(match.type, newEnvironment);
+                        checkType(matchingClause.expression, specificReturnType, newEnvironment);
+                    }
+
+                    return returnType;
+                } else {
+                    throw new PouletException("can only match on inductive type");
                 }
-
-                result = returnType;
-            }
-        } else if (term instanceof Fix) {
-            Fix fix = (Fix) term;
-            Definition callingDefinition = fix.getExported();
-            Environment newEnvironment = environment;
-
-            for (Definition definition : fix.definitions) {
-                newEnvironment = newEnvironment.appendType(definition.name, definition.type);
             }
 
-            for (Definition definition : fix.definitions) {
-                checkType(definition.definition, definition.type, newEnvironment);
+            @Override
+            public Expression visit(PiType piType) throws PouletException {
+                Expression typeType = deduceType(piType.type, environment);
+                Symbol tempSymbol = new Symbol("temp").makeUnique();
+                Environment newEnvironment = environment.appendType(tempSymbol, Evaluator.reduce(piType.type, environment));
+                Expression bodyType = deduceType(piType.body.substitute(piType.variable, new Variable(tempSymbol)), newEnvironment);
+
+                if (typeType instanceof Sort && bodyType instanceof Prop) {
+                    return new Prop();
+                } else if ((typeType instanceof Prop || typeType instanceof Set) && bodyType instanceof Set) {
+                    return new Set();
+                } else if (typeType instanceof Type && bodyType instanceof Type) {
+                    int typeLevel = ((Type) typeType).level;
+                    int bodyLevel = ((Type) bodyType).level;
+                    return new Type(Math.max(typeLevel, bodyLevel));
+                } else {
+                    throw new PouletException("pi type must qualify over a sort");
+                }
             }
 
+            @Override
+            public Expression visit(Prop prop) {
+                return new Type(1);
+            }
 
-            checkGuarded(fix, newEnvironment);
+            @Override
+            public Expression visit(Set set) {
+                return new Type(1);
+            }
 
-            result = callingDefinition.type;
-        } else if (term instanceof CharLiteral) {
-            result = new Variable(new Symbol("char"));
-        }
+            @Override
+            public Expression visit(Type type) {
+                return new Type(type.level + 1);
+            }
 
-        if (result == null) {
-            System.out.println(StringUtil.mapToStringWithNewlines(Map.of(
-                    "term", term == null ? "null" : term,
-                    "environment", environment
-            )));
-            throw new PouletException("Type Could not be Deduced");
-        }
+            @Override
+            public Expression visit(Variable variable) throws PouletException {
+                Expression variableType = environment.lookUpType(variable.symbol);
+                Expression definition = environment.lookUpScope(variable.symbol);
 
-        // TODO: do we need this uncommented?
-        // result = Interpreter.makeSymbolsUnique(result);
+                if (variableType != null) {
+                    return variableType;
+                } else if (definition != null) {
+                    return deduceType(definition, environment);
+                } else {
+                    throw new PouletException("unknown identifier " + variable);
+                }
+            }
+        });
+
         return Evaluator.reduce(result, environment);
-    }
-
-    private static class PiTypeDecomposition {
-        private List<Symbol> arguments;
-        private List<Expression> argumentTypes;
-        private Expression bodyType;
-
-        private PiTypeDecomposition() {
-            this.arguments = new ArrayList<>();
-            this.argumentTypes = new ArrayList<>();
-            this.bodyType = null;
-        }
-    }
-
-    // decomposes into M = {a_1:A_1}...{a_n:A_n}N with N not being a pi type,
-    private static PiTypeDecomposition getPiTypeDecomposition(Expression expression) {
-        return getPiTypeDecomposition(expression, new PiTypeDecomposition());
-    }
-
-    private static PiTypeDecomposition getPiTypeDecomposition(Expression expression, PiTypeDecomposition piTypeDecomposition) {
-        if (expression instanceof PiType) {
-            PiType piType = (PiType) expression;
-            piTypeDecomposition.arguments.add(piType.variable);
-            piTypeDecomposition.argumentTypes.add(piType.type);
-            return getPiTypeDecomposition(piType.body, piTypeDecomposition);
-        } else {
-            piTypeDecomposition.bodyType = expression;
-            return piTypeDecomposition;
-        }
-    }
-
-    private static class ArgumentDecomposition {
-        private List<Symbol> arguments;
-        private List<Expression> argumentTypes;
-        private Expression body;
-
-        private ArgumentDecomposition() {
-            this.arguments = new ArrayList<>();
-            this.argumentTypes = new ArrayList<>();
-            this.body = null;
-        }
-    }
-
-    // given an expression M = \a_1:A_1->...\a_n:A_n->N with N not being an abstraction,
-    // this function returns the list {a_1=A_1, ..., a_n=A_n}
-    private static ArgumentDecomposition getArgumentDecomposition(Expression expression) {
-        return getArgumentDecomposition(expression, new ArgumentDecomposition());
-    }
-
-    private static ArgumentDecomposition getArgumentDecomposition(Expression expression, ArgumentDecomposition argumentDecomposition) {
-        if (expression instanceof Abstraction) {
-            Abstraction abstraction = (Abstraction) expression;
-            argumentDecomposition.arguments.add(abstraction.symbol);
-            argumentDecomposition.argumentTypes.add(abstraction.type);
-            Expression body = abstraction.body;
-            return getArgumentDecomposition(body, argumentDecomposition);
-        } else {
-            argumentDecomposition.body = expression;
-            return argumentDecomposition;
-        }
-    }
-
-    private static class ApplicationDecomposition {
-        private Expression function = null;
-        private List<Expression> arguments = new ArrayList<>();
-    }
-
-    private static ApplicationDecomposition getApplicationDecomposition(Expression expression) {
-        return getApplicationDecomposition(expression, new ApplicationDecomposition());
-    }
-
-    private static ApplicationDecomposition getApplicationDecomposition(Expression expression, ApplicationDecomposition applicationDecomposition) {
-        if (expression instanceof Application) {
-            // TODO: do we need to try to reduce function and arugment to make it more general?
-            Application application = (Application) expression;
-            applicationDecomposition.arguments.add(0, application.argument);
-            return getApplicationDecomposition(application.function, applicationDecomposition);
-        } else {
-            applicationDecomposition.function = expression;
-            return applicationDecomposition;
-        }
     }
 
     private static void checkGuarded(Fix fix, Environment environment) throws PouletException {
@@ -414,7 +266,7 @@ public class Checker {
         List<Symbol> xs = new ArrayList<>();
 
         for (Definition definition : fix.definitions) {
-            ArgumentDecomposition argumentDecomposition = getArgumentDecomposition(definition.definition);
+            ArgumentDecomposition argumentDecomposition = new ArgumentDecomposition(definition.definition);
 
             if (!(argumentDecomposition.body instanceof Match))
                 throw new PouletException("body of fix definition must be a match, not a " + argumentDecomposition.body.getClass().getSimpleName());
@@ -454,31 +306,7 @@ public class Checker {
         throw new PouletException("function " + fix.export + " not defined in " + fix);
     }
 
-    static int depth = 0;
-
     private static void checkGuarded(Fix fix, Environment environment, List<Integer> ks, List<Symbol> xs, int i, List<Symbol> v, Expression expression) throws PouletException {
-        depth++;
-
-        String indent = "";
-        for (int j = 0; j < depth; j++)
-            indent += "--";
-        indent += " ";
-
-        String message = indent + "checking if " + expression + " is guarded";
-        message = message.replaceAll("\n", "\n" + indent);
-        // System.err.println(message);
-        // TODO: figure this out
-
-        /*boolean recursive = false;
-
-        for (Definition definition : fix.definitions) {
-            if (symbolAppearsIn(definition.name, expression)) {
-                recursive = true;
-            }
-        }
-        if (!recursive)
-            return;*/
-
         if (expression instanceof Variable) {
             Variable variable = (Variable) expression;
 
@@ -535,7 +363,7 @@ public class Checker {
         } else if (expression instanceof Match) {
             Match match = (Match) expression;
             Expression matchExpression = match.expression;
-            ApplicationDecomposition applicationDecomposition = getApplicationDecomposition(matchExpression);
+            ApplicationDecomposition applicationDecomposition = new ApplicationDecomposition(matchExpression);
 
             if (applicationDecomposition.function instanceof Variable) {
                 Variable variable = (Variable) applicationDecomposition.function;
@@ -569,7 +397,7 @@ public class Checker {
                 checkGuarded(fix, environment, ks, xs, i, v, clause.expression);
             }
         } else if (expression instanceof Application) {
-            ApplicationDecomposition applicationDecomposition = getApplicationDecomposition(expression);
+            ApplicationDecomposition applicationDecomposition = new ApplicationDecomposition(expression);
 
             if (applicationDecomposition.function instanceof Variable) {
                 Variable variable = (Variable) applicationDecomposition.function;
@@ -580,7 +408,7 @@ public class Checker {
                             throw new PouletException("must pass at least " + ks.get(i) + " arguments to " + fix.definitions.get(i).name);
 
                         Expression recursive = applicationDecomposition.arguments.get(ks.get(i));
-                        ApplicationDecomposition recursiveDecomposition = getApplicationDecomposition(recursive);
+                        ApplicationDecomposition recursiveDecomposition = new ApplicationDecomposition(recursive);
 
                         if (!(recursiveDecomposition.function instanceof Variable))
                             throw new PouletException("recursive argument must be application to variable");
@@ -606,97 +434,14 @@ public class Checker {
                 checkGuarded(fix, environment, ks, xs, i, v, argument);
             }
         }
-
-        depth--;
-    }
-
-    /*private static boolean symbolAppearsIn(Symbol export, Expression expression) {
-        if (expression instanceof Variable) {
-            Variable variable = (Variable) expression;
-            return variable.export.equals(export);
-        } else if (expression instanceof Application) {
-            Application application = (Application) expression;
-            return symbolAppearsIn(export, application.function)
-                    || symbolAppearsIn(export, application.argument);
-        } else if (expression instanceof Abstraction) {
-            Abstraction abstraction = (Abstraction) expression;
-            return symbolAppearsIn(export, abstraction.type)
-                    || symbolAppearsIn(export, abstraction.body);
-        } else if (expression instanceof PiType) {
-            PiType piType = (PiType) expression;
-            return symbolAppearsIn(export, piType.type)
-                    || symbolAppearsIn(export, piType.body);
-        } else if (expression instanceof Match) {
-            Match match = (Match) expression;
-
-            for (Match.Clause clause : match.clauses) {
-                if (symbolAppearsIn(export, clause.expression))
-                    return true;
-            }
-
-            return symbolAppearsIn(export, match.type)
-                    || symbolAppearsIn(export, match.expression);
-        } else if (expression instanceof InductiveType) {
-            InductiveType inductiveType = (InductiveType) expression;
-
-            for (Expression parameter : inductiveType.parameters) {
-                if (symbolAppearsIn(export, parameter))
-                    return true;
-            }
-
-            if (inductiveType.isConcrete()) {
-                for (Expression argument : inductiveType.arguments) {
-                    if (symbolAppearsIn(export, argument))
-                        return true;
-                }
-            }
-
-            return false;
-        } else if (expression instanceof ConstructorCall) {
-            ConstructorCall constructorCall = (ConstructorCall) expression;
-
-            if (constructorCall.isConcrete()) {
-                for (Expression argument : constructorCall.arguments) {
-                    if (symbolAppearsIn(export, argument))
-                        return true;
-                }
-            }
-
-            return symbolAppearsIn(export, constructorCall.inductiveType);
-        } else if (expression instanceof Fix) {
-            Fix fix = (Fix) expression;
-
-            for (Definition definition : fix.definitions) {
-                if (symbolAppearsIn(export, definition.type))
-                    return true;
-
-                if (symbolAppearsIn(export, definition.definition))
-                    return true;
-            }
-
-            return false;
-        }
-    }*/
-
-    private static int umax(int level1, int level2) {
-        if (level1 <= 2 && level2 <= 2) return 1;
-        return Math.max(level1, level2);
     }
 
     private static <T> boolean allDistinct(Collection<T> collection) {
         return collection.stream().distinct().count() == collection.size();
     }
 
-    private static boolean isSort(Expression expression) {
-        if (expression instanceof Variable) {
-            Variable variable = (Variable) expression;
-            return variable.symbol.name.matches("Type\\d+");
-        }
-        return false;
-    }
-
     private static boolean isArity(Expression type) {
-        if (isSort(type)) {
+        if (type instanceof Sort) {
             return true;
         } else if (type instanceof PiType) {
             PiType piType = (PiType) type;
@@ -745,7 +490,7 @@ public class Checker {
     }
 
     private static void checkPositivity(Expression expression, Symbol symbol, Environment environment) throws PouletException {
-        ApplicationDecomposition applicationDecomposition = getApplicationDecomposition(expression);
+        ApplicationDecomposition applicationDecomposition = new ApplicationDecomposition(expression);
 
         if (applicationDecomposition.function instanceof Variable) {
             Variable variable = (Variable) applicationDecomposition.function;
@@ -789,7 +534,7 @@ public class Checker {
         if (!occursIn(symbol, expression))
             return;
 
-        ApplicationDecomposition applicationDecomposition = getApplicationDecomposition(expression);
+        ApplicationDecomposition applicationDecomposition = new ApplicationDecomposition(expression);
 
         if (applicationDecomposition.function instanceof Variable) {
             Variable variable = (Variable) applicationDecomposition.function;
@@ -864,7 +609,7 @@ public class Checker {
     }
 
     private static void checkNestedPositivity(Expression expression, Symbol symbol, Environment environment) throws PouletException {
-        ApplicationDecomposition applicationDecomposition = getApplicationDecomposition(expression);
+        ApplicationDecomposition applicationDecomposition = new ApplicationDecomposition(expression);
 
         if (applicationDecomposition.function instanceof InductiveType) {
             InductiveType inductiveType = (InductiveType) applicationDecomposition.function;

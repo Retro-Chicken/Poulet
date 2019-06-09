@@ -36,6 +36,18 @@ public interface ExpressionVisitor<T> {
         return other(piType);
     }
 
+    default T visit(Prop prop) throws PouletException {
+        return other(prop);
+    }
+
+    default T visit(Set set) throws PouletException {
+        return other(set);
+    }
+
+    default T visit(Type type) throws PouletException {
+        return other(type);
+    }
+
     default T visit(Variable variable) throws PouletException {
         return other(variable);
     }

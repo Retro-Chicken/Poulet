@@ -22,7 +22,11 @@ type_declaration : 'type' symbol parameter* ':' expression '{' constructor* '}' 
 
 parameter : '(' symbol ':' expression ')' ;
 
-expression : variable | abstraction | expression '(' (expression ',')* expression ')' | pi_type | match | inductive_type | constructor_call | fix | '(' expression ')' | string | character | <assoc=right> expression '->' expression ;
+expression : sort | variable | abstraction | expression '(' (expression ',')* expression ')' | pi_type | match | inductive_type | constructor_call | fix | '(' expression ')' | string | character | <assoc=right> expression '->' expression ;
+
+sort : 'Prop' | 'Set' | TYPE ;
+
+TYPE : 'Type'[0-9]+ ;
 
 constructor_call : inductive_type '.' symbol ;
 
