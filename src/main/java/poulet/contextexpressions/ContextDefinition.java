@@ -1,8 +1,8 @@
 package poulet.contextexpressions;
 
 import poulet.ast.Definition;
-import poulet.ast.Expression;
 import poulet.ast.Symbol;
+import poulet.exceptions.PouletException;
 import poulet.typing.Environment;
 
 public class ContextDefinition {
@@ -10,7 +10,7 @@ public class ContextDefinition {
     public final ContextExpression type;
     public final ContextExpression definition;
 
-    public ContextDefinition(Definition definition, Environment environment) {
+    public ContextDefinition(Definition definition, Environment environment) throws PouletException {
         this.name = definition.name;
         this.type = definition.type.contextExpression(environment);
         this.definition = definition.definition.contextExpression(environment);

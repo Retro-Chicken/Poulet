@@ -4,6 +4,7 @@ import poulet.ast.PiType;
 import poulet.ast.Symbol;
 import poulet.exceptions.PouletException;
 import poulet.typing.Environment;
+import poulet.util.ContextExpressionVisitor;
 
 public class ContextPiType extends ContextExpression {
     public final Symbol variable;
@@ -15,5 +16,9 @@ public class ContextPiType extends ContextExpression {
         this.variable = piType.variable;
         this.type = piType.type.contextExpression(environment);
         this.body = piType.body.contextExpression(environment.appendType(piType.variable, piType.type));
+    }
+
+    public <T> T accept(ContextExpressionVisitor<T> visitor) throws PouletException {
+        return visitor.visit(this);
     }
 }

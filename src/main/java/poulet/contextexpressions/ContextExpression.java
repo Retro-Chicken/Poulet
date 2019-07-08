@@ -1,7 +1,9 @@
 package poulet.contextexpressions;
 
 import poulet.ast.Expression;
+import poulet.exceptions.PouletException;
 import poulet.typing.Environment;
+import poulet.util.ContextExpressionVisitor;
 
 public abstract class ContextExpression {
     public final Expression expression;
@@ -25,4 +27,6 @@ public abstract class ContextExpression {
         }
         return false;
     }
+
+    public abstract <T> T accept(ContextExpressionVisitor<T> visitor) throws PouletException;
 }

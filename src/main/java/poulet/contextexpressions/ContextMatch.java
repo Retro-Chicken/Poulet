@@ -4,6 +4,7 @@ import poulet.ast.*;
 import poulet.exceptions.PouletException;
 import poulet.typing.Checker;
 import poulet.typing.Environment;
+import poulet.util.ContextExpressionVisitor;
 import poulet.util.PiTypeDecomposition;
 
 import java.util.ArrayList;
@@ -111,5 +112,9 @@ public class ContextMatch extends ContextExpression {
         }
 
         throw new PouletException("no clause for " + constructor + " in " + this);
+    }
+
+    public <T> T accept(ContextExpressionVisitor<T> visitor) throws PouletException {
+        return visitor.visit(this);
     }
 }
