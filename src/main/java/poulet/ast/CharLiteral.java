@@ -29,7 +29,7 @@ public class CharLiteral extends Expression {
         return visitor.visit(this);
     }
 
-    public ContextCharLiteral contextExpression(Environment environment) {
+    public ContextCharLiteral contextExpression(Environment environment) throws PouletException {
         return new ContextCharLiteral(this, environment);
     }
 }

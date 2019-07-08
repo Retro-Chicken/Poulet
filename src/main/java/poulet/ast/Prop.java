@@ -16,7 +16,7 @@ public class Prop extends Sort {
         return visitor.visit(this);
     }
 
-    public ContextProp contextExpression(Environment environment) {
+    public ContextProp contextExpression(Environment environment) throws PouletException {
         return new ContextProp(this, environment);
     }
 }

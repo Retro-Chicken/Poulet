@@ -16,7 +16,7 @@ public class Set extends Sort {
         return visitor.visit(this);
     }
 
-    public ContextSet contextExpression(Environment environment) {
+    public ContextSet contextExpression(Environment environment) throws PouletException {
         return new ContextSet(this, environment);
     }
 }

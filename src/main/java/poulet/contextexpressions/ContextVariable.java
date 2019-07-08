@@ -9,9 +9,13 @@ import poulet.util.ContextExpressionVisitor;
 public class ContextVariable extends ContextExpression {
     public final Symbol symbol;
 
-    public ContextVariable(Variable variable, Environment environment) {
+    public ContextVariable(Variable variable, Environment environment) throws PouletException {
         super(variable, environment);
         this.symbol = variable.symbol;
+    }
+
+    public ContextVariable(Symbol symbol, Environment environment) throws PouletException {
+        this(new Variable(symbol), environment);
     }
 
     public <T> T accept(ContextExpressionVisitor<T> visitor) throws PouletException {

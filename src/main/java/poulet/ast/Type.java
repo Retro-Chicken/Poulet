@@ -22,7 +22,7 @@ public class Type extends Sort {
         return visitor.visit(this);
     }
 
-    public ContextType contextExpression(Environment environment) {
+    public ContextType contextExpression(Environment environment) throws PouletException {
         return new ContextType(this, environment);
     }
 }

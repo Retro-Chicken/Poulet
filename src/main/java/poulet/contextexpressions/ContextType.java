@@ -8,9 +8,13 @@ import poulet.util.ContextExpressionVisitor;
 public class ContextType extends ContextExpression {
     public final int level;
 
-    public ContextType(Type type, Environment environment) {
+    public ContextType(Type type, Environment environment) throws PouletException {
         super(type, environment);
         this.level = type.level;
+    }
+
+    public ContextType(int level, Environment environment) throws PouletException {
+        this(new Type(level), environment);
     }
 
     public <T> T accept(ContextExpressionVisitor<T> visitor) throws PouletException {

@@ -10,7 +10,9 @@ public abstract class ContextExpression {
     public final Expression expression;
     public final Environment environment;
 
-    protected ContextExpression(Expression expression, Environment environment) {
+    protected ContextExpression(Expression expression, Environment environment) throws PouletException {
+        if(environment == null)
+            throw new PouletException("Cannot construct a ContextExpression with null environment");
         this.expression = expression;
         this.environment = environment;
     }
@@ -21,6 +23,14 @@ public abstract class ContextExpression {
 
     public ContextExpression appendType(Symbol name, Expression value) throws PouletException {
         return expression.contextExpression(environment.appendType(name, value));
+    }
+
+    public ContextExpression substitute(Symbol symbol, Expression substitution) throws PouletException {
+        return expression.substitute(symbol, substitution).contextExpression(environment);
+    }
+
+    public ContextExpression substitute(Symbol symbol, ContextExpression subsitution) throws PouletException {
+        return substitute(symbol, subsitution.expression);
     }
 
     @Override

@@ -8,7 +8,7 @@ import poulet.util.ContextExpressionVisitor;
 public class ContextCharLiteral extends ContextExpression {
     public final char c;
 
-    public ContextCharLiteral(CharLiteral charLiteral, Environment environment) {
+    public ContextCharLiteral(CharLiteral charLiteral, Environment environment) throws PouletException {
         super(charLiteral, environment);
         this.c = charLiteral.c;
     }

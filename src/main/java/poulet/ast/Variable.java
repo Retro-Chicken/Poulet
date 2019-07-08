@@ -49,7 +49,7 @@ public class Variable extends Expression {
         return visitor.visit(this);
     }
 
-    public ContextVariable contextExpression(Environment environment) {
+    public ContextVariable contextExpression(Environment environment) throws PouletException {
         return new ContextVariable(this, environment);
     }
 }

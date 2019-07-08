@@ -34,7 +34,7 @@ public class ContextInductiveType extends ContextExpression {
         this.arguments = arguments;
     }
 
-    public ContextInductiveType(Symbol type, boolean concrete, List<ContextExpression> parameters) {
+    public ContextInductiveType(Symbol type, boolean concrete, List<ContextExpression> parameters) throws PouletException {
         super(new InductiveType(type, concrete, parameters.stream().map(x -> x.expression).collect(Collectors.toList())), parameters.size() > 0 ? parameters.get(0).environment : null);
         this.type = type;
         this.concrete = concrete;
@@ -42,9 +42,9 @@ public class ContextInductiveType extends ContextExpression {
         this.arguments = concrete ? new ArrayList<>() : null;
     }
 
-    public ContextInductiveType(Symbol type, boolean concrete, List<ContextExpression> parameters, List<ContextExpression> arguments) {
+    public ContextInductiveType(Symbol type, boolean concrete, List<ContextExpression> parameters, List<ContextExpression> arguments, Environment environment) throws PouletException {
         super(new InductiveType(type, concrete, parameters.stream().map(x -> x.expression).collect(Collectors.toList()),
-                arguments.stream().map(x -> x.expression).collect(Collectors.toList())), parameters.size() > 0 ? parameters.get(0).environment : null);
+                arguments.stream().map(x -> x.expression).collect(Collectors.toList())), environment);
         if (concrete && arguments == null) {
             System.out.println(type);
             System.out.println(parameters);

@@ -9,7 +9,6 @@ import poulet.util.ContextExpressionVisitor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ContextFix extends ContextExpression {
     public final List<ContextDefinition> definitions;

@@ -30,11 +30,11 @@ public class ContextConstructorCall extends ContextExpression {
         this.arguments = arguments;
     }
 
-    public ContextConstructorCall(ContextInductiveType inductiveType, Symbol constructor) {
+    public ContextConstructorCall(ContextInductiveType inductiveType, Symbol constructor) throws PouletException {
         this(inductiveType, constructor, null);
     }
 
-    public ContextConstructorCall(ContextInductiveType inductiveType, Symbol constructor, List<ContextExpression> arguments) {
+    public ContextConstructorCall(ContextInductiveType inductiveType, Symbol constructor, List<ContextExpression> arguments) throws PouletException {
         super(new ConstructorCall((InductiveType) inductiveType.expression, constructor, arguments != null ? arguments.stream().map(x -> x.expression).collect(Collectors.toList()) : null), inductiveType.environment);
         this.inductiveType = inductiveType;
         this.constructor = constructor;

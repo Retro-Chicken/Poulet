@@ -15,7 +15,7 @@ public class Evaluator {
         return reduce(expression.contextExpression(environment)).expression;
     }
 
-    private static ContextExpression reduce(ContextExpression reducable) throws PouletException {
+    public static ContextExpression reduce(ContextExpression reducable) throws PouletException {
         return reducable.accept(new ContextExpressionVisitor<>() {
             @Override
             public ContextExpression visit(ContextApplication application) throws PouletException {
@@ -52,7 +52,8 @@ public class Evaluator {
                                         inductiveType.type,
                                         inductiveType.isConcrete(),
                                         inductiveType.parameters,
-                                        newArguments
+                                        newArguments,
+                                        inductiveType.environment
                                 );
                     }
 
@@ -103,14 +104,16 @@ public class Evaluator {
                                     inductiveType.type,
                                     true,
                                     parameters,
-                                    arguments
+                                    arguments,
+                                    inductiveType.environment
                             );
                 } else {
                     return new ContextInductiveType(
                                     inductiveType.type,
                                     true,
                                     inductiveType.parameters,
-                                    new ArrayList<>()
+                                    new ArrayList<>(),
+                                    inductiveType.environment
                             );
                 }
             }
