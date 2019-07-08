@@ -1,6 +1,7 @@
 package poulet.contextexpressions;
 
 import poulet.ast.Expression;
+import poulet.ast.Symbol;
 import poulet.exceptions.PouletException;
 import poulet.typing.Environment;
 import poulet.util.ContextExpressionVisitor;
@@ -12,6 +13,14 @@ public abstract class ContextExpression {
     protected ContextExpression(Expression expression, Environment environment) {
         this.expression = expression;
         this.environment = environment;
+    }
+
+    public ContextExpression appendScope(Symbol name, Expression value) throws PouletException {
+        return expression.contextExpression(environment.appendScope(name, value));
+    }
+
+    public ContextExpression appendType(Symbol name, Expression value) throws PouletException {
+        return expression.contextExpression(environment.appendType(name, value));
     }
 
     @Override

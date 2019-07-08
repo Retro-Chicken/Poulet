@@ -2,6 +2,7 @@ package poulet.contextexpressions;
 
 import poulet.ast.ConstructorCall;
 import poulet.ast.Expression;
+import poulet.ast.InductiveType;
 import poulet.ast.Symbol;
 import poulet.exceptions.PouletException;
 import poulet.typing.Environment;
@@ -9,6 +10,7 @@ import poulet.util.ContextExpressionVisitor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ContextConstructorCall extends ContextExpression {
     public final ContextInductiveType inductiveType;
@@ -25,6 +27,17 @@ public class ContextConstructorCall extends ContextExpression {
             for (Expression argument : constructorCall.arguments)
                 arguments.add(argument.contextExpression(environment));
         }
+        this.arguments = arguments;
+    }
+
+    public ContextConstructorCall(ContextInductiveType inductiveType, Symbol constructor) {
+        this(inductiveType, constructor, null);
+    }
+
+    public ContextConstructorCall(ContextInductiveType inductiveType, Symbol constructor, List<ContextExpression> arguments) {
+        super(new ConstructorCall((InductiveType) inductiveType.expression, constructor, arguments != null ? arguments.stream().map(x -> x.expression).collect(Collectors.toList()) : null), inductiveType.environment);
+        this.inductiveType = inductiveType;
+        this.constructor = constructor;
         this.arguments = arguments;
     }
 
