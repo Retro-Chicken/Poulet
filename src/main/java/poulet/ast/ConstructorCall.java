@@ -94,7 +94,7 @@ public class ConstructorCall extends Expression {
         return visitor.visit(this);
     }
 
-    public ContextConstructorCall contextExpression(Environment environment) {
+    public ContextConstructorCall contextExpression(Environment environment) throws PouletException {
         return new ContextConstructorCall(this, environment);
     }
 }

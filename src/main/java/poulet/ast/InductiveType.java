@@ -85,7 +85,7 @@ public class InductiveType extends Expression {
         return visitor.visit(this);
     }
 
-    public ContextInductiveType contextExpression(Environment environment) {
+    public ContextInductiveType contextExpression(Environment environment) throws PouletException {
         return new ContextInductiveType(this, environment);
     }
 }

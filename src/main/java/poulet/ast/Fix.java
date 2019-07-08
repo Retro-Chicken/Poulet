@@ -74,7 +74,7 @@ public class Fix extends Expression {
         return visitor.visit(this);
     }
 
-    public ContextFix contextExpression(Environment environment) {
+    public ContextFix contextExpression(Environment environment) throws PouletException {
         return new ContextFix(this, environment);
     }
 }

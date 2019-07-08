@@ -56,7 +56,7 @@ public class Abstraction extends Expression {
         return visitor.visit(this);
     }
 
-    public ContextAbstraction contextExpression(Environment environment) {
+    public ContextAbstraction contextExpression(Environment environment) throws PouletException {
         return new ContextAbstraction(this, environment);
     }
 }

@@ -44,7 +44,7 @@ public class Application extends Expression {
         return visitor.visit(this);
     }
 
-    public ContextApplication contextExpression(Environment environment) {
+    public ContextApplication contextExpression(Environment environment) throws PouletException {
         return new ContextApplication(this, environment);
     }
 }
