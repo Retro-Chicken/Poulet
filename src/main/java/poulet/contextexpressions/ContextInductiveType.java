@@ -9,6 +9,7 @@ import poulet.util.ContextExpressionVisitor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ContextInductiveType extends ContextExpression {
     public final Symbol type;
@@ -24,9 +25,35 @@ public class ContextInductiveType extends ContextExpression {
         for(Expression parameter : inductiveType.parameters)
             parameters.add(parameter.contextExpression(environment));
         this.parameters = parameters;
-        List<ContextExpression> arguments = new ArrayList<>();
-        for(Expression argument : inductiveType.arguments)
-            arguments.add(argument.contextExpression(environment));
+        List<ContextExpression> arguments = null;
+        if(inductiveType.arguments != null) {
+            arguments = new ArrayList<>();
+            for (Expression argument : inductiveType.arguments)
+                arguments.add(argument.contextExpression(environment));
+        }
+        this.arguments = arguments;
+    }
+
+    public ContextInductiveType(Symbol type, boolean concrete, List<ContextExpression> parameters) {
+        super(new InductiveType(type, concrete, parameters.stream().map(x -> x.expression).collect(Collectors.toList())), parameters.size() > 0 ? parameters.get(0).environment : null);
+        this.type = type;
+        this.concrete = concrete;
+        this.parameters = parameters;
+        this.arguments = concrete ? new ArrayList<>() : null;
+    }
+
+    public ContextInductiveType(Symbol type, boolean concrete, List<ContextExpression> parameters, List<ContextExpression> arguments) {
+        super(new InductiveType(type, concrete, parameters.stream().map(x -> x.expression).collect(Collectors.toList()),
+                arguments.stream().map(x -> x.expression).collect(Collectors.toList())), parameters.size() > 0 ? parameters.get(0).environment : null);
+        if (concrete && arguments == null) {
+            System.out.println(type);
+            System.out.println(parameters);
+            System.out.println(">>>the fuck");
+        }
+
+        this.type = type;
+        this.concrete = concrete;
+        this.parameters = parameters;
         this.arguments = arguments;
     }
 

@@ -18,6 +18,13 @@ public class ContextPiType extends ContextExpression {
         this.body = piType.body.contextExpression(environment.appendType(piType.variable, piType.type));
     }
 
+    public ContextPiType(Symbol variable, ContextExpression type, ContextExpression body) {
+        super(new PiType(variable, type.expression, body.expression), type.environment);
+        this.variable = variable;
+        this.type = type;
+        this.body = body;
+    }
+
     public <T> T accept(ContextExpressionVisitor<T> visitor) throws PouletException {
         return visitor.visit(this);
     }

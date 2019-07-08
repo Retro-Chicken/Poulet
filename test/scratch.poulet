@@ -1,3 +1,24 @@
+type nat : Type1 {
+    Z : nat[]
+    S : nat[] -> nat[]
+}
+
+pred : nat[] -> nat[] := \n : nat[] -> match n as _() in nat[] {
+    Z() => nat[].Z,
+    S(m) => m
+}
+
+n0 : nat[] := nat[].Z
+n1 : nat[] := nat[].S(n0)
+
+#check n0
+#check pred
+#check pred(n0)
+#check pred(n1)
+
+#reduce pred(n1)
+
+/*
 #import "std_test.poulet"
 
 n0 : nat[] := nat[].Z

@@ -26,7 +26,7 @@ public class Main {
                 directories.put(new File(args[i]), recursive);
 
         Program program = ASTParser.parse(CharStreams.fromFileName(fileName));
-        System.out.println("parsed = \n" + program);
+        //System.out.println("parsed = \n" + program);
         program = ImportHandler.includeImports(program, directories, fileName);
 
         PrintWriter printWriter = new PrintWriter(System.out);

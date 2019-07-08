@@ -2,6 +2,7 @@ package poulet.contextexpressions;
 
 import poulet.ast.*;
 import poulet.exceptions.PouletException;
+import poulet.interpreter.Evaluator;
 import poulet.typing.Checker;
 import poulet.typing.Environment;
 import poulet.util.ContextExpressionVisitor;
@@ -20,8 +21,10 @@ public class ContextMatch extends ContextExpression {
     public ContextMatch(Match match, Environment environment) throws PouletException {
         super(match, environment);
         Expression expressionType = Checker.deduceType(match.expression, environment);
-        if(!(expressionType instanceof InductiveType))
-            throw new PouletException("Matching on non-inductive type");
+        if(!(expressionType instanceof InductiveType)) {
+            System.out.println("\n\n" + match.toString() + "\n\n" + match.expression.toString() + "\n\n" + Evaluator.reduce(match.expression, environment) + "\n\n" + environment.toString() + "\n\n" + Checker.deduceType(Evaluator.reduce(match.expression, environment), environment));
+            throw new PouletException("Matching on non-inductive type of class " + expressionType.getClass().getSimpleName());
+        }
 
         // Add basic stuff
         this.expressionSymbol = match.expressionSymbol;

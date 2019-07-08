@@ -19,10 +19,17 @@ public class ContextConstructorCall extends ContextExpression {
         super(constructorCall, environment);
         this.inductiveType = constructorCall.inductiveType.contextExpression(environment);
         this.constructor = constructorCall.constructor;
-        List<ContextExpression> arguments = new ArrayList<>();
-        for(Expression argument : constructorCall.arguments)
-            arguments.add(argument.contextExpression(environment));
+        List<ContextExpression> arguments = null;
+        if(constructorCall.arguments != null) {
+            arguments = new ArrayList<>();
+            for (Expression argument : constructorCall.arguments)
+                arguments.add(argument.contextExpression(environment));
+        }
         this.arguments = arguments;
+    }
+
+    public boolean isConcrete() {
+        return arguments != null;
     }
 
     public <T> T accept(ContextExpressionVisitor<T> visitor) throws PouletException {

@@ -19,8 +19,11 @@ public class ContextFix extends ContextExpression {
         super(fix, environment);
         this.export = fix.export;
         Environment innerEnvironment = environment;
-        for(Definition definition : fix.definitions)
+        for(Definition definition : fix.definitions) {
             innerEnvironment = innerEnvironment.appendType(definition.name, definition.type);
+            Fix newFix = new Fix(fix.definitions, definition.name);
+            innerEnvironment = innerEnvironment.appendScope(definition.name, newFix);
+        }
         List<ContextDefinition> definitions = new ArrayList<>();
         for(Definition definition : fix.definitions)
             definitions.add(new ContextDefinition(definition.name, definition.type.contextExpression(environment), definition.definition.contextExpression(innerEnvironment)));
