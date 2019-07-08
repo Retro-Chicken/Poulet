@@ -1,6 +1,8 @@
 package poulet.ast;
 
+import poulet.contextexpressions.ContextExpression;
 import poulet.exceptions.PouletException;
+import poulet.typing.Environment;
 import poulet.util.ExpressionVisitor;
 
 import java.util.ArrayList;
@@ -167,4 +169,6 @@ public abstract class Expression extends Node {
     abstract Expression transformSymbols(Function<Symbol, Symbol> transformer, Map<Symbol, Symbol> map) throws PouletException;
 
     public abstract <T> T accept(ExpressionVisitor<T> visitor) throws PouletException;
+
+    public abstract ContextExpression contextExpression(Environment environment) throws PouletException;
 }

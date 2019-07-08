@@ -1,6 +1,8 @@
 package poulet.ast;
 
+import poulet.contextexpressions.ContextVariable;
 import poulet.exceptions.PouletException;
+import poulet.typing.Environment;
 import poulet.util.ExpressionVisitor;
 
 import java.util.Map;
@@ -45,5 +47,9 @@ public class Variable extends Expression {
 
     public <T> T accept(ExpressionVisitor<T> visitor) throws PouletException {
         return visitor.visit(this);
+    }
+
+    public ContextVariable contextExpression(Environment environment) {
+        return new ContextVariable(this, environment);
     }
 }

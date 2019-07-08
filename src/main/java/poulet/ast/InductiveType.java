@@ -1,5 +1,6 @@
 package poulet.ast;
 
+import poulet.contextexpressions.ContextInductiveType;
 import poulet.exceptions.PouletException;
 import poulet.typing.Environment;
 import poulet.util.ExpressionVisitor;
@@ -82,5 +83,9 @@ public class InductiveType extends Expression {
 
     public <T> T accept(ExpressionVisitor<T> visitor) throws PouletException {
         return visitor.visit(this);
+    }
+
+    public ContextInductiveType contextExpression(Environment environment) {
+        return new ContextInductiveType(this, environment);
     }
 }
