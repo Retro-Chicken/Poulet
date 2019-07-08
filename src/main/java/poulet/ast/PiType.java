@@ -1,6 +1,8 @@
 package poulet.ast;
 
+import poulet.contextexpressions.ContextPiType;
 import poulet.exceptions.PouletException;
+import poulet.typing.Environment;
 import poulet.util.ExpressionVisitor;
 
 import java.util.HashMap;
@@ -38,5 +40,9 @@ public class PiType extends Expression {
 
     public <T> T accept(ExpressionVisitor<T> visitor) throws PouletException {
         return visitor.visit(this);
+    }
+
+    public ContextPiType contextExpression(Environment environment) throws PouletException {
+        return new ContextPiType(this, environment);
     }
 }

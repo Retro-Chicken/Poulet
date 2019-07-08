@@ -1,5 +1,7 @@
 package poulet.ast;
 
+import poulet.contextexpressions.ContextMatch;
+import poulet.typing.Environment;
 import poulet.util.StringUtil;
 import poulet.exceptions.PouletException;
 import poulet.util.ExpressionVisitor;
@@ -114,5 +116,9 @@ public class Match extends Expression {
 
     public <T> T accept(ExpressionVisitor<T> visitor) throws PouletException {
         return visitor.visit(this);
+    }
+
+    public ContextMatch contextExpression(Environment environment) throws PouletException {
+        return new ContextMatch(this, environment);
     }
 }

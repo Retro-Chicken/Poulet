@@ -1,5 +1,7 @@
 package poulet.ast;
 
+import poulet.contextexpressions.ContextFix;
+import poulet.typing.Environment;
 import poulet.util.StringUtil;
 import poulet.exceptions.PouletException;
 import poulet.util.ExpressionVisitor;
@@ -70,5 +72,9 @@ public class Fix extends Expression {
 
     public <T> T accept(ExpressionVisitor<T> visitor) throws PouletException {
         return visitor.visit(this);
+    }
+
+    public ContextFix contextExpression(Environment environment) throws PouletException {
+        return new ContextFix(this, environment);
     }
 }

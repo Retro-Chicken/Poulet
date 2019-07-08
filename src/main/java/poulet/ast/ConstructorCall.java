@@ -1,6 +1,8 @@
 package poulet.ast;
 
+import poulet.contextexpressions.ContextConstructorCall;
 import poulet.exceptions.PouletException;
+import poulet.typing.Environment;
 import poulet.util.ExpressionVisitor;
 
 import java.util.ArrayList;
@@ -90,5 +92,9 @@ public class ConstructorCall extends Expression {
 
     public <T> T accept(ExpressionVisitor<T> visitor) throws PouletException {
         return visitor.visit(this);
+    }
+
+    public ContextConstructorCall contextExpression(Environment environment) throws PouletException {
+        return new ContextConstructorCall(this, environment);
     }
 }
