@@ -34,7 +34,7 @@ inductive_type : symbol '[' ((expression ',')* expression)? ']' ;
 
 variable : symbol ;
 
-abstraction : '\\' symbol ':' expression '->' expression ;
+abstraction : '\\' symbol ':' expression IMPLICIT_ARGUMENT? '->' expression ;
 
 pi_type : '{' symbol ':' expression '}' expression ;
 
@@ -65,6 +65,8 @@ ASSERT : '#assert' ;
 STRING : '"' (~'"')* '"' ;
 
 CHAR : '\'' (~'\'')* '\'' ;
+
+IMPLICIT_ARGUMENT : '?' ;
 
 SYMBOL : [a-zA-Z_][a-zA-Z0-9_]* ;
 

@@ -122,10 +122,11 @@ public class ASTParser extends PouletBaseListener {
             Symbol name = (Symbol) children.get(0);
             return new Variable(name);
         } else if (payload instanceof PouletParser.AbstractionContext) {
+            PouletParser.AbstractionContext context = (PouletParser.AbstractionContext) payload;
             Symbol variable = (Symbol) children.get(1);
             Expression type = (Expression) children.get(3);
-            Expression body = (Expression) children.get(5);
-            return new Abstraction(variable, type, body);
+            Expression body = (Expression) children.get(5 + (context.IMPLICIT_ARGUMENT() == null ? 0 : 1));
+            return new Abstraction(variable, type, body, context.IMPLICIT_ARGUMENT() == null ? false : true);
         } else if (payload instanceof PouletParser.Pi_typeContext) {
             Symbol variable = (Symbol) children.get(1);
             Expression type = (Expression) children.get(3);

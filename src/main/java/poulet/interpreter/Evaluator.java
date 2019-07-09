@@ -3,6 +3,8 @@ package poulet.interpreter;
 import poulet.ast.*;
 import poulet.contextexpressions.*;
 import poulet.exceptions.PouletException;
+import poulet.inference.Inferer;
+import poulet.typing.Checker;
 import poulet.typing.Environment;
 import poulet.util.ContextExpressionVisitor;
 import poulet.util.ExpressionVisitor;
@@ -28,7 +30,10 @@ public class Evaluator {
                         // TODO: figure out if this makes sense
                         // do we need to store an Environment with everything in scope?
 
-                        return reduce(abstraction.body.appendScope(abstraction.symbol, argument.expression));
+                        // ------------------ WITHOUT INFERENCE ----------------------------
+                        //return reduce(abstraction.body.appendScope(abstraction.symbol, argument.expression));
+                        // ------------------   WITH INFERENCE  ----------------------------
+                        return reduce(Inferer.inferApplication(new ContextApplication(function, argument)));
                     }
 
                     @Override
@@ -59,7 +64,7 @@ public class Evaluator {
 
                     @Override
                     public ContextExpression other(ContextExpression expression) throws PouletException {
-                        return new Application(function.expression, argument.expression).contextExpression(reducable.environment);
+                        return new ContextApplication(function, argument);
                     }
                 });
             }

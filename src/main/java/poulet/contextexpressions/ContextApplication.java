@@ -15,6 +15,12 @@ public class ContextApplication extends ContextExpression {
         this.argument = application.argument.contextExpression(environment);
     }
 
+    public ContextApplication(ContextExpression function, ContextExpression argument) throws PouletException {
+        super(new Application(function.expression, argument.expression), function.environment);
+        this.function = function;
+        this.argument = argument;
+    }
+
     public <T> T accept(ContextExpressionVisitor<T> visitor) throws PouletException {
         return visitor.visit(this);
     }

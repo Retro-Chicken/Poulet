@@ -11,11 +11,14 @@ public class ContextAbstraction extends ContextExpression {
     public final ContextExpression type;
     public final ContextExpression body;
 
+    public final boolean inferable;
+
     public ContextAbstraction(Abstraction abstraction, Environment environment) throws PouletException {
         super(abstraction, environment);
         this.symbol = abstraction.symbol;
         this.type = abstraction.type.contextExpression(environment);
         this.body = abstraction.body.contextExpression(environment.appendType(abstraction.symbol, abstraction.type));
+        this.inferable = abstraction.inferable;
     }
 
     public <T> T accept(ContextExpressionVisitor<T> visitor) throws PouletException {

@@ -102,7 +102,23 @@ public class Checker {
                     newEnvironment = newEnvironment.appendScope(typeDeclaration.parameters.get(i).symbol, parameter.expression);
                 }
 
-                return Evaluator.reduce(constructor.definition.contextExpression(newEnvironment));
+                if(constructorCall.isConcrete()) {
+                    PiTypeDecomposition piTypeDecomposition = new PiTypeDecomposition(constructor.definition);
+
+                    if (constructorCall.arguments.size() != piTypeDecomposition.argumentTypes.size()) {
+                        throw new PouletException("wrong number of arguments");
+                    }
+
+                    for (int i = 0; i < constructorCall.arguments.size(); i++) {
+                        Expression argumentType = piTypeDecomposition.argumentTypes.get(i);
+                        ContextExpression argument = constructorCall.arguments.get(i);
+                        checkType(argument.expression, argumentType, newEnvironment);
+                    }
+
+                    return Evaluator.reduce(piTypeDecomposition.bodyType.contextExpression(newEnvironment));
+                } else {
+                    return Evaluator.reduce(constructor.definition.contextExpression(newEnvironment));
+                }
             }
 
             @Override
