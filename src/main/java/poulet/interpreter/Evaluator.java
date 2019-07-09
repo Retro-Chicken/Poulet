@@ -3,6 +3,8 @@ package poulet.interpreter;
 import poulet.ast.*;
 import poulet.contextexpressions.*;
 import poulet.exceptions.PouletException;
+import poulet.inference.Inferer;
+import poulet.typing.Checker;
 import poulet.typing.Environment;
 import poulet.util.ContextExpressionVisitor;
 import poulet.util.ExpressionVisitor;
@@ -19,6 +21,8 @@ public class Evaluator {
         return reducable.accept(new ContextExpressionVisitor<>() {
             @Override
             public ContextExpression visit(ContextApplication application) throws PouletException {
+                application = Inferer.fillImplicitArguments(application);
+
                 ContextExpression function = reduce(application.function);
                 ContextExpression argument = reduce(application.argument);
 
@@ -28,7 +32,15 @@ public class Evaluator {
                         // TODO: figure out if this makes sense
                         // do we need to store an Environment with everything in scope?
 
-                        return reduce(abstraction.body.appendScope(abstraction.symbol, argument.expression));
+                        ContextAbstraction result = abstraction;
+                        // ------------------------- INFERENCE  ----------------------------
+                        /*
+                        List<Expression> implictArguments = Inferer.getImplicitArguments(application);
+                        for(Expression implicitArgument : implictArguments) {
+                            result = (ContextAbstraction) result.body.appendScope(result.symbol, implicitArgument);
+                        }*/
+                        // -----------------------------------------------------------------
+                        return reduce(result.body.appendScope(abstraction.symbol, argument.expression));
                     }
 
                     @Override
@@ -59,7 +71,7 @@ public class Evaluator {
 
                     @Override
                     public ContextExpression other(ContextExpression expression) throws PouletException {
-                        return new Application(function.expression, argument.expression).contextExpression(reducable.environment);
+                        return new ContextApplication(function, argument);
                     }
                 });
             }
@@ -148,7 +160,8 @@ public class Evaluator {
                 return new ContextPiType(
                                 piType.variable,
                                 reduce(piType.type),
-                                reduce(piType.body)
+                                reduce(piType.body),
+                                piType.inferable
                         );
             }
 

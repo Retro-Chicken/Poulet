@@ -14,10 +14,17 @@ public class Abstraction extends Expression {
     public final Expression type;
     public final Expression body;
 
-    public Abstraction(Symbol symbol, Expression type, Expression body) {
+    public final boolean inferable;
+
+    public Abstraction(Symbol symbol, Expression type, Expression body, boolean inferable) {
         this.symbol = symbol;
         this.type = type;
         this.body = body;
+        this.inferable = inferable;
+    }
+
+    public Abstraction(Symbol symbol, Expression type, Expression body) {
+        this(symbol, type, body, false);
     }
 
     @Override
@@ -48,7 +55,8 @@ public class Abstraction extends Expression {
         return new Abstraction(
                 newSymbol,
                 type.transformSymbols(transformer, map),
-                body.transformSymbols(transformer, newMap)
+                body.transformSymbols(transformer, newMap),
+                inferable
         );
     }
 

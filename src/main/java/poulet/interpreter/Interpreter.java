@@ -26,11 +26,17 @@ public class Interpreter {
 
         for (TopLevel topLevel : program.program) {
             if (topLevel instanceof Definition) {
-                Definition definition = (Definition) topLevel;
-                if (definition.definition != null)
-                    Checker.checkType(definition.definition, definition.type, environment);
+                try {
+                    Definition definition = (Definition) topLevel;
+                    if (definition.definition != null)
+                        Checker.checkType(definition.definition, definition.type, environment);
 
-                environment = environment.appendType(definition.name, definition.type);
+                    environment = environment.appendType(definition.name, definition.type);
+                } catch (PouletException e) {
+                    e.printStackTrace();
+                    System.out.println("Error on line: " + topLevel);
+                    System.exit(0);
+                }
             }
         }
 

@@ -22,7 +22,7 @@ public abstract class Expression extends Node {
                 } else {
                     Expression type = abstraction.type.substitute(symbol, substitution);
                     Expression body = abstraction.body.substitute(symbol, substitution);
-                    return new Abstraction(abstraction.symbol, type, body);
+                    return new Abstraction(abstraction.symbol, type, body, abstraction.inferable);
                 }
             }
 
@@ -128,7 +128,7 @@ public abstract class Expression extends Node {
             public Expression visit(PiType piType) throws PouletException {
                 Expression type = piType.type.substitute(symbol, substitution);
                 Expression body = piType.body.substitute(symbol, substitution);
-                return new PiType(piType.variable, type, body);
+                return new PiType(piType.variable, type, body, piType.inferable);
             }
 
             @Override

@@ -3,6 +3,7 @@ package poulet.typing;
 import poulet.ast.*;
 import poulet.contextexpressions.*;
 import poulet.exceptions.PouletException;
+import poulet.inference.Inferer;
 import poulet.interpreter.Evaluator;
 import poulet.util.*;
 
@@ -53,11 +54,13 @@ public class Checker {
             public ContextExpression visit(ContextAbstraction abstraction) throws PouletException {
                 ContextExpression abstractionType = Evaluator.reduce(abstraction.type);
                 ContextExpression bodyType = deduceType(abstraction.body);
-                return new ContextPiType(abstraction.symbol, abstractionType, bodyType);
+                return new ContextPiType(abstraction.symbol, abstractionType, bodyType, abstraction.inferable);
             }
 
             @Override
             public ContextExpression visit(ContextApplication application) throws PouletException {
+                application = Inferer.fillImplicitArguments(application);
+
                 ContextExpression functionType = deduceType(application.function);
 
                 if (functionType instanceof ContextPiType) {
@@ -102,7 +105,23 @@ public class Checker {
                     newEnvironment = newEnvironment.appendScope(typeDeclaration.parameters.get(i).symbol, parameter.expression);
                 }
 
-                return Evaluator.reduce(constructor.definition.contextExpression(newEnvironment));
+                if(constructorCall.isConcrete()) {
+                    PiTypeDecomposition piTypeDecomposition = new PiTypeDecomposition(constructor.definition);
+
+                    if (constructorCall.arguments.size() != piTypeDecomposition.argumentTypes.size()) {
+                        throw new PouletException("wrong number of arguments");
+                    }
+
+                    for (int i = 0; i < constructorCall.arguments.size(); i++) {
+                        Expression argumentType = piTypeDecomposition.argumentTypes.get(i);
+                        ContextExpression argument = constructorCall.arguments.get(i);
+                        checkType(argument.expression, argumentType, newEnvironment);
+                    }
+
+                    return Evaluator.reduce(piTypeDecomposition.bodyType.contextExpression(newEnvironment));
+                } else {
+                    return Evaluator.reduce(constructor.definition.contextExpression(newEnvironment));
+                }
             }
 
             @Override

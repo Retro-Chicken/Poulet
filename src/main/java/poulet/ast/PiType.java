@@ -14,10 +14,17 @@ public class PiType extends Expression {
     public final Expression type;
     public final Expression body;
 
-    public PiType(Symbol variable, Expression type, Expression body) {
+    public final boolean inferable;
+
+    public PiType(Symbol variable, Expression type, Expression body, boolean inferable) {
         this.variable = variable;
         this.type = type;
         this.body = body;
+        this.inferable = inferable;
+    }
+
+    public PiType(Symbol variable, Expression type, Expression body) {
+        this(variable, type, body, false);
     }
 
     @Override
@@ -34,7 +41,8 @@ public class PiType extends Expression {
         return new PiType(
                 newVariable,
                 type.transformSymbols(transformer, map),
-                body.transformSymbols(transformer, newMap)
+                body.transformSymbols(transformer, newMap),
+                inferable
         );
     }
 
