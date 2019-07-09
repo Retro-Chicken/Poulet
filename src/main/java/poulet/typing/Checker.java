@@ -3,6 +3,7 @@ package poulet.typing;
 import poulet.ast.*;
 import poulet.contextexpressions.*;
 import poulet.exceptions.PouletException;
+import poulet.inference.Inferer;
 import poulet.interpreter.Evaluator;
 import poulet.util.*;
 
@@ -53,11 +54,13 @@ public class Checker {
             public ContextExpression visit(ContextAbstraction abstraction) throws PouletException {
                 ContextExpression abstractionType = Evaluator.reduce(abstraction.type);
                 ContextExpression bodyType = deduceType(abstraction.body);
-                return new ContextPiType(abstraction.symbol, abstractionType, bodyType);
+                return new ContextPiType(abstraction.symbol, abstractionType, bodyType, abstraction.inferable);
             }
 
             @Override
             public ContextExpression visit(ContextApplication application) throws PouletException {
+                application = Inferer.fillImplicitArguments(application);
+
                 ContextExpression functionType = deduceType(application.function);
 
                 if (functionType instanceof ContextPiType) {

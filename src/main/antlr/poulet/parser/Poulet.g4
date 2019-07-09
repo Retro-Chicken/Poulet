@@ -36,7 +36,7 @@ variable : symbol ;
 
 abstraction : '\\' symbol ':' expression IMPLICIT_ARGUMENT? '->' expression ;
 
-pi_type : '{' symbol ':' expression '}' expression ;
+pi_type : '{' symbol ':' expression '}' IMPLICIT_ARGUMENT? expression ;
 
 constructor : symbol ':' expression ;
 

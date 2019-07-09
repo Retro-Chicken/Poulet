@@ -10,6 +10,7 @@ import poulet.util.PiTypeDecomposition;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ContextMatch extends ContextExpression {
     public final ContextExpression expression;
@@ -17,6 +18,16 @@ public class ContextMatch extends ContextExpression {
     public final List<Symbol> argumentSymbols;
     public final ContextExpression type;
     public final List<Clause> clauses;
+
+    public ContextMatch(ContextExpression expression, Symbol expressionSymbol, List<Symbol> argumentSymbols, ContextExpression type, List<Clause> clauses) throws PouletException {
+        super(new Match(expression.expression, expressionSymbol, argumentSymbols, type.expression,
+                clauses.stream().map(x -> new Match.Clause(x.constructorSymbol, x.argumentSymbols, x.expression.expression)).collect(Collectors.toList())), expression.environment);
+        this.expression = expression;
+        this.expressionSymbol = expressionSymbol;
+        this.argumentSymbols = argumentSymbols;
+        this.type = type;
+        this.clauses = clauses;
+    }
 
     public ContextMatch(Match match, Environment environment) throws PouletException {
         super(match, environment);
@@ -104,6 +115,12 @@ public class ContextMatch extends ContextExpression {
             this.constructorSymbol = clause.constructorSymbol;
             this.argumentSymbols = clause.argumentSymbols;
             this.expression = clause.expression.contextExpression(environment);
+        }
+
+        public Clause(Symbol constructorSymbol, List<Symbol> argumentSymbols, ContextExpression expression) {
+            this.constructorSymbol = constructorSymbol;
+            this.argumentSymbols = argumentSymbols;
+            this.expression = expression;
         }
     }
 

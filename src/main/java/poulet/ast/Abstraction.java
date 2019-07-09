@@ -55,7 +55,8 @@ public class Abstraction extends Expression {
         return new Abstraction(
                 newSymbol,
                 type.transformSymbols(transformer, map),
-                body.transformSymbols(transformer, newMap)
+                body.transformSymbols(transformer, newMap),
+                inferable
         );
     }
 
