@@ -44,3 +44,12 @@ fix to_zero : nat[] -> nat[] := \n : nat[] -> match n as _() in nat[] {
         S(n_pred) => t(n_pred)
     }
 }.t) ~ nat[].Z
+
+type pair (A : Type1) (B : Type1) : Type1 {
+    mk : A -> B -> pair[A, B]
+}
+
+pr1 : {A : Type1} {B : Type1} pair[A, B] -> A
+    := \A : Type1 -> \B : Type1 -> \p : pair[A, B] -> match p as _() in A {
+        mk(a, b) => a
+    }

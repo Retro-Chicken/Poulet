@@ -65,9 +65,9 @@ public class ContextMatch extends ContextExpression {
         List<Clause> clauses = new ArrayList<>();
         for (Constructor constructor : typeDeclaration.constructors) {
             Match.Clause matchingClause = null;
-            for (Match.Clause clause : match.clauses) {
-                newEnvironment = environment;
+            newEnvironment = environment;
 
+            for (Match.Clause clause : match.clauses) {
                 if (clause.constructorSymbol.equals(constructor.name)) {
                     matchingClause = clause;
                     break;
@@ -76,6 +76,13 @@ public class ContextMatch extends ContextExpression {
 
             if (matchingClause == null)
                 throw new PouletException("no matching clause for constructor " + constructor.name);
+
+            for (int i = 0; i < typeDeclaration.parameters.size(); i++) {
+                newEnvironment = newEnvironment.appendScope(
+                        typeDeclaration.parameters.get(i).symbol,
+                        inductiveType.parameters.get(i)
+                );
+            }
 
             PiTypeDecomposition constructorPiTypeDecomposition = new PiTypeDecomposition(constructor.definition);
 
