@@ -89,3 +89,20 @@ type list (A : Type1) : Type1 {
 
 char : Type1
 string : Type1 := list[char]
+
+type pair (A : Type1) (B : Type1) : Type1 {
+    mk : A -> B -> pair[A, B]
+}
+
+pair : {A : Type1}? A -> {B : Type1}? B -> pair[A, B]
+    := \A : Type1? -> \a : A -> \B : Type1? -> \b : B -> pair[A, B].mk(a, b)
+
+pr1 : {A : Type1}? {B : Type1}? pair[A, B] -> A
+    := \A : Type1? -> \B : Type1? -> \p : pair[A, B] -> match p as _() in A {
+        mk(a, b) => a
+    }
+
+pr2 : {A : Type1}? {B : Type1}? pair[A, B] -> B
+    := \A : Type1? -> \B : Type1? -> \p : pair[A, B] -> match p as _() in B {
+        mk(a, b) => b
+    }

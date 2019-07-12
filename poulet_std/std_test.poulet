@@ -66,3 +66,6 @@ n9 : nat[] := nat[].S(n8)
 #assert div(n8, n3) ~ n2
 #assert div(n0, n2) ~ n0
 #assert div(n9, n0) ~ n9
+
+#assert pr1(pair(nat[].Z, bool[].true)) ~ nat[].Z
+#assert pr2(pair(nat[].Z, bool[].true)) ~ bool[].true

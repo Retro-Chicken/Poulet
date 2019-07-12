@@ -3,17 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="d593545a-e331-4606-91b8-91b6f4f72e2f" name="Default Changelist" comment="jk">
       <change beforePath="$PROJECT_DIR$/Poulet.iws" beforeDir="false" afterPath="$PROJECT_DIR$/Poulet.iws" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/antlr/poulet/parser/Poulet.g4" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/antlr/poulet/parser/Poulet.g4" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/ast/Abstraction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/ast/Abstraction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/ast/Expression.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/ast/Expression.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/ast/PiType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/ast/PiType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/contextexpressions/ContextMatch.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/contextexpressions/ContextMatch.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/contextexpressions/ContextPiType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/contextexpressions/ContextPiType.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/inference/Inferer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/inference/Inferer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/interpreter/Evaluator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/interpreter/Evaluator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/interpreter/Interpreter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/interpreter/Interpreter.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/parser/ASTParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/parser/ASTParser.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/typing/Checker.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/typing/Checker.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/poulet_std/std.poulet" beforeDir="false" afterPath="$PROJECT_DIR$/poulet_std/std.poulet" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/poulet_std/std_test.poulet" beforeDir="false" afterPath="$PROJECT_DIR$/poulet_std/std_test.poulet" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/scratch.poulet" beforeDir="false" afterPath="$PROJECT_DIR$/test/scratch.poulet" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.gradle/" />
     <ignored path="$PROJECT_DIR$/build/" />
@@ -126,17 +118,50 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/test/scratch.poulet">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="425">
-              <caret line="25" column="9" lean-forward="true" selection-start-line="25" selection-start-column="9" selection-end-line="25" selection-end-column="9" />
+            <state relative-caret-position="68">
+              <caret line="4" column="39" lean-forward="true" selection-start-line="4" selection-start-column="39" selection-end-line="4" selection-end-column="39" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/poulet/interpreter/Interpreter.java">
+        <entry file="file://$PROJECT_DIR$/poulet_std/std_test.poulet">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="248">
-              <caret line="35" column="40" selection-start-line="35" selection-start-column="40" selection-end-line="35" selection-end-column="40" />
+            <state relative-caret-position="796">
+              <caret line="70" column="53" selection-start-line="70" selection-start-column="53" selection-end-line="70" selection-end-column="53" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/poulet_std/std.poulet">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="170">
+              <caret line="10" column="9" selection-start-line="10" selection-start-column="9" selection-end-line="10" selection-end-column="9" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/poulet/interpreter/Evaluator.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="509">
+              <caret line="153" column="21" selection-start-line="153" selection-start-column="21" selection-end-line="153" selection-end-column="21" />
+              <folding>
+                <element signature="e#9179#9180#0" expanded="true" />
+                <element signature="e#9227#9228#0" expanded="true" />
+                <element signature="e#10827#10828#0" expanded="true" />
+                <element signature="e#10871#10872#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/poulet/contextexpressions/ContextMatch.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="68">
+              <caret line="14" column="13" selection-start-line="14" selection-start-column="13" selection-end-line="14" selection-end-column="13" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -145,19 +170,22 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/poulet_std/std.poulet">
+        <entry file="file://$PROJECT_DIR$/src/main/java/poulet/typing/Checker.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="255">
-              <caret line="15" column="1" lean-forward="true" selection-start-line="15" selection-start-column="1" selection-end-line="15" selection-end-column="1" />
+            <state relative-caret-position="2822">
+              <caret line="176" column="61" selection-start-line="176" selection-start-column="61" selection-end-line="176" selection-end-column="61" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/poulet/inference/Inferer.java">
+        <entry file="file://$PROJECT_DIR$/src/main/java/poulet/util/ExpressionVisitor.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="340">
-              <caret line="27" column="5" lean-forward="true" selection-start-line="27" selection-start-column="5" selection-end-line="27" selection-end-column="5" />
+            <state relative-caret-position="850">
+              <caret line="51" column="15" selection-start-line="51" selection-start-column="15" selection-end-line="51" selection-end-column="15" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -200,7 +228,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/main/java/poulet/util/ApplicationDecomposition.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/util/Util.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/util/StringUtil.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/util/PiTypeDecomposition.java" />
@@ -220,7 +247,6 @@
         <option value="$PROJECT_DIR$/src/main/java/poulet/ast/InductiveType.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/contextexpressions/ContextTopLevel.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/contextexpressions/ContextDefinition.java" />
-        <option value="$PROJECT_DIR$/poulet_std/std_test.poulet" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/Main.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/contextexpressions/ContextCharLiteral.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/contextexpressions/ContextConstructorCall.java" />
@@ -245,12 +271,14 @@
         <option value="$PROJECT_DIR$/src/main/antlr/poulet/parser/Poulet.g4" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/parser/ASTParser.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/ast/PiType.java" />
-        <option value="$PROJECT_DIR$/src/main/java/poulet/interpreter/Evaluator.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/typing/Checker.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/ast/Expression.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/contextexpressions/ContextPiType.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/inference/Inferer.java" />
+        <option value="$PROJECT_DIR$/poulet_std/std_test.poulet" />
         <option value="$PROJECT_DIR$/test/scratch.poulet" />
+        <option value="$PROJECT_DIR$/poulet_std/std.poulet" />
+        <option value="$PROJECT_DIR$/src/main/java/poulet/interpreter/Evaluator.java" />
       </list>
     </option>
   </component>
@@ -308,30 +336,6 @@
               <item name="Poulet" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="antlr" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Poulet" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Poulet" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="antlr" type="462c0819:PsiDirectoryNode" />
-              <item name="poulet" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Poulet" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Poulet" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="antlr" type="462c0819:PsiDirectoryNode" />
-              <item name="poulet" type="462c0819:PsiDirectoryNode" />
-              <item name="parser" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Poulet" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Poulet" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="java" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -341,69 +345,6 @@
               <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="java" type="462c0819:PsiDirectoryNode" />
               <item name="poulet" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Poulet" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Poulet" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="poulet" type="462c0819:PsiDirectoryNode" />
-              <item name="ast" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Poulet" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Poulet" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="poulet" type="462c0819:PsiDirectoryNode" />
-              <item name="contextexpressions" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Poulet" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Poulet" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="poulet" type="462c0819:PsiDirectoryNode" />
-              <item name="inference" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Poulet" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Poulet" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="poulet" type="462c0819:PsiDirectoryNode" />
-              <item name="interpreter" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Poulet" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Poulet" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="poulet" type="462c0819:PsiDirectoryNode" />
-              <item name="parser" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Poulet" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Poulet" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="poulet" type="462c0819:PsiDirectoryNode" />
-              <item name="typing" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="Poulet" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Poulet" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="poulet" type="462c0819:PsiDirectoryNode" />
-              <item name="util" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="Poulet" type="b2602c69:ProjectViewProjectNode" />
@@ -620,7 +561,7 @@
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49860725" visible="true" weight="0.22974414" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49860725" visible="true" weight="0.23507462" />
       <window_info id="Structure" order="1" sideWeight="0.5013928" side_tool="true" weight="0.2336874" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
@@ -629,7 +570,7 @@
       <window_info id="Favorites" order="6" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32970452" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.5827011" visible="true" weight="0.37811485" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.5827011" weight="0.37811485" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.46912244" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -1034,16 +975,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/util/ExpressionVisitor.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="246">
-          <caret line="51" column="15" selection-start-line="51" selection-start-column="15" selection-end-line="51" selection-end-column="15" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/poulet/Main.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="204">
@@ -1054,27 +985,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/poulet_std/std_test.poulet">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-581">
-          <caret line="11" column="25" selection-start-line="11" selection-start-column="25" selection-end-line="11" selection-end-column="25" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/poulet/ast/Match.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1334">
           <caret line="121" column="19" selection-start-line="121" selection-start-column="19" selection-end-line="121" selection-end-column="19" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/contextexpressions/ContextMatch.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="316">
-          <caret line="122" column="41" selection-start-line="122" selection-start-column="41" selection-end-line="122" selection-end-column="41" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -1111,17 +1025,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/interpreter/Evaluator.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="314">
-          <caret line="163" column="48" selection-start-line="163" selection-start-column="48" selection-end-line="163" selection-end-column="48" />
-          <folding>
-            <element signature="e#6386#7453#0" expanded="true" />
-            <element signature="e#7452#7453#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/poulet/contextexpressions/ContextFix.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="306">
@@ -1129,13 +1032,6 @@
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/poulet_std/std.poulet">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="15" column="1" lean-forward="true" selection-start-line="15" selection-start-column="1" selection-end-line="15" selection-end-column="1" />
         </state>
       </provider>
     </entry>
@@ -1173,16 +1069,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/typing/Checker.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="328">
-          <caret line="69" column="40" selection-start-line="69" selection-start-column="40" selection-end-line="69" selection-end-column="40" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/poulet/inference/Inferer.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="340">
@@ -1193,10 +1079,67 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/contextexpressions/ContextMatch.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="68">
+          <caret line="14" column="13" selection-start-line="14" selection-start-column="13" selection-end-line="14" selection-end-column="13" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/typing/Checker.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2822">
+          <caret line="176" column="61" selection-start-line="176" selection-start-column="61" selection-end-line="176" selection-end-column="61" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/util/ExpressionVisitor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="850">
+          <caret line="51" column="15" selection-start-line="51" selection-start-column="15" selection-end-line="51" selection-end-column="15" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/interpreter/Evaluator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="509">
+          <caret line="153" column="21" selection-start-line="153" selection-start-column="21" selection-end-line="153" selection-end-column="21" />
+          <folding>
+            <element signature="e#9179#9180#0" expanded="true" />
+            <element signature="e#9227#9228#0" expanded="true" />
+            <element signature="e#10827#10828#0" expanded="true" />
+            <element signature="e#10871#10872#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/poulet_std/std.poulet">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="10" column="9" selection-start-line="10" selection-start-column="9" selection-end-line="10" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/poulet_std/std_test.poulet">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="796">
+          <caret line="70" column="53" selection-start-line="70" selection-start-column="53" selection-end-line="70" selection-end-column="53" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/test/scratch.poulet">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="425">
-          <caret line="25" column="9" lean-forward="true" selection-start-line="25" selection-start-column="9" selection-end-line="25" selection-end-column="9" />
+        <state relative-caret-position="68">
+          <caret line="4" column="39" lean-forward="true" selection-start-line="4" selection-start-column="39" selection-end-line="4" selection-end-column="39" />
         </state>
       </provider>
     </entry>
