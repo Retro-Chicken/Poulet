@@ -1,6 +1,5 @@
 package poulet.ast;
 
-import poulet.contextexpressions.ContextProp;
 import poulet.exceptions.PouletException;
 import poulet.typing.Environment;
 import poulet.util.ExpressionVisitor;
@@ -16,7 +15,15 @@ public class Prop extends Sort {
         return visitor.visit(this);
     }
 
-    public ContextProp contextExpression(Environment environment) throws PouletException {
-        return new ContextProp(this, environment);
+    public Prop(Environment environment) {
+        super(environment);
+    }
+
+    public Prop() {
+        this(null);
+    }
+
+    public Prop context(Environment environment) {
+        return new Prop(environment);
     }
 }

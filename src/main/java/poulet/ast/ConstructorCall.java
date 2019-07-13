@@ -1,6 +1,5 @@
 package poulet.ast;
 
-import poulet.contextexpressions.ContextConstructorCall;
 import poulet.exceptions.PouletException;
 import poulet.typing.Environment;
 import poulet.util.ExpressionVisitor;
@@ -16,14 +15,23 @@ public class ConstructorCall extends Expression {
     public final Symbol constructor;
     public final List<Expression> arguments;
 
-    public ConstructorCall(InductiveType inductiveType, Symbol constructor) {
-        this(inductiveType, constructor, null);
+    public ConstructorCall(InductiveType inductiveType, Symbol constructor, List<Expression> arguments, Environment environment) throws PouletException {
+        super(environment);
+        this.inductiveType = inductiveType.context(environment);
+        this.constructor = constructor;
+        this.arguments = arguments == null ? null : arguments.stream().map(x -> x.context(environment)).collect(Collectors.toList());
     }
 
-    public ConstructorCall(InductiveType inductiveType, Symbol constructor, List<Expression> arguments) {
-        this.inductiveType = inductiveType;
-        this.constructor = constructor;
-        this.arguments = arguments;
+    public ConstructorCall(InductiveType inductiveType, Symbol constructor, Environment environment) throws PouletException {
+        this(inductiveType, constructor, null, environment);
+    }
+
+    public ConstructorCall(InductiveType inductiveType, Symbol constructor) throws PouletException {
+        this(inductiveType, constructor, null, null);
+    }
+
+    public ConstructorCall(InductiveType inductiveType, Symbol constructor, List<Expression> arguments) throws PouletException {
+        this(inductiveType, constructor, arguments, null);
     }
 
     public boolean isConcrete() {
@@ -86,7 +94,8 @@ public class ConstructorCall extends Expression {
         return new ConstructorCall(
                 inductiveType.transformSymbols(transformer, map),
                 constructor,
-                newArguments
+                newArguments,
+                environment
         );
     }
 
@@ -94,7 +103,7 @@ public class ConstructorCall extends Expression {
         return visitor.visit(this);
     }
 
-    public ContextConstructorCall contextExpression(Environment environment) throws PouletException {
-        return new ContextConstructorCall(this, environment);
+    public ConstructorCall context(Environment environment) throws PouletException {
+        return new ConstructorCall(inductiveType, constructor, arguments, environment);
     }
 }

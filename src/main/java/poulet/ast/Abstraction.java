@@ -1,6 +1,5 @@
 package poulet.ast;
 
-import poulet.contextexpressions.ContextAbstraction;
 import poulet.exceptions.PouletException;
 import poulet.typing.Environment;
 import poulet.util.ExpressionVisitor;
@@ -16,15 +15,26 @@ public class Abstraction extends Expression {
 
     public final boolean inferable;
 
-    public Abstraction(Symbol symbol, Expression type, Expression body, boolean inferable) {
+
+
+    public Abstraction(Symbol symbol, Expression type, Expression body, boolean inferable, Environment environment) throws PouletException {
+        super(environment);
         this.symbol = symbol;
-        this.type = type;
-        this.body = body;
+        this.type = type.context(environment);
+        this.body = body.context(environment == null ? null : environment.appendType(symbol, type));
         this.inferable = inferable;
     }
 
-    public Abstraction(Symbol symbol, Expression type, Expression body) {
-        this(symbol, type, body, false);
+    public Abstraction(Symbol symbol, Expression type, Expression body, Environment environment) throws PouletException {
+        this(symbol, type, body, false, environment);
+    }
+
+    public Abstraction(Symbol symbol, Expression type, Expression body, boolean inferable) throws PouletException {
+        this(symbol, type, body, inferable, null);
+    }
+
+    public Abstraction(Symbol symbol, Expression type, Expression body) throws PouletException {
+        this(symbol, type, body, false, null);
     }
 
     @Override
@@ -56,7 +66,8 @@ public class Abstraction extends Expression {
                 newSymbol,
                 type.transformSymbols(transformer, map),
                 body.transformSymbols(transformer, newMap),
-                inferable
+                inferable,
+                environment
         );
     }
 
@@ -64,7 +75,7 @@ public class Abstraction extends Expression {
         return visitor.visit(this);
     }
 
-    public ContextAbstraction contextExpression(Environment environment) throws PouletException {
-        return new ContextAbstraction(this, environment);
+    public Abstraction context(Environment environment) throws PouletException {
+        return new Abstraction(symbol, type, body, inferable, environment);
     }
 }

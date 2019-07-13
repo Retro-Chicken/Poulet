@@ -1,6 +1,5 @@
 package poulet.ast;
 
-import poulet.contextexpressions.ContextInductiveType;
 import poulet.exceptions.PouletException;
 import poulet.typing.Environment;
 import poulet.util.ExpressionVisitor;
@@ -17,14 +16,9 @@ public class InductiveType extends Expression {
     public final List<Expression> parameters;
     public final List<Expression> arguments;
 
-    public InductiveType(Symbol type, boolean concrete, List<Expression> parameters) {
-        this.type = type;
-        this.concrete = concrete;
-        this.parameters = parameters;
-        this.arguments = concrete ? new ArrayList<>() : null;
-    }
+    public InductiveType(Symbol type, boolean concrete, List<Expression> parameters, List<Expression> arguments, Environment environment) throws PouletException {
+        super(environment);
 
-    public InductiveType(Symbol type, boolean concrete, List<Expression> parameters, List<Expression> arguments) {
         if (concrete && arguments == null) {
             System.out.println(type);
             System.out.println(parameters);
@@ -33,8 +27,20 @@ public class InductiveType extends Expression {
 
         this.type = type;
         this.concrete = concrete;
-        this.parameters = parameters;
-        this.arguments = arguments;
+        this.parameters = parameters == null ? null : parameters.stream().map(x -> x.context(environment)).collect(Collectors.toList());
+        this.arguments = arguments == null ? null : arguments.stream().map(x -> x.context(environment)).collect(Collectors.toList());
+    }
+
+    public InductiveType(Symbol type, boolean concrete, List<Expression> parameters, Environment environment) throws PouletException {
+        this(type, concrete, parameters, concrete ? new ArrayList<>() : null, environment);
+    }
+
+    public InductiveType(Symbol type, boolean concrete, List<Expression> parameters, List<Expression> arguments) throws PouletException {
+        this(type, concrete, parameters, arguments, null);
+    }
+
+    public InductiveType(Symbol type, boolean concrete, List<Expression> parameters) throws PouletException {
+        this(type, concrete, parameters, concrete ? new ArrayList<>() : null, null);
     }
 
     public boolean isConcrete() {
@@ -77,7 +83,8 @@ public class InductiveType extends Expression {
                 type,
                 concrete,
                 newParameters,
-                newArguments
+                newArguments,
+                environment
         );
     }
 
@@ -85,7 +92,7 @@ public class InductiveType extends Expression {
         return visitor.visit(this);
     }
 
-    public ContextInductiveType contextExpression(Environment environment) throws PouletException {
-        return new ContextInductiveType(this, environment);
+    public InductiveType context(Environment environment) throws PouletException {
+        return new InductiveType(type, concrete, parameters, arguments, environment);
     }
 }

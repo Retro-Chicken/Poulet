@@ -1,7 +1,6 @@
 package poulet.typing;
 
 import poulet.ast.*;
-import poulet.contextexpressions.*;
 import poulet.exceptions.PouletException;
 import poulet.inference.Inferer;
 import poulet.interpreter.Evaluator;
@@ -13,12 +12,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Checker {
-    public static void checkType(ContextExpression term, ContextExpression type) throws PouletException {
-        checkType(term.expression, type.expression, term.environment);
-    }
-
-    public static void checkType(ContextExpression term, Expression type) throws PouletException {
-        checkType(term.expression, type, term.environment);
+    public static void checkType(Expression term, Expression type) throws PouletException {
+        checkType(term, type, term.environment);
     }
 
     public static void checkType(Expression term, Expression type, Environment environment) throws PouletException {
@@ -42,29 +37,29 @@ public class Checker {
     }
 
     public static Expression deduceType(Expression term, Environment environment) throws PouletException {
-        return deduceType(term.contextExpression(environment)).expression;
+        return deduceType(term.context(environment));
     }
 
-    public static ContextExpression deduceType(ContextExpression term) throws PouletException {
+    public static Expression deduceType(Expression term) throws PouletException {
         if(term.environment == null)
             throw new PouletException("Cannot deduce type in null environment");
 
-        ContextExpression result = term.accept(new ContextExpressionVisitor<>() {
+        Expression result = term.accept(new ExpressionVisitor<>() {
             @Override
-            public ContextExpression visit(ContextAbstraction abstraction) throws PouletException {
-                ContextExpression abstractionType = Evaluator.reduce(abstraction.type);
-                ContextExpression bodyType = deduceType(abstraction.body);
-                return new ContextPiType(abstraction.symbol, abstractionType, bodyType, abstraction.inferable);
+            public Expression visit(Abstraction abstraction) throws PouletException {
+                Expression abstractionType = Evaluator.reduce(abstraction.type);
+                Expression bodyType = deduceType(abstraction.body);
+                return new PiType(abstraction.symbol, abstractionType, bodyType, abstraction.inferable, term.environment);
             }
 
             @Override
-            public ContextExpression visit(ContextApplication application) throws PouletException {
+            public Expression visit(Application application) throws PouletException {
                 application = Inferer.fillImplicitArguments(application);
 
-                ContextExpression functionType = deduceType(application.function);
+                Expression functionType = deduceType(application.function);
 
-                if (functionType instanceof ContextPiType) {
-                    ContextPiType piType = (ContextPiType) functionType;
+                if (functionType instanceof PiType) {
+                    PiType piType = (PiType) functionType;
                     // TODO: Fix this
                     checkType(application.argument, piType.type);
                     return piType.body.substitute(piType.variable, application.argument);
@@ -74,13 +69,13 @@ public class Checker {
             }
 
             @Override
-            public ContextExpression visit(ContextCharLiteral charLiteral) throws PouletException {
-                return new ContextVariable(new Symbol("char"), term.environment);
+            public Expression visit(CharLiteral charLiteral) throws PouletException {
+                return new Variable(new Symbol("char"), term.environment);
             }
 
             @Override
-            public ContextExpression visit(ContextConstructorCall constructorCall) throws PouletException {
-                Constructor constructor = term.environment.lookUpConstructor((ConstructorCall) constructorCall.expression);
+            public Expression visit(ConstructorCall constructorCall) throws PouletException {
+                Constructor constructor = term.environment.lookUpConstructor(constructorCall);
 
                 if (constructor == null) {
                     throw new PouletException("constructor not found");
@@ -100,9 +95,9 @@ public class Checker {
 
                 for (int i = 0; i < constructorCall.inductiveType.parameters.size(); i++) {
                     Expression parameterType = typeDeclaration.parameters.get(i).type;
-                    ContextExpression parameter = constructorCall.inductiveType.parameters.get(i);
+                    Expression parameter = constructorCall.inductiveType.parameters.get(i);
                     checkType(parameter, parameterType);
-                    newEnvironment = newEnvironment.appendScope(typeDeclaration.parameters.get(i).symbol, parameter.expression);
+                    newEnvironment = newEnvironment.appendScope(typeDeclaration.parameters.get(i).symbol, parameter);
                 }
 
                 if(constructorCall.isConcrete()) {
@@ -114,36 +109,36 @@ public class Checker {
 
                     for (int i = 0; i < constructorCall.arguments.size(); i++) {
                         Expression argumentType = piTypeDecomposition.argumentTypes.get(i);
-                        ContextExpression argument = constructorCall.arguments.get(i);
-                        checkType(argument.expression, argumentType, newEnvironment);
+                        Expression argument = constructorCall.arguments.get(i);
+                        checkType(argument, argumentType, newEnvironment);
                     }
 
-                    return Evaluator.reduce(piTypeDecomposition.bodyType.contextExpression(newEnvironment));
+                    return Evaluator.reduce(piTypeDecomposition.bodyType, newEnvironment);
                 } else {
-                    return Evaluator.reduce(constructor.definition.contextExpression(newEnvironment));
+                    return Evaluator.reduce(constructor.definition, newEnvironment);
                 }
             }
 
             @Override
-            public ContextExpression visit(ContextFix fix) throws PouletException {
-                ContextDefinition callingDefinition = fix.getExported();
+            public Expression visit(Fix fix) throws PouletException {
+                Definition callingDefinition = fix.getExported();
                 Environment newEnvironment = term.environment;
 
-                for (ContextDefinition definition : fix.definitions) {
-                    newEnvironment = newEnvironment.appendType(definition.name, definition.type.expression);
+                for (Definition definition : fix.definitions) {
+                    newEnvironment = newEnvironment.appendType(definition.name, definition.type);
                 }
 
-                for (ContextDefinition definition : fix.definitions) {
+                for (Definition definition : fix.definitions) {
                     checkType(definition.definition, definition.type);
                 }
 
-                checkGuarded((Fix) fix.expression, newEnvironment);
+                checkGuarded(fix, newEnvironment);
 
                 return callingDefinition.type;
             }
 
             @Override
-            public ContextExpression visit(ContextInductiveType inductiveType) throws PouletException {
+            public Expression visit(InductiveType inductiveType) throws PouletException {
                 TypeDeclaration typeDeclaration = term.environment.lookUpTypeDeclaration(inductiveType.type);
 
                 if (typeDeclaration == null) {
@@ -158,27 +153,27 @@ public class Checker {
 
                 for (int i = 0; i < inductiveType.parameters.size(); i++) {
                     Expression parameterType = typeDeclaration.parameters.get(i).type;
-                    ContextExpression parameter = inductiveType.parameters.get(i);
+                    Expression parameter = inductiveType.parameters.get(i);
                     checkType(parameter, parameterType);
-                    newEnvironment = newEnvironment.appendScope(typeDeclaration.parameters.get(i).symbol, parameter.expression);
+                    newEnvironment = newEnvironment.appendScope(typeDeclaration.parameters.get(i).symbol, parameter);
                 }
 
-                return Evaluator.reduce(typeDeclaration.type.contextExpression(newEnvironment));
+                return Evaluator.reduce(typeDeclaration.type, newEnvironment);
             }
 
             @Override
-            public ContextExpression visit(ContextMatch match) throws PouletException {
-                ContextExpression expressionType = deduceType(match.expression);
+            public Expression visit(Match match) throws PouletException {
+                Expression expressionType = deduceType(match.expression);
 
-                if (expressionType instanceof ContextInductiveType) {
-                    ContextInductiveType inductiveType = (ContextInductiveType) expressionType;
+                if (expressionType instanceof InductiveType) {
+                    InductiveType inductiveType = (InductiveType) expressionType;
                     TypeDeclaration typeDeclaration = term.environment.lookUpTypeDeclaration(inductiveType.type);
 
-                    ContextExpression returnType = Evaluator.reduce(match.type);
+                    Expression returnType = Evaluator.reduce(match.type);
 
                     for (Constructor constructor : typeDeclaration.constructors) {
-                        ContextMatch.Clause matchingClause = null;
-                        for (ContextMatch.Clause clause : match.clauses) {
+                        Match.Clause matchingClause = null;
+                        for (Match.Clause clause : match.clauses) {
                             if (clause.constructorSymbol.equals(constructor.name)) {
                                 matchingClause = clause;
                                 break;
@@ -196,49 +191,50 @@ public class Checker {
             }
 
             @Override
-            public ContextExpression visit(ContextPiType piType) throws PouletException {
-                ContextExpression typeType = deduceType(piType.type);
-                Symbol tempSymbol = new Symbol("temp").makeUnique();
-                ContextExpression bodyType = deduceType(piType.body.substitute(tempSymbol, new Variable(tempSymbol)).appendType(tempSymbol, Evaluator.reduce(piType.type).expression));
+            public Expression visit(PiType piType) throws PouletException {
+                Expression typeType = deduceType(piType.type);
+                //Symbol tempSymbol = new Symbol("temp").makeUnique();
+                Expression bodyType = deduceType(piType.body);
+                //Expression bodyType = deduceType(piType.body.substitute(tempSymbol, new Variable(tempSymbol, term.environment)), term.environment.appendType(tempSymbol, Evaluator.reduce(piType.type)));
 
 
-                if (typeType.expression instanceof Sort && bodyType instanceof ContextProp) {
-                    return new ContextProp(term.environment);
-                } else if ((typeType instanceof ContextProp || typeType.expression instanceof Set) && bodyType instanceof ContextSet) {
-                    return new ContextSet(term.environment);
-                } else if (typeType instanceof ContextType && bodyType instanceof ContextType) {
-                    int typeLevel = ((ContextType) typeType).level;
-                    int bodyLevel = ((ContextType) bodyType).level;
-                    return new ContextType(Math.max(typeLevel, bodyLevel), term.environment);
+                if (typeType instanceof Sort && bodyType instanceof Prop) {
+                    return new Prop(term.environment);
+                } else if ((typeType instanceof Prop || typeType instanceof Set) && bodyType instanceof Set) {
+                    return new Set(term.environment);
+                } else if (typeType instanceof Type && bodyType instanceof Type) {
+                    int typeLevel = ((Type) typeType).level;
+                    int bodyLevel = ((Type) bodyType).level;
+                    return new Type(Math.max(typeLevel, bodyLevel), term.environment);
                 } else {
                     throw new PouletException("pi type must qualify over a sort");
                 }
             }
 
             @Override
-            public ContextExpression visit(ContextProp prop) throws PouletException {
-                return new ContextType(1, term.environment);
+            public Expression visit(Prop prop) throws PouletException {
+                return new Type(1, term.environment);
             }
 
             @Override
-            public ContextExpression visit(ContextSet set) throws PouletException {
-                return new ContextType(1, term.environment);
+            public Expression visit(Set set) throws PouletException {
+                return new Type(1, term.environment);
             }
 
             @Override
-            public ContextExpression visit(ContextType type) throws PouletException {
-                return new ContextType(type.level + 1, term.environment);
+            public Expression visit(Type type) throws PouletException {
+                return new Type(type.level + 1, term.environment);
             }
 
             @Override
-            public ContextExpression visit(ContextVariable variable) throws PouletException {
+            public Expression visit(Variable variable) throws PouletException {
                 Expression variableType = term.environment.lookUpType(variable.symbol);
                 Expression definition = term.environment.lookUpScope(variable.symbol);
 
                 if (variableType != null) {
-                    return variableType.contextExpression(term.environment);
+                    return variableType.context(term.environment);
                 } else if (definition != null) {
-                    return deduceType(definition.contextExpression(term.environment));
+                    return deduceType(definition, term.environment);
                 } else {
                     throw new PouletException("unknown identifier " + variable);
                 }

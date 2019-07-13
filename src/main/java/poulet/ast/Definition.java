@@ -1,8 +1,6 @@
 package poulet.ast;
 
-import poulet.contextexpressions.ContextDefinition;
 import poulet.exceptions.PouletException;
-import poulet.typing.Environment;
 import poulet.util.TopLevelVisitor;
 
 import java.util.Map;
@@ -49,9 +47,5 @@ public class Definition extends TopLevel {
     @Override
     public <T> T accept(TopLevelVisitor<T> visitor) throws PouletException {
         return visitor.visit(this);
-    }
-
-    public ContextDefinition contextTopLevel(Environment environment) throws PouletException {
-        return new ContextDefinition(this, environment);
     }
 }

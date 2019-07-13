@@ -1,6 +1,5 @@
 package poulet.ast;
 
-import poulet.contextexpressions.ContextApplication;
 import poulet.exceptions.PouletException;
 import poulet.typing.Environment;
 import poulet.util.ExpressionVisitor;
@@ -12,9 +11,14 @@ public class Application extends Expression {
     public final Expression function;
     public final Expression argument;
 
-    public Application(Expression function, Expression argument) {
-        this.function = function;
-        this.argument = argument;
+    public Application(Expression function, Expression argument, Environment environment) throws PouletException {
+        super(environment);
+        this.function = function.context(environment);
+        this.argument = argument.context(environment);
+    }
+
+    public Application(Expression function, Expression argument) throws PouletException {
+        this(function, argument, null);
     }
 
     @Override
@@ -36,7 +40,8 @@ public class Application extends Expression {
     Application transformSymbols(Function<Symbol, Symbol> transformer, Map<Symbol, Symbol> map) throws PouletException {
         return new Application(
                 function.transformSymbols(transformer, map),
-                argument.transformSymbols(transformer, map)
+                argument.transformSymbols(transformer, map),
+                environment
         );
     }
 
@@ -44,7 +49,7 @@ public class Application extends Expression {
         return visitor.visit(this);
     }
 
-    public ContextApplication contextExpression(Environment environment) throws PouletException {
-        return new ContextApplication(this, environment);
+    public Application context(Environment environment) throws PouletException {
+        return new Application(function, argument, environment);
     }
 }

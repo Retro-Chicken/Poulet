@@ -1,6 +1,5 @@
 package poulet.ast;
 
-import poulet.contextexpressions.ContextCharLiteral;
 import poulet.exceptions.PouletException;
 import poulet.typing.Environment;
 import poulet.util.ExpressionVisitor;
@@ -11,8 +10,13 @@ import java.util.function.Function;
 public class CharLiteral extends Expression {
     public final char c;
 
-    public CharLiteral(char c) {
+    public CharLiteral(char c, Environment environment) {
+        super(environment);
         this.c = c;
+    }
+
+    public CharLiteral(char c) {
+        this(c, null);
     }
 
     @Override
@@ -29,7 +33,7 @@ public class CharLiteral extends Expression {
         return visitor.visit(this);
     }
 
-    public ContextCharLiteral contextExpression(Environment environment) throws PouletException {
-        return new ContextCharLiteral(this, environment);
+    public CharLiteral context(Environment environment) {
+        return new CharLiteral(c, environment);
     }
 }

@@ -1,6 +1,5 @@
 package poulet.ast;
 
-import poulet.contextexpressions.ContextExpression;
 import poulet.exceptions.PouletException;
 import poulet.typing.Environment;
 import poulet.util.ExpressionVisitor;
@@ -12,6 +11,12 @@ import java.util.Map;
 import java.util.function.Function;
 
 public abstract class Expression extends Node {
+    public final Environment environment;
+
+    public Expression(Environment environment) {
+        this.environment = environment;
+    }
+
     public Expression substitute(Symbol symbol, Expression substitution) throws PouletException {
         Expression expression = this;
         return expression.accept(new ExpressionVisitor<>() {
@@ -22,7 +27,7 @@ public abstract class Expression extends Node {
                 } else {
                     Expression type = abstraction.type.substitute(symbol, substitution);
                     Expression body = abstraction.body.substitute(symbol, substitution);
-                    return new Abstraction(abstraction.symbol, type, body, abstraction.inferable);
+                    return new Abstraction(abstraction.symbol, type, body, abstraction.inferable, environment);
                 }
             }
 
@@ -30,7 +35,7 @@ public abstract class Expression extends Node {
             public Expression visit(Application application) throws PouletException {
                 Expression function = application.function.substitute(symbol, substitution);
                 Expression argument = application.argument.substitute(symbol, substitution);
-                return new Application(function, argument);
+                return new Application(function, argument, environment);
             }
 
             @Override
@@ -53,7 +58,8 @@ public abstract class Expression extends Node {
                 return new ConstructorCall(
                         (InductiveType) constructorCall.inductiveType.substitute(symbol, substitution),
                         constructorCall.constructor,
-                        arguments
+                        arguments,
+                        environment
                 );
             }
 
@@ -70,7 +76,7 @@ public abstract class Expression extends Node {
                     definitions.add(newDefinition);
                 }
 
-                return new Fix(definitions, fix.export);
+                return new Fix(definitions, fix.export, environment);
             }
 
             @Override
@@ -95,7 +101,8 @@ public abstract class Expression extends Node {
                         inductiveType.type,
                         inductiveType.isConcrete(),
                         parameters,
-                        arguments
+                        arguments,
+                        environment
                 );
             }
 
@@ -120,7 +127,8 @@ public abstract class Expression extends Node {
                         match.expressionSymbol,
                         match.argumentSymbols,
                         type,
-                        clauses
+                        clauses,
+                        environment
                 );
             }
 
@@ -128,7 +136,7 @@ public abstract class Expression extends Node {
             public Expression visit(PiType piType) throws PouletException {
                 Expression type = piType.type.substitute(symbol, substitution);
                 Expression body = piType.body.substitute(symbol, substitution);
-                return new PiType(piType.variable, type, body, piType.inferable);
+                return new PiType(piType.variable, type, body, piType.inferable, environment);
             }
 
             @Override
@@ -170,5 +178,5 @@ public abstract class Expression extends Node {
 
     public abstract <T> T accept(ExpressionVisitor<T> visitor) throws PouletException;
 
-    public abstract ContextExpression contextExpression(Environment environment) throws PouletException;
+    public abstract Expression context(Environment environment) throws PouletException;
 }
