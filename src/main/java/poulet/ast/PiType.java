@@ -1,6 +1,5 @@
 package poulet.ast;
 
-import poulet.contextexpressions.ContextPiType;
 import poulet.exceptions.PouletException;
 import poulet.typing.Environment;
 import poulet.util.ExpressionVisitor;
@@ -16,15 +15,24 @@ public class PiType extends Expression {
 
     public final boolean inferable;
 
-    public PiType(Symbol variable, Expression type, Expression body, boolean inferable) {
+    public PiType(Symbol variable, Expression type, Expression body, boolean inferable, Environment environment) throws PouletException {
+        super(environment);
         this.variable = variable;
-        this.type = type;
-        this.body = body;
+        this.type = type.context(environment);
+        this.body = body.context(environment == null ? null : environment.appendType(variable, type));
         this.inferable = inferable;
     }
 
-    public PiType(Symbol variable, Expression type, Expression body) {
-        this(variable, type, body, false);
+    public PiType(Symbol variable, Expression type, Expression body, Environment environment) throws PouletException {
+        this(variable, type, body, false, environment);
+    }
+
+    public PiType(Symbol variable, Expression type, Expression body, boolean inferable) throws PouletException {
+        this(variable, type, body, inferable, null);
+    }
+
+    public PiType(Symbol variable, Expression type, Expression body) throws PouletException {
+        this(variable, type, body, null);
     }
 
     @Override
@@ -42,7 +50,8 @@ public class PiType extends Expression {
                 newVariable,
                 type.transformSymbols(transformer, map),
                 body.transformSymbols(transformer, newMap),
-                inferable
+                inferable,
+                environment
         );
     }
 
@@ -50,7 +59,7 @@ public class PiType extends Expression {
         return visitor.visit(this);
     }
 
-    public ContextPiType contextExpression(Environment environment) throws PouletException {
-        return new ContextPiType(this, environment);
+    public PiType context(Environment environment) throws PouletException {
+        return new PiType(variable, type, body, inferable, environment);
     }
 }

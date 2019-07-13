@@ -1,12 +1,9 @@
 package poulet.interpreter;
 
 import poulet.ast.*;
-import poulet.contextexpressions.*;
 import poulet.exceptions.PouletException;
 import poulet.inference.Inferer;
-import poulet.typing.Checker;
 import poulet.typing.Environment;
-import poulet.util.ContextExpressionVisitor;
 import poulet.util.ExpressionVisitor;
 
 import java.util.ArrayList;
@@ -14,53 +11,45 @@ import java.util.List;
 
 public class Evaluator {
     public static Expression reduce(Expression expression, Environment environment) throws PouletException {
-        return reduce(expression.contextExpression(environment)).expression;
+        return reduce(expression.context(environment));
     }
 
-    public static ContextExpression reduce(ContextExpression reducable) throws PouletException {
-        return reducable.accept(new ContextExpressionVisitor<>() {
+    public static Expression reduce(Expression expression) throws PouletException {
+        return expression.accept(new ExpressionVisitor<>() {
             @Override
-            public ContextExpression visit(ContextApplication application) throws PouletException {
+            public Expression visit(Application application) throws PouletException {
                 application = Inferer.fillImplicitArguments(application);
 
-                ContextExpression function = reduce(application.function);
-                ContextExpression argument = reduce(application.argument);
+                Expression function = reduce(application.function);
+                Expression argument = reduce(application.argument);
 
-                return function.accept(new ContextExpressionVisitor<>() {
+                return function.accept(new ExpressionVisitor<>() {
                     @Override
-                    public ContextExpression visit(ContextAbstraction abstraction) throws PouletException {
+                    public Expression visit(Abstraction abstraction) throws PouletException {
                         // TODO: figure out if this makes sense
                         // do we need to store an Environment with everything in scope?
-
-                        ContextAbstraction result = abstraction;
-                        // ------------------------- INFERENCE  ----------------------------
-                        /*
-                        List<Expression> implictArguments = Inferer.getImplicitArguments(application);
-                        for(Expression implicitArgument : implictArguments) {
-                            result = (ContextAbstraction) result.body.appendScope(result.symbol, implicitArgument);
-                        }*/
-                        // -----------------------------------------------------------------
-                        return reduce(result.body.appendScope(abstraction.symbol, argument.expression));
+                        return reduce(abstraction.body.context(abstraction.body.environment.appendScope(abstraction.symbol, argument)));
                     }
 
                     @Override
-                    public ContextExpression visit(ContextConstructorCall constructorCall) throws PouletException {
-                        ArrayList<ContextExpression> newArguments = new ArrayList<>(constructorCall.arguments);
+                    public Expression visit(ConstructorCall constructorCall) throws PouletException {
+                        ArrayList<Expression> newArguments = new ArrayList<>(constructorCall.arguments);
                         newArguments.add(argument);
 
-                        return new ContextConstructorCall(
+                        return new ConstructorCall(
                                         constructorCall.inductiveType,
                                         constructorCall.constructor,
-                                        newArguments
+                                        newArguments,
+                                        constructorCall.environment
                                 );
                     }
 
                     @Override
-                    public ContextExpression visit(ContextInductiveType inductiveType) throws PouletException {
-                        ArrayList<ContextExpression> newArguments = new ArrayList<>(inductiveType.arguments);
+                    public Expression visit(InductiveType inductiveType) throws PouletException {
+                        ArrayList<Expression> newArguments = new ArrayList<>(inductiveType.arguments);
                         newArguments.add(argument);
 
-                        return new ContextInductiveType(
+                        return new InductiveType(
                                         inductiveType.type,
                                         inductiveType.isConcrete(),
                                         inductiveType.parameters,
@@ -70,49 +59,50 @@ public class Evaluator {
                     }
 
                     @Override
-                    public ContextExpression other(ContextExpression expression) throws PouletException {
-                        return new ContextApplication(function, argument);
+                    public Expression other(Expression expression) throws PouletException {
+                        return new Application(function, argument, function.environment);
                     }
                 });
             }
 
             @Override
-            public ContextExpression visit(ContextConstructorCall constructorCall) throws PouletException {
-                List<ContextExpression> arguments = new ArrayList<>();
+            public Expression visit(ConstructorCall constructorCall) throws PouletException {
+                List<Expression> arguments = new ArrayList<>();
 
                 if (constructorCall.isConcrete()) {
-                    for (ContextExpression argument : constructorCall.arguments) {
+                    for (Expression argument : constructorCall.arguments) {
                         arguments.add(reduce(argument));
                     }
                 }
 
-                return new ContextConstructorCall(
+                return new ConstructorCall(
                             constructorCall.inductiveType,
                             constructorCall.constructor,
-                            arguments
+                            arguments,
+                            constructorCall.environment
                         );
             }
 
             @Override
-            public ContextExpression visit(ContextFix fix) throws PouletException {
-                ContextDefinition exported = fix.getExported();
+            public Expression visit(Fix fix) throws PouletException {
+                Definition exported = fix.getExported();
                 return reduce(exported.definition);
             }
 
             @Override
-            public ContextExpression visit(ContextInductiveType inductiveType) throws PouletException {
+            public Expression visit(InductiveType inductiveType) throws PouletException {
                 if (inductiveType.isConcrete()) {
-                    List<ContextExpression> parameters = new ArrayList<>();
-                    for (ContextExpression parameter : inductiveType.parameters) {
+                    List<Expression> parameters = new ArrayList<>();
+                    for (Expression parameter : inductiveType.parameters) {
                         parameters.add(reduce(parameter));
                     }
 
-                    List<ContextExpression> arguments = new ArrayList<>();
-                    for (ContextExpression argument : inductiveType.arguments) {
+                    List<Expression> arguments = new ArrayList<>();
+                    for (Expression argument : inductiveType.arguments) {
                         arguments.add(reduce(argument));
                     }
 
-                    return new ContextInductiveType(
+                    return new InductiveType(
                                     inductiveType.type,
                                     true,
                                     parameters,
@@ -120,7 +110,7 @@ public class Evaluator {
                                     inductiveType.environment
                             );
                 } else {
-                    return new ContextInductiveType(
+                    return new InductiveType(
                                     inductiveType.type,
                                     true,
                                     inductiveType.parameters,
@@ -131,18 +121,18 @@ public class Evaluator {
             }
 
             @Override
-            public ContextExpression visit(ContextMatch match) throws PouletException {
-                ContextExpression matchExpression = reduce(match.expression);
+            public Expression visit(Match match) throws PouletException {
+                Expression matchExpression = reduce(match.expression);
 
-                return matchExpression.expression.accept(new ExpressionVisitor<>() {
+                return matchExpression.accept(new ExpressionVisitor<>() {
                     @Override
-                    public ContextExpression visit(ConstructorCall constructorCall) throws PouletException {
+                    public Expression visit(ConstructorCall constructorCall) throws PouletException {
                         if (!constructorCall.isConcrete()) {
                             throw new PouletException("can't match on non-concrete constructor call");
                         }
 
-                        ContextMatch.Clause matchingClause = match.getClause(constructorCall.constructor);
-                        Environment newEnvironment = reducable.environment;
+                        Match.Clause matchingClause = match.getClause(constructorCall.constructor);
+                        Environment newEnvironment = expression.environment;
 
                         for (int i = 0; i < matchingClause.argumentSymbols.size(); i++) {
                             Symbol symbol = matchingClause.argumentSymbols.get(i);
@@ -150,35 +140,36 @@ public class Evaluator {
                             newEnvironment = newEnvironment.appendScope(symbol, argument);
                         }
 
-                        return reduce(matchingClause.expression.expression.contextExpression(newEnvironment));
+                        return reduce(matchingClause.expression.context(newEnvironment));
                     }
                 });
             }
 
             @Override
-            public ContextExpression visit(ContextPiType piType) throws PouletException {
-                return new ContextPiType(
+            public Expression visit(PiType piType) throws PouletException {
+                return new PiType(
                                 piType.variable,
                                 reduce(piType.type),
                                 reduce(piType.body),
-                                piType.inferable
+                                piType.inferable,
+                                piType.environment
                         );
             }
 
             @Override
-            public ContextExpression visit(ContextVariable variable) throws PouletException {
-                Expression value = reducable.environment.lookUpScope(variable.symbol);
+            public Expression visit(Variable variable) throws PouletException {
+                Expression value = expression.environment.lookUpScope(variable.symbol);
 
                 if (value == null) {
-                    return reducable;
+                    return expression;
                 } else {
-                    return reduce(value.contextExpression(reducable.environment));
+                    return reduce(value, expression.environment);
                 }
             }
 
             @Override
-            public ContextExpression other(ContextExpression expression) {
-                return reducable;
+            public Expression other(Expression expression) {
+                return expression;
             }
         });
     }
@@ -213,7 +204,8 @@ public class Evaluator {
             public Boolean visit(Abstraction abstraction) throws PouletException {
                 Application application = new Application(
                         b,
-                        new Variable(abstraction.symbol)
+                        new Variable(abstraction.symbol, environment),
+                        environment
                 );
                 return convertible(abstraction.body, application, environment);
             }

@@ -1,6 +1,5 @@
 package poulet.ast;
 
-import poulet.contextexpressions.ContextType;
 import poulet.exceptions.PouletException;
 import poulet.typing.Environment;
 import poulet.util.ExpressionVisitor;
@@ -8,8 +7,13 @@ import poulet.util.ExpressionVisitor;
 public class Type extends Sort {
     public final int level;
 
-    public Type(int level) {
+    public Type(int level, Environment environment) {
+        super(environment);
         this.level = level;
+    }
+
+    public Type(int level) {
+        this(level, null);
     }
 
     @Override
@@ -22,7 +26,7 @@ public class Type extends Sort {
         return visitor.visit(this);
     }
 
-    public ContextType contextExpression(Environment environment) throws PouletException {
-        return new ContextType(this, environment);
+    public Type context(Environment environment) {
+        return new Type(level, environment);
     }
 }

@@ -1,6 +1,5 @@
 package poulet.ast;
 
-import poulet.contextexpressions.ContextFix;
 import poulet.typing.Environment;
 import poulet.util.StringUtil;
 import poulet.exceptions.PouletException;
@@ -17,9 +16,26 @@ public class Fix extends Expression {
     public final List<Definition> definitions;
     public final Symbol export;
 
-    public Fix(List<Definition> definitions, Symbol export) {
-        this.definitions = definitions;
+    public Fix(List<Definition> definitions, Symbol export, Environment environment) throws PouletException {
+        super(environment);
         this.export = export;
+        // Add recursive function types and definitions to environment for definition bodies
+        Environment innerEnvironment = environment;
+        if(innerEnvironment != null) {
+            for (Definition definition : definitions) {
+                innerEnvironment = innerEnvironment.appendType(definition.name, definition.type);
+                Fix newFix = new Fix(definitions, definition.name);
+                innerEnvironment = innerEnvironment.appendScope(definition.name, newFix);
+            }
+        }
+        List<Definition> contextDefinitions = new ArrayList<>();
+        for(Definition definition : definitions)
+            contextDefinitions.add(new Definition(definition.name, definition.type.context(environment), definition.definition.context(innerEnvironment)));
+        this.definitions = contextDefinitions;
+    }
+
+    public Fix(List<Definition> definitions, Symbol export) throws PouletException {
+        this(definitions, export, null);
     }
 
     public Definition getExported() throws PouletException {
@@ -67,14 +83,14 @@ public class Fix extends Expression {
             newDefinitions.add(newDefinition);
         }
 
-        return new Fix(newDefinitions, newExport);
+        return new Fix(newDefinitions, newExport, environment);
     }
 
     public <T> T accept(ExpressionVisitor<T> visitor) throws PouletException {
         return visitor.visit(this);
     }
 
-    public ContextFix contextExpression(Environment environment) throws PouletException {
-        return new ContextFix(this, environment);
+    public Fix context(Environment environment) throws PouletException {
+        return new Fix(definitions, export, environment);
     }
 }

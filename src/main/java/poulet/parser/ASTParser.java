@@ -3,7 +3,7 @@ package poulet.parser;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import poulet.ast.*;
-import poulet.interpreter.Interpreter;
+import poulet.exceptions.PouletException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,7 +16,7 @@ public class ASTParser extends PouletBaseListener {
         return (Program) TreeReduce.reduce(parser.program(), ASTParser::reducer);
     }
 
-    private static Node reducer(Object payload, List<Node> children) {
+    private static Node reducer(Object payload, List<Node> children) throws PouletException {
         if (payload instanceof PouletParser.ProgramContext) {
             List<TopLevel> topLevels = new ArrayList<>();
 

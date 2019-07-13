@@ -1,6 +1,5 @@
 package poulet.ast;
 
-import poulet.contextexpressions.ContextVariable;
 import poulet.exceptions.PouletException;
 import poulet.typing.Environment;
 import poulet.util.ExpressionVisitor;
@@ -11,8 +10,13 @@ import java.util.function.Function;
 public class Variable extends Expression {
     public final Symbol symbol;
 
-    public Variable(Symbol symbol) {
+    public Variable(Symbol symbol, Environment environment) {
+        super(environment);
         this.symbol = symbol;
+    }
+
+    public Variable(Symbol symbol) {
+        this(symbol, null);
     }
 
     public boolean isFree() {
@@ -41,7 +45,7 @@ public class Variable extends Expression {
         if (newSymbol == null) {
             return this;
         } else {
-            return new Variable(newSymbol);
+            return new Variable(newSymbol, environment);
         }
     }
 
@@ -49,7 +53,7 @@ public class Variable extends Expression {
         return visitor.visit(this);
     }
 
-    public ContextVariable contextExpression(Environment environment) throws PouletException {
-        return new ContextVariable(this, environment);
+    public Variable context(Environment environment) {
+        return new Variable(symbol, environment);
     }
 }
