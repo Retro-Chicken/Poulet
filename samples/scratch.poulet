@@ -1,0 +1,17 @@
+type nat : Type1 {
+    Z : nat[]
+    S : nat[] -> nat[]
+}
+
+fix plus : nat[] -> nat[] -> nat[] := \n : nat[] -> \m : nat[] ->
+    match n as _() in nat[] {
+        S(n_pred) => nat[].S(plus(n_pred, m)),
+        Z() =>  m
+    }
+
+n0 : nat[] := nat[].Z
+n1 : nat[] := nat[].S(n0)
+n2 : nat[] := nat[].S(n1)
+n3 : nat[] := nat[].S(n2)
+
+#reduce plus(n1, n3)
