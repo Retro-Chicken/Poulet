@@ -4,6 +4,11 @@ public class UniqueSymbol extends Symbol {
     public final int id;
     static int nextId = 0;
 
+    // placeholder symbol
+    public UniqueSymbol() {
+        this(new Symbol("_"));
+    }
+
     public UniqueSymbol(Symbol symbol) {
         super(symbol.symbol);
         this.id = nextId++;

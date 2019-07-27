@@ -20,7 +20,12 @@ public class ConstructorCall extends Expression {
     }
 
     public ConstructorCall(ConstructorCall constructorCall) {
-        this(constructorCall.inductiveType, constructorCall.parameters, constructorCall.constructor, constructorCall.arguments);
+        this(
+                constructorCall.inductiveType,
+                new ArrayList<>(constructorCall.parameters),
+                constructorCall.constructor,
+                new ArrayList<>(constructorCall.arguments)
+        );
     }
 
     @Override

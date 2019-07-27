@@ -1,5 +1,7 @@
 package poulet.kernel.ast;
 
+import poulet.PouletException;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -35,9 +37,13 @@ public abstract class Expression extends Node {
     public Expression normalizeUniqueSymbols() {
         int oldNextId = UniqueSymbol.nextId;
         UniqueSymbol.nextId = 0;
-        Expression normalized = transformSymbols(symbol ->
-                new UniqueSymbol(new Symbol("_"))
-        );
+        Expression normalized = transformSymbols(symbol -> {
+                if (symbol instanceof UniqueSymbol) {
+                    return new UniqueSymbol(new Symbol("_"));
+                } else {
+                    return symbol;
+                }
+        });
         UniqueSymbol.nextId = oldNextId;
         return normalized;
     }

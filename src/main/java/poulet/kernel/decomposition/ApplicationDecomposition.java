@@ -15,6 +15,11 @@ public class ApplicationDecomposition {
         decompose(expression);
     }
 
+    public ApplicationDecomposition(Expression function, List<Expression> arguments) {
+        this.function = function;
+        this.arguments = arguments;
+    }
+
     private void decompose(Expression expression) {
         if (expression instanceof Application) {
             Application application = (Application) expression;
@@ -23,5 +28,18 @@ public class ApplicationDecomposition {
         } else {
             function = expression;
         }
+    }
+
+    public Expression expression() {
+        Expression expression = function;
+
+        for (Expression argument : arguments) {
+            expression = new Application(
+                    expression,
+                    argument
+            );
+        }
+
+        return expression;
     }
 }

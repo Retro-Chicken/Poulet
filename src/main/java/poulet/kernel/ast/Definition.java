@@ -19,4 +19,14 @@ public class Definition extends TopLevel {
     public TopLevel makeSymbolsUnique() {
         return new Definition(name, type.makeSymbolsUnique(), definition.makeSymbolsUnique());
     }
+
+    @Override
+    public String toString() {
+        if (definition == null) {
+            return "" + name + " : " + type;
+        } else {
+
+            return "" + name + " : " + type + " := " + definition;
+        }
+    }
 }

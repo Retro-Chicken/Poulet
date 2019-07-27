@@ -1,6 +1,7 @@
 package poulet.kernel.ast;
 
 import poulet.PouletException;
+import poulet.kernel.decomposition.AbstractionDecomposition;
 import poulet.util.StringUtil;
 
 import java.util.ArrayList;
@@ -116,7 +117,7 @@ public class Match extends Expression {
     public boolean equals(Object obj) {
         if (obj instanceof Match) {
             Match other = (Match) obj;
-            return expressionSymbol.equals(other.expression) &&
+            return expression.equals(other.expression) &&
                     expressionSymbol.equals(other.expressionSymbol) &&
                     argumentSymbols.equals(other.argumentSymbols) &&
                     type.equals(other.type) &&

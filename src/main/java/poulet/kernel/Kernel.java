@@ -14,20 +14,24 @@ public class Kernel {
 
     public void runProgram(Program program) {
         Program unique = program.makeSymbolsUnique();
-        System.out.println(unique);
 
         for (TopLevel topLevel : unique.topLevels) {
-            if (topLevel instanceof Command) {
-                runCommand((Command) topLevel);
-            } else if (topLevel instanceof Definition) {
-                Definition definition = (Definition) topLevel;
-                if (definition.definition == null) {
-                    assume(definition.name, definition.type);
-                } else {
-                    define(definition.name, definition.type, definition.definition);
+            try {
+                if (topLevel instanceof Command) {
+                    runCommand((Command) topLevel);
+                } else if (topLevel instanceof Definition) {
+                    Definition definition = (Definition) topLevel;
+                    if (definition.definition == null) {
+                        assume(definition.name, definition.type);
+                    } else {
+                        define(definition.name, definition.type, definition.definition);
+                    }
+                } else if (topLevel instanceof InductiveDeclaration) {
+                    declareInductive((InductiveDeclaration) topLevel);
                 }
-            } else if (topLevel instanceof InductiveDeclaration) {
-                declareInductive((InductiveDeclaration) topLevel);
+            } catch (PouletException e) {
+                e.printStackTrace();
+                System.err.println("\n on line: " + topLevel);
             }
         }
     }
@@ -36,6 +40,7 @@ public class Kernel {
         if (command.action == Command.Action.ASSERT) {
             Expression a = command.arguments.get(0);
             Expression b = command.arguments.get(1);
+
             if (!convertible(a, b)) {
                 throw new PouletException("assertion " + a + " ~ " + b + " failed");
             }

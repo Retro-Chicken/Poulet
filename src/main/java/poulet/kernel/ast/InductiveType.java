@@ -18,7 +18,11 @@ public class InductiveType extends Expression {
     }
 
     public InductiveType(InductiveType inductiveType) {
-        this(inductiveType.inductiveType, inductiveType.parameters, inductiveType.arguments);
+        this(
+                inductiveType.inductiveType,
+                new ArrayList<>(inductiveType.parameters),
+                new ArrayList<>(inductiveType.arguments)
+        );
     }
 
     @Override
@@ -62,13 +66,9 @@ public class InductiveType extends Expression {
         String s = "" + inductiveType + '[';
         s += parameters.stream().map(Expression::toString).collect(Collectors.joining(", "));
         s += ']';
-
-        if (!arguments.isEmpty()) {
-            s += '(';
-            s += arguments.stream().map(Expression::toString).collect(Collectors.joining(", "));
-            s += ')';
-        }
-
+        s += '[';
+        s += arguments.stream().map(Expression::toString).collect(Collectors.joining(", "));
+        s += ']';
         return s;
     }
 

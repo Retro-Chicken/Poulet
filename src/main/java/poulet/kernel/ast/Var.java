@@ -6,6 +6,11 @@ import java.util.function.Function;
 public class Var extends Expression {
     public final Symbol symbol;
 
+    // placeholder variable
+    public Var() {
+        this(new UniqueSymbol());
+    }
+
     public Var(Symbol symbol) {
         this.symbol = symbol;
     }

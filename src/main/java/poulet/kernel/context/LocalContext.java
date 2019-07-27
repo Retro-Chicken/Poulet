@@ -53,8 +53,8 @@ public class LocalContext extends Context {
         return globalContext.getTypeDeclaration(symbol);
     }
 
-    public TypeDeclaration.Constructor getConstructor(ConstructorCall constructorCall) {
-        return globalContext.getConstructor(constructorCall);
+    public TypeDeclaration.Constructor getConstructor(Symbol inductiveType, Symbol constructor) {
+        return globalContext.getConstructor(inductiveType, constructor);
     }
 
     @Override

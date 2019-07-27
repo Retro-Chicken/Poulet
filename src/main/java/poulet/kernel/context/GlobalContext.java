@@ -37,15 +37,11 @@ public class GlobalContext extends Context {
         return typeDeclarations.getOrDefault(symbol, null);
     }
 
-    public TypeDeclaration.Constructor getConstructor(ConstructorCall constructorCall) {
-        TypeDeclaration typeDeclaration = getTypeDeclaration(constructorCall.inductiveType);
-
-        if (typeDeclaration == null) {
-            return null;
-        }
+    public TypeDeclaration.Constructor getConstructor(Symbol inductiveType, Symbol constructor) {
+        TypeDeclaration typeDeclaration = getTypeDeclaration(inductiveType);
 
         for (TypeDeclaration.Constructor c : typeDeclaration.constructors) {
-            if (c.name.equals(constructorCall.constructor)) {
+            if (c.name.equals(constructor)) {
                 return c;
             }
         }

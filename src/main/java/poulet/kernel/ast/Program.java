@@ -2,6 +2,7 @@ package poulet.kernel.ast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Program extends Node {
     public final List<TopLevel> topLevels;
@@ -18,5 +19,12 @@ public class Program extends Node {
         }
 
         return new Program(unique);
+    }
+
+    @Override
+    public String toString() {
+        return topLevels.stream()
+                .map(TopLevel::toString)
+                .collect(Collectors.joining("\n"));
     }
 }

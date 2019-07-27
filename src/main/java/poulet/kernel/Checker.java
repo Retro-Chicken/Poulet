@@ -5,12 +5,14 @@ import poulet.kernel.ast.*;
 import poulet.kernel.context.GlobalContext;
 import poulet.kernel.context.LocalContext;
 import poulet.kernel.decomposition.ApplicationDecomposition;
-import poulet.kernel.decomposition.ArgumentDecomposition;
+import poulet.kernel.decomposition.AbstractionDecomposition;
 import poulet.kernel.decomposition.ProdDecomposition;
+import poulet.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 class Checker {
@@ -29,8 +31,19 @@ class Checker {
             }
         }
 
-        if (!Reducer.convertible(deduced, type, context)) {
-            throw new PouletException("deduced type of " + term + " is " + deduced + ", doesn't match actual type " + type);
+        try {
+            Reducer.convertible(deduced, type, context);
+        } catch (PouletException e) {
+            System.err.println("d ~> " + deduced.normalizeUniqueSymbols());
+            System.err.println("t ~> " + type.normalizeUniqueSymbols());
+            throw new PouletException(
+                    StringUtil.mapToStringWithNewlines(Map.of(
+                            "term", term,
+                            "deduced", deduced,
+                            "expected", type,
+                            "context", context
+                    ))
+            );
         }
     }
 
@@ -52,7 +65,7 @@ class Checker {
 
             @Override
             public Expression visit(ConstructorCall constructorCall) {
-                TypeDeclaration.Constructor constructor = context.getConstructor(constructorCall);
+                TypeDeclaration.Constructor constructor = context.getConstructor(constructorCall.inductiveType, constructorCall.constructor);
 
                 if (constructor == null) {
                     throw new PouletException("constructor " + constructorCall.constructor + " for " + constructorCall.inductiveType + " not found");
@@ -132,36 +145,31 @@ class Checker {
 
                 if (expressionType instanceof InductiveType) {
                     InductiveType inductiveType = (InductiveType) expressionType;
-                    TypeDeclaration typeDeclaration = context.getTypeDeclaration(inductiveType.inductiveType);
+                    Expression expressionSort = deduceType(inductiveType, context);
+                    Expression returnType = convertMatchTypeToAbstraction(match, inductiveType, context);
+                    Expression returnSort = deduceType(returnType, context);
 
-                    Expression returnType = Reducer.reduce(match.type, context);
-
-                    for (TypeDeclaration.Constructor constructor : typeDeclaration.constructors) {
-                        Match.Clause matchingClause = null;
-                        for (Match.Clause clause : match.clauses) {
-                            if (clause.constructor.equals(constructor.name)) {
-                                matchingClause = clause;
-                                break;
-                            }
-                        }
-
-                        if (matchingClause == null) {
-                            throw new PouletException("no matching clause for constructor " + constructor.name);
-                        }
-
-                        ProdDecomposition prodDecomposition = new ProdDecomposition(constructor.definition);
-                        LocalContext clauseContext = new LocalContext(context);
-
-                        for (int i = 0; i < matchingClause.argumentSymbols.size(); i++) {
-                            Symbol argumentSymbol = matchingClause.argumentSymbols.get(i);
-                            Expression argumentType = prodDecomposition.argumentTypes.get(i);
-                            clauseContext.assume(argumentSymbol, argumentType);
-                        }
-
-                        checkType(matchingClause.expression, match.type, clauseContext);
+                    if (!isAllowedEliminationSort(inductiveType, expressionSort, returnSort, context)) {
+                        throw new PouletException("elimination sort [" + inductiveType + " : " + expressionSort + " | " + returnSort + "] not allowed");
                     }
 
-                    return returnType;
+                    for (Match.Clause clause : match.clauses) {
+                        Expression abstraction = convertMatchBranchToAbstraction(clause, inductiveType, context);
+                        Expression constructionExpression = context.getConstructor(inductiveType.inductiveType, clause.constructor).definition;
+                        Expression clauseType = getMatchClauseType(constructionExpression, returnType);
+                        checkType(abstraction, clauseType, context);
+                    }
+
+                    List<Expression> arguments = new ArrayList<>(inductiveType.arguments);
+                    arguments.add(match.expression);
+
+                    return Reducer.reduce(
+                            new ApplicationDecomposition(
+                                    returnType,
+                                    arguments
+                            ).expression(),
+                            context
+                    );
                 } else {
                     throw new PouletException("can only match on inductive type");
                 }
@@ -181,14 +189,14 @@ class Checker {
 
                 if (argumentSort instanceof Sort && bodySort instanceof Prop) {
                     return new Prop();
-                } else if ((argumentSort instanceof Prop || bodySort instanceof Set) && bodySort instanceof Set) {
+                } else if ((argumentSort instanceof Prop || argumentSort instanceof Set) && bodySort instanceof Set) {
                     return new Set();
                 } else if (argumentSort instanceof Type && bodySort instanceof Type) {
                     int typeLevel = ((Type) argumentSort).level;
                     int bodyLevel = ((Type) bodySort).level;
                     return new Type(Math.max(typeLevel, bodyLevel));
                 } else {
-                    throw new PouletException("pi type must qualify over a sort");
+                    throw new PouletException("prod must qualify over a sort");
                 }
             }
 
@@ -223,6 +231,43 @@ class Checker {
         });
     }
 
+    // match _ as m(a_1, ..., a_n) in P { ... } gives us \a_1 -> ... -> \a_n -> \m -> P
+    private static Expression convertMatchTypeToAbstraction(Match match, InductiveType expressionType, LocalContext context) {
+        List<Symbol> argumentSymbols = new ArrayList<>(match.argumentSymbols);
+        argumentSymbols.add(match.expressionSymbol);
+
+        TypeDeclaration typeDeclaration = context.getTypeDeclaration(expressionType.inductiveType);
+        ProdDecomposition prodDecomposition = new ProdDecomposition(typeDeclaration.type);
+        List<Expression> argumentTypes = new ArrayList<>(prodDecomposition.argumentTypes);
+        argumentTypes.add(expressionType);
+
+        return new AbstractionDecomposition(argumentSymbols, argumentTypes, match.type).expression();
+    }
+
+    // convert clause c(a_1, ..., a_n) => e to \a_1 -> ... -> \a_n -> e
+    private static Expression convertMatchBranchToAbstraction(Match.Clause clause, InductiveType inductiveType, LocalContext context) {
+        TypeDeclaration.Constructor constructor = context.getConstructor(inductiveType.inductiveType, clause.constructor);
+        ProdDecomposition prodDecomposition = new ProdDecomposition(constructor.definition);
+        List<Expression> argumentTypes = new ArrayList<>(prodDecomposition.argumentTypes);
+        return new AbstractionDecomposition(
+                clause.argumentSymbols,
+                argumentTypes,
+                clause.expression
+        ).expression();
+    }
+
+    private static Expression getMatchClauseType(Expression constructorExpression, Expression returnType) {
+        ProdDecomposition prodDecomposition = new ProdDecomposition(constructorExpression);
+        InductiveType inductiveType = (InductiveType) prodDecomposition.bodyType;
+        List<Expression> arguments = new ArrayList<>(inductiveType.arguments);
+        arguments.add(prodDecomposition.bodyType);
+        prodDecomposition.bodyType = new ApplicationDecomposition(
+                returnType,
+                arguments
+        ).expression();
+        return prodDecomposition.expression();
+    }
+
     private static Expression deduceApplicationType(Application application, LocalContext context) {
         Expression functionType = deduceType(application.function, context);
 
@@ -233,6 +278,38 @@ class Checker {
         } else {
             throw new PouletException("can't apply to " + application.function);
         }
+    }
+
+    private static boolean isAllowedEliminationSort(InductiveType inductiveType, Expression a, Expression b, LocalContext context) {
+        if (a instanceof Prod && b instanceof Prod) {
+            Prod aProd = (Prod) a;
+            Prod bProd = (Prod) b;
+
+            if (Reducer.convertible(aProd.argumentType, bProd.argumentType, context)) {
+                InductiveType newInductiveType = new InductiveType(inductiveType);
+                newInductiveType.arguments.add(new Var());
+                return isAllowedEliminationSort(newInductiveType, aProd.bodyType, bProd.bodyType, context);
+            }
+        } else if ((a instanceof Set || a instanceof Type) && b instanceof Prod) {
+            Prod bProd = (Prod) b;
+            return bProd.bodyType instanceof Sort;
+        } else if (a instanceof Prop) {
+            if (b instanceof Prop) {
+                return true;
+            }
+
+            TypeDeclaration typeDeclaration = context.getTypeDeclaration(inductiveType.inductiveType);
+
+            if (typeDeclaration.constructors.size() == 0) {
+                return true;
+            } else if (typeDeclaration.constructors.size() == 1) {
+                TypeDeclaration.Constructor constructor = typeDeclaration.constructors.get(0);
+                List<Expression> argumentTypes = new ProdDecomposition(constructor.definition).argumentTypes;
+                return argumentTypes.stream().allMatch(argumentType -> argumentType instanceof Prop);
+            }
+        }
+
+        return false;
     }
 
     static void checkWellFormed(InductiveDeclaration inductiveDeclaration) {
@@ -273,12 +350,12 @@ class Checker {
         List<Symbol> xs = new ArrayList<>();
 
         for (Fix.Clause clause : fix.clauses) {
-            ArgumentDecomposition argumentDecomposition = new ArgumentDecomposition(clause.definition);
+            AbstractionDecomposition abstractionDecomposition = new AbstractionDecomposition(clause.definition);
 
-            if (!(argumentDecomposition.body instanceof Match))
-                throw new PouletException("body of fix definition must be a match, not a " + argumentDecomposition.body.getClass().getSimpleName());
+            if (!(abstractionDecomposition.body instanceof Match))
+                throw new PouletException("body of fix definition must be a match, not a " + abstractionDecomposition.body.getClass().getSimpleName());
 
-            Match match = (Match) argumentDecomposition.body;
+            Match match = (Match) abstractionDecomposition.body;
 
             if (!(match.expression instanceof Var))
                 throw new PouletException("body of fix definition must match on an argument");
@@ -286,8 +363,8 @@ class Checker {
             Var var = (Var) match.expression;
             Integer k = null;
 
-            for (int i = 0; i < argumentDecomposition.arguments.size(); i++) {
-                Symbol argument = argumentDecomposition.arguments.get(i);
+            for (int i = 0; i < abstractionDecomposition.arguments.size(); i++) {
+                Symbol argument = abstractionDecomposition.arguments.get(i);
 
                 if (argument.equals(var.symbol)) {
                     k = i;
@@ -305,7 +382,7 @@ class Checker {
         for (int i = 0; i < fix.clauses.size(); i++) {
             Fix.Clause clause = fix.clauses.get(i);
             if (clause.symbol.equals(fix.mainSymbol)) {
-                checkGuarded(fix, context, ks, xs, i, new ArrayList<>(), clause.definition);
+                checkGuarded(fix, ks, xs, i, new ArrayList<>(), clause.definition);
                 return;
             }
         }
@@ -313,7 +390,7 @@ class Checker {
         throw new PouletException("function " + fix.mainSymbol + " not defined in " + fix);
     }
 
-    private static void checkGuarded(Fix fix, LocalContext context, List<Integer> ks, List<Symbol> xs, int i, List<Symbol> v, Expression expression) {
+    private static void checkGuarded(Fix fix, List<Integer> ks, List<Symbol> xs, int i, List<Symbol> v, Expression expression) {
         if (expression instanceof Var) {
             Var var = (Var) expression;
 
@@ -324,36 +401,36 @@ class Checker {
             }
         } else if (expression instanceof Abstraction) {
             Abstraction abstraction = (Abstraction) expression;
-            checkGuarded(fix, context, ks, xs, i, v, abstraction.argumentType);
-            checkGuarded(fix, context, ks, xs, i, v, abstraction.body);
+            checkGuarded(fix, ks, xs, i, v, abstraction.argumentType);
+            checkGuarded(fix, ks, xs, i, v, abstraction.body);
         } else if (expression instanceof Prod) {
             Prod prod = (Prod) expression;
-            checkGuarded(fix, context, ks, xs, i, v, prod.argumentType);
-            checkGuarded(fix, context, ks, xs, i, v, prod.bodyType);
+            checkGuarded(fix, ks, xs, i, v, prod.argumentType);
+            checkGuarded(fix, ks, xs, i, v, prod.bodyType);
         } else if (expression instanceof Fix) {
             Fix innerFix = (Fix) expression;
             Fix.Clause mainClause = innerFix.getMainClause();
-            checkGuarded(fix, context, ks, xs, i, v, mainClause.type);
-            checkGuarded(fix, context, ks, xs, i, v, mainClause.definition);
+            checkGuarded(fix, ks, xs, i, v, mainClause.type);
+            checkGuarded(fix, ks, xs, i, v, mainClause.definition);
         } else if (expression instanceof InductiveType) {
             InductiveType inductiveType = (InductiveType) expression;
 
             for (Expression parameter : inductiveType.parameters) {
-                checkGuarded(fix, context, ks, xs, i, v, parameter);
+                checkGuarded(fix, ks, xs, i, v, parameter);
             }
 
             for (Expression argument : inductiveType.arguments) {
-                checkGuarded(fix, context, ks, xs, i, v, argument);
+                checkGuarded(fix, ks, xs, i, v, argument);
             }
         } else if (expression instanceof ConstructorCall) {
             ConstructorCall constructorCall = (ConstructorCall) expression;
 
             for (Expression parameter : constructorCall.parameters) {
-                checkGuarded(fix, context, ks, xs, i, v, parameter);
+                checkGuarded(fix, ks, xs, i, v, parameter);
             }
 
             for (Expression argument : constructorCall.arguments) {
-                checkGuarded(fix, context, ks, xs, i, v, argument);
+                checkGuarded(fix, ks, xs, i, v, argument);
             }
         } else if (expression instanceof Match) {
             Match match = (Match) expression;
@@ -365,16 +442,16 @@ class Checker {
                 Symbol x = xs.get(i);
 
                 if (var.symbol.equals(x) || v.contains(var.symbol)) {
-                    checkGuarded(fix, context, ks, xs, i, v, match.type);
+                    checkGuarded(fix, ks, xs, i, v, match.type);
 
                     for (Expression argument : applicationDecomposition.arguments) {
-                        checkGuarded(fix, context, ks, xs, i, v, argument);
+                        checkGuarded(fix, ks, xs, i, v, argument);
                     }
 
                     for (Match.Clause clause : match.clauses) {
                         List<Symbol> newV = new ArrayList<>(v);
                         newV.addAll(clause.argumentSymbols);
-                        checkGuarded(fix, context, ks, xs, i, newV, clause.expression);
+                        checkGuarded(fix, ks, xs, i, newV, clause.expression);
 
                         // TODO: figure this out
                         // do we need to check whether i is a recursive position,
@@ -385,11 +462,11 @@ class Checker {
                 }
             }
 
-            checkGuarded(fix, context, ks, xs, i, v, match.type);
-            checkGuarded(fix, context, ks, xs, i, v, match.expression);
+            checkGuarded(fix, ks, xs, i, v, match.type);
+            checkGuarded(fix, ks, xs, i, v, match.expression);
 
             for (Match.Clause clause : match.clauses) {
-                checkGuarded(fix, context, ks, xs, i, v, clause.expression);
+                checkGuarded(fix, ks, xs, i, v, clause.expression);
             }
         } else if (expression instanceof Application) {
             ApplicationDecomposition applicationDecomposition = new ApplicationDecomposition(expression);
@@ -411,7 +488,7 @@ class Checker {
                         Var call = (Var) recursiveDecomposition.function;
 
                         for (Expression argument : applicationDecomposition.arguments) {
-                            checkGuarded(fix, context, ks, xs, i, v, argument);
+                            checkGuarded(fix, ks, xs, i, v, argument);
                         }
 
                         if (!v.contains(call.symbol)) {
@@ -423,10 +500,10 @@ class Checker {
                 }
             }
 
-            checkGuarded(fix, context, ks, xs, i, v, applicationDecomposition.function);
+            checkGuarded(fix, ks, xs, i, v, applicationDecomposition.function);
 
             for (Expression argument : applicationDecomposition.arguments) {
-                checkGuarded(fix, context, ks, xs, i, v, argument);
+                checkGuarded(fix, ks, xs, i, v, argument);
             }
         }
     }

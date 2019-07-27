@@ -32,7 +32,11 @@ public class Application extends Expression {
 
     @Override
     public String toString() {
-        return "" + function + "(" + argument + ")";
+        if (function instanceof Abstraction) {
+            return "(" + function + ")(" + argument + ")";
+        } else {
+            return "" + function + "(" + argument + ")";
+        }
     }
 
     @Override

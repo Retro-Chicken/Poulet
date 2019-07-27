@@ -1,17 +1,192 @@
+type bool : Type1 {
+    true : bool[]
+    false : bool[]
+}
+
+ifthenelse : {A : Type1} bool[] -> A -> A -> A
+    := \A : Type1 -> \p : bool[] -> \t : A -> \f : A ->
+        match p as _() in A {
+            true() => t,
+            false() => f
+        }
+
 type nat : Type1 {
     Z : nat[]
     S : nat[] -> nat[]
 }
 
+pred : nat[] -> nat[] := \n : nat[] -> match n as _() in nat[] {
+    Z() => nat[].Z,
+    S(m) => m
+}
+
 fix plus : nat[] -> nat[] -> nat[] := \n : nat[] -> \m : nat[] ->
     match n as _() in nat[] {
-        S(n_pred) => nat[].S(plus(n_pred, m)),
-        Z() =>  m
+        Z() => m,
+        S(n_pred) => nat[].S(plus(n_pred, m))
     }
+
+fix minus : nat[] -> nat[] -> nat[] := \n : nat[] -> \m : nat[] ->
+    match n as _() in nat[] {
+        Z() => nat[].Z,
+        S(n_pred) => match m as _() in nat[] {
+            Z() => nat[].S(n_pred),
+            S(m_pred) => minus(n_pred, m_pred)
+        }
+    }
+
+fix mult : nat[] -> nat[] -> nat[] := \n : nat[] -> \m : nat[] ->
+    match n as _() in nat[] {
+        Z() => nat[].Z,
+        S(n_pred) => plus(mult(n_pred, m), m)
+    }
+
+fix nat_eq : nat[] -> nat[] -> bool[] := \n : nat[] -> \m : nat[] ->
+    match n as _() in bool[] {
+        Z() => match m as _() in bool[] {
+            Z() => bool[].true,
+            S(_) => bool[].false
+        },
+        S(n_pred) => match m as _() in bool[] {
+            Z() => bool[].false,
+            S(m_pred) => nat_eq(n_pred, m_pred)
+        }
+    }
+
+geq : nat[] -> nat[] -> bool[] := \n : nat[] -> \m : nat[] ->
+    nat_eq(minus(m, n), nat[].Z)
+
+gt : nat[] -> nat[] -> bool[] := \n : nat[] -> \m : nat[] ->
+    match n as _() in bool[] {
+        Z() => bool[].false,
+        S(n_pred) => geq(n_pred, m)
+    }
+
+fix div_internal : nat[] -> nat[] -> nat[] -> nat[] :=
+    \n : nat[] -> \m : nat[] -> \q : nat[] ->
+        match q as _() in nat[] {
+           Z() => nat[].Z,
+           S(q_pred) => ifthenelse(nat[], geq(n, mult(m, q)))
+               (q)
+               (div_internal(n, m, q_pred))
+        }
+
+div : nat[] -> nat[] -> nat[] :=
+    \n : nat[] -> \m : nat[] -> div_internal(n, m, n)
+
+fix compose : {A : Type1} nat[] -> (A -> A) -> (A -> A)
+    := \A : Type1 -> \n : nat[] -> \f : (A -> A) ->
+        match n as _() in A -> A {
+            Z() => \x : A -> x,
+            S(n_pred) => \x : A -> compose(A, n_pred, f)(f(x))
+        }
+
+type list (A : Type1) : Type1 {
+    nil : list[A]
+    cons : A -> list[A] -> list[A]
+}
 
 n0 : nat[] := nat[].Z
 n1 : nat[] := nat[].S(n0)
 n2 : nat[] := nat[].S(n1)
 n3 : nat[] := nat[].S(n2)
+n4 : nat[] := nat[].S(n3)
+n5 : nat[] := nat[].S(n4)
+n6 : nat[] := nat[].S(n5)
+n7 : nat[] := nat[].S(n6)
+n8 : nat[] := nat[].S(n7)
+n9 : nat[] := nat[].S(n8)
 
-#reduce plus(n1, n3)
+#assert pred(n0) ~ n0
+#reduce pred(n1)
+#assert pred(n1) ~ n0
+#assert pred(n2) ~ n1
+#assert pred(n3) ~ n2
+#assert pred(n4) ~ n3
+
+#assert minus(n0, n0) ~ n0
+#assert minus(n3, n1) ~ n2
+#assert minus(n9, n3) ~ n6
+#assert minus(n0, n1) ~ n0
+#assert minus(n8, n9) ~ n0
+
+#assert nat_eq(n0, n0) ~ bool[].true
+#assert nat_eq(n0, n1) ~ bool[].false
+#assert nat_eq(n0, n2) ~ bool[].false
+#assert nat_eq(n0, n3) ~ bool[].false
+#assert nat_eq(n0, n4) ~ bool[].false
+
+#assert nat_eq(n1, n0) ~ bool[].false
+#assert nat_eq(n1, n1) ~ bool[].true
+#assert nat_eq(n1, n2) ~ bool[].false
+#assert nat_eq(n1, n3) ~ bool[].false
+#assert nat_eq(n1, n4) ~ bool[].false
+
+#assert nat_eq(n2, n0) ~ bool[].false
+#assert nat_eq(n2, n1) ~ bool[].false
+#assert nat_eq(n2, n2) ~ bool[].true
+#assert nat_eq(n2, n3) ~ bool[].false
+#assert nat_eq(n2, n4) ~ bool[].false
+
+#assert geq(n0, n0) ~ bool[].true
+#assert geq(n0, n1) ~ bool[].false
+#assert geq(n0, n2) ~ bool[].false
+#assert geq(n0, n3) ~ bool[].false
+#assert geq(n0, n4) ~ bool[].false
+
+#assert geq(n1, n0) ~ bool[].true
+#assert geq(n1, n1) ~ bool[].true
+#assert geq(n1, n2) ~ bool[].false
+#assert geq(n1, n3) ~ bool[].false
+#assert geq(n1, n4) ~ bool[].false
+
+#assert geq(n2, n0) ~ bool[].true
+#assert geq(n2, n1) ~ bool[].true
+#assert geq(n2, n2) ~ bool[].true
+#assert geq(n2, n3) ~ bool[].false
+#assert geq(n2, n4) ~ bool[].false
+
+#assert div(n9, n2) ~ n4
+#assert div(n8, n2) ~ n4
+#assert div(n7, n2) ~ n3
+#assert div(n9, n3) ~ n3
+#assert div(n8, n3) ~ n2
+#assert div(n0, n2) ~ n0
+#assert div(n9, n0) ~ n9
+
+inductive {
+    type even : nat[] -> Type1 {
+        even_z : even[](nat[].Z)
+        even_s : {n : nat[]} odd[](n) -> even[](nat[].S(n))
+    }
+    type odd : nat[] -> Type1 {
+        odd_s : {n : nat[]} even[](n) -> odd[](nat[].S(n))
+    }
+}
+
+a : even[](n2) := even[].even_s(nat[].S(nat[].Z), odd[].odd_s(nat[].Z, even[].even_z))
+b : even[](n0) := even[].even_z
+
+fix nat_ind : {P : nat[] -> Type1} P(nat[].Z) -> ({n : nat[]} P(n) -> P(nat[].S(n))) -> ({n : nat[]} P(n))
+    := \P : (nat[] -> Type1) -> \pz : P(nat[].Z) -> \ps : ({n : nat[]} P(n) -> P(nat[].S(n))) -> \n : nat[] ->
+        match n as m() in P(m) {
+            Z() => pz,
+            S(n_pred) => ps(n_pred, nat_ind(P, pz, ps, n_pred))
+        }
+
+fix fib : nat[] -> nat[] := \n : nat[] -> match n as _() in nat[] {
+    Z() => nat[].Z,
+    S(n_pred) => match n_pred as _() in nat[] {
+        Z() => nat[].S(nat[].Z),
+        S(n_pred_pred) => plus(fib(n_pred_pred), fib(n_pred))
+    }
+}
+
+fix to_zero : nat[] -> nat[] := \n : nat[] -> match n as _() in nat[] {
+    Z() => nat[].Z,
+    S(n_pred) => to_zero(n_pred)
+}
+
+type Eq (A : Type1) : Prop {
+    refl : A -> Eq[A]
+}

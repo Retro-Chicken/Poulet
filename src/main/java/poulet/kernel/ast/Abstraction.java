@@ -36,6 +36,12 @@ public class Abstraction extends Expression {
 
     @Override
     public String toString() {
+        if (argumentType instanceof Prod) {
+            Prod prod = (Prod) argumentType;
+            if (!prod.isDependent()) {
+                return "\\" + argumentSymbol + " : (" + argumentType + ") -> " + body;
+            }
+        }
         return "\\" + argumentSymbol + " : " + argumentType + " -> " + body;
     }
 

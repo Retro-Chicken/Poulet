@@ -23,6 +23,11 @@ public class TypeDeclaration extends Node {
             this.name = name;
             this.type = type;
         }
+
+        @Override
+        public String toString() {
+            return "(" + name + " : " + type + ")";
+        }
     }
 
     public static class Constructor extends Node {

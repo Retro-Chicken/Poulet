@@ -87,8 +87,6 @@ public class KernelASTParser extends KernelBaseListener {
                 constructors.add((TypeDeclaration.Constructor) children.get(i));
 
             TypeDeclaration typeDeclaration = new TypeDeclaration(null, name, parameters, type, constructors);
-            InductiveDeclaration inductiveDeclaration = new InductiveDeclaration(List.of(typeDeclaration));
-            typeDeclaration.inductiveDeclaration = inductiveDeclaration;
             return typeDeclaration;
         } else if (payload instanceof KernelParser.ExpressionContext) {
             KernelParser.ExpressionContext context = (KernelParser.ExpressionContext) payload;
@@ -161,6 +159,12 @@ public class KernelASTParser extends KernelBaseListener {
             for (TypeDeclaration typeDeclaration : inductiveDeclaration.typeDeclarations) {
                 typeDeclaration.inductiveDeclaration = inductiveDeclaration;
             }
+            return inductiveDeclaration;
+        } else if (payload instanceof KernelParser.Toplevel_type_declarationContext) {
+            TypeDeclaration typeDeclaration = (TypeDeclaration) children.get(0);
+            InductiveDeclaration inductiveDeclaration = new InductiveDeclaration(Arrays.asList(typeDeclaration));
+            typeDeclaration.inductiveDeclaration = inductiveDeclaration;
+            return inductiveDeclaration;
         } else if (payload instanceof KernelParser.ParameterContext) {
             Symbol symbol = (Symbol) children.get(1);
             Expression type = (Expression) children.get(3);
@@ -219,9 +223,9 @@ public class KernelASTParser extends KernelBaseListener {
             for (int i = 2; i < children.size() - 3; i++) {
                 Definition definition = (Definition) children.get(i);
                 clauses.add(new Fix.Clause(
-                       definition.name,
-                       definition.type,
-                       definition.definition
+                        definition.name,
+                        definition.type,
+                        definition.definition
                 ));
             }
             Symbol symbol = (Symbol) children.get(children.size() - 1);
@@ -235,9 +239,9 @@ public class KernelASTParser extends KernelBaseListener {
             }
 
             Fix.Clause clause = new Fix.Clause(
-                definition.name,
-                definition.type,
-                definition.definition
+                    definition.name,
+                    definition.type,
+                    definition.definition
             );
 
             Fix fix = new Fix(

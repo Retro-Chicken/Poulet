@@ -4,7 +4,7 @@ grammar Kernel;
     package poulet.parser;
 }
 
-program : (definition | toplevel_fix | inductive_types | type_declaration | command | assert_eq)+ EOF ;
+program : (definition | toplevel_fix | inductive_types | toplevel_type_declaration | command | assert_eq)+ EOF ;
 
 assert_eq : '#assert' expression '~' expression ;
 
@@ -15,6 +15,8 @@ toplevel_fix : 'fix' definition ;
 command : REDUCE expression | DEDUCE expression | ASSERT expression '~' expression ;
 
 inductive_types : 'inductive' '{' type_declaration* '}' ;
+
+toplevel_type_declaration : type_declaration ;
 
 type_declaration : 'type' symbol parameter* ':' expression '{' constructor* '}' ;
 
@@ -32,9 +34,9 @@ inductive_type : symbol '[' ((expression ',')* expression)? ']' ;
 
 variable : symbol ;
 
-abstraction : '\\' symbol ':' expression IMPLICIT_ARGUMENT? '->' expression ;
+abstraction : '\\' symbol ':' expression '->' expression ;
 
-pi_type : '{' symbol ':' expression '}' IMPLICIT_ARGUMENT? expression ;
+pi_type : '{' symbol ':' expression '}' expression ;
 
 constructor : symbol ':' expression ;
 

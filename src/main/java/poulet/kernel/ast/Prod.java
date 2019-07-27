@@ -9,6 +9,13 @@ public class Prod extends Expression {
     public Expression argumentType;
     public Expression bodyType;
 
+    // non-dependent arrow type
+    public Prod(Expression argumentType, Expression bodyType) {
+        this.argumentSymbol = new UniqueSymbol();
+        this.argumentType = argumentType;
+        this.bodyType = bodyType;
+    }
+
     public Prod(Symbol argumentSymbol, Expression argumentType, Expression bodyType) {
         this.argumentSymbol = argumentSymbol;
         this.argumentType = argumentType;
@@ -46,9 +53,13 @@ public class Prod extends Expression {
         return false;
     }
 
+    boolean isDependent() {
+        return bodyType.occurs(argumentSymbol);
+    }
+
     @Override
     public String toString() {
-        if (bodyType.occurs(argumentSymbol)) {
+        if (isDependent()) {
             return "{" + argumentSymbol + " : " + argumentType + "} " + bodyType;
         } else {
             return "" + argumentType + " -> " + bodyType;
