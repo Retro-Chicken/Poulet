@@ -1,7 +1,7 @@
 grammar Kernel;
 
 @header {
-    package poulet.parser;
+    package poulet.parser.kernel;
 }
 
 program : (definition | toplevel_fix | inductive_types | toplevel_type_declaration | command | assert_eq)+ EOF ;

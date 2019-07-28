@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import poulet.kernel.ast.*;
-import poulet.PouletException;
+import poulet.parser.kernel.*;
 
 public class KernelASTParser extends KernelBaseListener {
     public static Program parse(CharStream stream) {
