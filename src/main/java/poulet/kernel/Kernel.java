@@ -14,6 +14,7 @@ public class Kernel {
 
     public void runProgram(Program program) {
         Program unique = program.makeSymbolsUnique();
+        System.out.println(unique);
 
         for (TopLevel topLevel : unique.topLevels) {
             try {

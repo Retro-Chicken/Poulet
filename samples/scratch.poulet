@@ -98,7 +98,6 @@ n8 : nat[] := nat[].S(n7)
 n9 : nat[] := nat[].S(n8)
 
 #assert pred(n0) ~ n0
-#reduce pred(n1)
 #assert pred(n1) ~ n0
 #assert pred(n2) ~ n1
 #assert pred(n3) ~ n2
@@ -187,6 +186,32 @@ fix to_zero : nat[] -> nat[] := \n : nat[] -> match n as _() in nat[] {
     S(n_pred) => to_zero(n_pred)
 }
 
-type Eq (A : Type1) : Prop {
-    refl : A -> Eq[A]
+type Eq (A : Type1) : A -> A -> Prop {
+    refl : {x : A} Eq[A](x, x)
 }
+
+assoc_nat : {n : nat[]} {m : nat[]} {k : nat[]} Eq[nat[]](plus(n, plus(m, k)), plus(plus(n, m), k))
+
+type sigma (A : Type1) (B : A -> Type1) : Type1 {
+    mk : {a : A} B(a) -> sigma[A, B]
+}
+
+pr1 : {A : Type1} {B : A -> Type1} sigma[A, B] -> A
+    := \A : Type1 -> \B : (A -> Type1) -> \s : sigma[A, B] ->
+        match s as _() in A {
+            mk(a, b) => a
+        }
+
+fix add : nat[] -> nat[] -> nat[] := \n : nat[] -> \m : nat[] ->
+    match n as _() in nat[] {
+        Z() => m,
+        S(n_pred) => nat[].S(add(n_pred, m))
+    }
+
+#assert add ~ plus
+
+pr2 : {A : Type1} {B : A -> Type1} {s : sigma[A, B]} B(pr1(A, B, s))
+    := \A : Type1 -> \B : (A -> Type1) -> \s : sigma[A, B] ->
+        match s as _() in B(pr1(A, B, s)) {
+            mk(a, b) => b
+        }

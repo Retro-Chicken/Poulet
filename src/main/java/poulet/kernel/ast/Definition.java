@@ -17,7 +17,8 @@ public class Definition extends TopLevel {
 
     @Override
     public TopLevel makeSymbolsUnique() {
-        return new Definition(name, type.makeSymbolsUnique(), definition.makeSymbolsUnique());
+        Expression uniqueDefinition = definition == null ? null : definition.makeSymbolsUnique();
+        return new Definition(name, type.makeSymbolsUnique(), uniqueDefinition);
     }
 
     @Override

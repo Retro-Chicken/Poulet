@@ -1,7 +1,11 @@
 package poulet.kernel.ast;
 
+import poulet.kernel.decomposition.ApplicationDecomposition;
+
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Application extends Expression {
     public final Expression function;
@@ -32,10 +36,13 @@ public class Application extends Expression {
 
     @Override
     public String toString() {
-        if (function instanceof Abstraction) {
-            return "(" + function + ")(" + argument + ")";
+        ApplicationDecomposition applicationDecomposition = new ApplicationDecomposition(this);
+        String arguments = applicationDecomposition.arguments.stream().map(Objects::toString).collect(Collectors.joining(", "));
+
+        if (applicationDecomposition.function instanceof Abstraction) {
+            return "(" + applicationDecomposition.function + ")(" + arguments + ")";
         } else {
-            return "" + function + "(" + argument + ")";
+            return "" + applicationDecomposition.function + "(" + arguments + ")";
         }
     }
 

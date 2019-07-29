@@ -31,11 +31,7 @@ class Checker {
             }
         }
 
-        try {
-            Reducer.convertible(deduced, type, context);
-        } catch (PouletException e) {
-            System.err.println("d ~> " + deduced.normalizeUniqueSymbols());
-            System.err.println("t ~> " + type.normalizeUniqueSymbols());
+        if (!Reducer.convertible(deduced, type, context)) {
             throw new PouletException(
                     StringUtil.mapToStringWithNewlines(Map.of(
                             "term", term,
@@ -110,7 +106,7 @@ class Checker {
                     checkType(clause.definition, clause.type, fixContext);
                 }
 
-                checkGuarded(fix, fixContext);
+                checkGuarded(fix);
 
                 return mainClause.type;
             }
@@ -154,9 +150,9 @@ class Checker {
                     }
 
                     for (Match.Clause clause : match.clauses) {
-                        Expression abstraction = convertMatchBranchToAbstraction(clause, inductiveType, context);
-                        Expression constructionExpression = context.getConstructor(inductiveType.inductiveType, clause.constructor).definition;
-                        Expression clauseType = getMatchClauseType(constructionExpression, returnType);
+                        Expression constructorDefinition = context.getConstructor(inductiveType.inductiveType, clause.constructor).definition;
+                        Expression abstraction = convertMatchBranchToAbstraction(inductiveType, clause, constructorDefinition, context);
+                        Expression clauseType = getMatchClauseType(inductiveType, clause.constructor, returnType, context);
                         checkType(abstraction, clauseType, context);
                     }
 
@@ -184,7 +180,9 @@ class Checker {
             @Override
             public Expression visit(Prod prod) {
                 Expression argumentSort = deduceType(prod.argumentType, context);
-                Expression bodySort = deduceType(prod.bodyType, context);
+                LocalContext boundContext = new LocalContext(context);
+                boundContext.assume(prod.argumentSymbol, prod.argumentType);
+                Expression bodySort = deduceType(prod.bodyType, boundContext);
 
 
                 if (argumentSort instanceof Sort && bodySort instanceof Prop) {
@@ -245,10 +243,31 @@ class Checker {
     }
 
     // convert clause c(a_1, ..., a_n) => e to \a_1 -> ... -> \a_n -> e
-    private static Expression convertMatchBranchToAbstraction(Match.Clause clause, InductiveType inductiveType, LocalContext context) {
-        TypeDeclaration.Constructor constructor = context.getConstructor(inductiveType.inductiveType, clause.constructor);
-        ProdDecomposition prodDecomposition = new ProdDecomposition(constructor.definition);
+    private static Expression convertMatchBranchToAbstraction(InductiveType inductiveType, Match.Clause clause, Expression constructorDefinition, LocalContext context) {
+        List<TypeDeclaration.Parameter> parameters = context.getTypeDeclaration(inductiveType.inductiveType).parameters;
+        ProdDecomposition prodDecomposition = new ProdDecomposition(constructorDefinition);
         List<Expression> argumentTypes = new ArrayList<>(prodDecomposition.argumentTypes);
+
+        for (int i = 0; i < argumentTypes.size(); i++) {
+            Expression argumentType = argumentTypes.get(i);
+
+            for (int j = 0; j < i; j++) {
+                argumentType = argumentType.substitute(
+                        prodDecomposition.arguments.get(j),
+                        new Var(clause.argumentSymbols.get(j))
+                );
+            }
+
+            for (int j = 0; j < parameters.size(); j++) {
+                argumentType = argumentType.substitute(
+                        parameters.get(j).name,
+                        inductiveType.parameters.get(j)
+                );
+            }
+
+            argumentTypes.set(i, argumentType);
+        }
+
         return new AbstractionDecomposition(
                 clause.argumentSymbols,
                 argumentTypes,
@@ -256,11 +275,73 @@ class Checker {
         ).expression();
     }
 
-    private static Expression getMatchClauseType(Expression constructorExpression, Expression returnType) {
-        ProdDecomposition prodDecomposition = new ProdDecomposition(constructorExpression);
-        InductiveType inductiveType = (InductiveType) prodDecomposition.bodyType;
-        List<Expression> arguments = new ArrayList<>(inductiveType.arguments);
-        arguments.add(prodDecomposition.bodyType);
+    /*private static Expression getMatchClauseType(InductiveType inductiveType, Symbol constructor, Expression returnType, LocalContext context) {
+        Expression constructorDefinition = context.getConstructor(inductiveType.inductiveType, constructor).definition;
+        ProdDecomposition prodDecomposition = new ProdDecomposition(constructorDefinition);
+        InductiveType genericInductiveType = (InductiveType) prodDecomposition.bodyType;
+
+        List<Expression> ccArguments = new ArrayList<>();
+
+        for (Symbol argumentSymbol : prodDecomposition.arguments) {
+            ccArguments.add(new Var(argumentSymbol));
+        }
+
+        ConstructorCall constructorCall = new ConstructorCall(
+                inductiveType.inductiveType,
+                inductiveType.parameters,
+                constructor,
+                ccArguments
+        );
+
+        List<Expression> arguments = new ArrayList<>(genericInductiveType.arguments);
+        arguments.add(constructorCall);
+        prodDecomposition.bodyType = new ApplicationDecomposition(
+                returnType,
+                arguments
+        ).expression();
+        return prodDecomposition.expression();
+    }*/
+
+    private static Expression getMatchClauseType(InductiveType inductiveType, Symbol constructor, Expression returnType, LocalContext context) {
+        List<TypeDeclaration.Parameter> parameters = context.getTypeDeclaration(inductiveType.inductiveType).parameters;
+        Expression constructorDefinition = context.getConstructor(inductiveType.inductiveType, constructor).definition;
+        ProdDecomposition prodDecomposition = new ProdDecomposition(constructorDefinition);
+
+        for (int i = 0; i < prodDecomposition.arguments.size(); i++) {
+            Expression newArgumentType = prodDecomposition.argumentTypes.get(i);
+            for (int j = 0; j < parameters.size(); j++) {
+                Symbol symbol = parameters.get(j).name;
+                Expression parameter = inductiveType.parameters.get(j);
+                newArgumentType = newArgumentType.substitute(symbol, parameter);
+            }
+            prodDecomposition.argumentTypes.set(i, newArgumentType);
+        }
+
+        List<Expression> arguments = new ArrayList<>(((InductiveType) prodDecomposition.bodyType).arguments);
+
+        for (int i = 0; i < arguments.size(); i++) {
+            Expression newArgument = arguments.get(i);
+            for (int j = 0; j < parameters.size(); j++) {
+                Symbol symbol = parameters.get(j).name;
+                Expression parameter = inductiveType.parameters.get(j);
+                newArgument = newArgument.substitute(symbol, parameter);
+            }
+            arguments.set(i, newArgument);
+        }
+
+        List<Expression> argumentVars = new ArrayList<>();
+
+        for (Symbol argumentSymbol : prodDecomposition.arguments) {
+            argumentVars.add(new Var(argumentSymbol));
+        }
+
+        arguments.add(new ConstructorCall(
+                inductiveType.inductiveType,
+                inductiveType.parameters,
+                constructor,
+                argumentVars
+        ));
+
         prodDecomposition.bodyType = new ApplicationDecomposition(
                 returnType,
                 arguments
@@ -273,8 +354,9 @@ class Checker {
 
         if (functionType instanceof Prod) {
             Prod prod = (Prod) functionType;
+            Expression argument = Reducer.reduce(application.argument, context);
             checkType(application.argument, prod.argumentType, context);
-            return prod.bodyType.substitute(prod.argumentSymbol, application.argument);
+            return Reducer.reduce(prod.bodyType.substitute(prod.argumentSymbol, argument), context);
         } else {
             throw new PouletException("can't apply to " + application.function);
         }
@@ -345,11 +427,18 @@ class Checker {
         }
     }
 
-    private static void checkGuarded(Fix fix, LocalContext context) {
+    private static void checkGuarded(Fix fix) {
         List<Integer> ks = new ArrayList<>();
         List<Symbol> xs = new ArrayList<>();
 
         for (Fix.Clause clause : fix.clauses) {
+            // make sure no recursion in types
+            for (Fix.Clause otherClause : fix.clauses) {
+                if (clause.type.occurs(otherClause.symbol)) {
+                    throw new PouletException("no recusion allowed in types of fix clauses");
+                }
+            }
+
             AbstractionDecomposition abstractionDecomposition = new AbstractionDecomposition(clause.definition);
 
             if (!(abstractionDecomposition.body instanceof Match))

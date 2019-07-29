@@ -21,7 +21,13 @@ public class InductiveDeclaration extends TopLevel {
             unique.add(typeDeclaration.makeSymbolsUnique());
         }
 
-        return new InductiveDeclaration(unique);
+        InductiveDeclaration inductiveDeclaration = new InductiveDeclaration(unique);
+
+        for (TypeDeclaration typeDeclaration : inductiveDeclaration.typeDeclarations) {
+            typeDeclaration.inductiveDeclaration = inductiveDeclaration;
+        }
+
+        return inductiveDeclaration;
     }
 
     @Override

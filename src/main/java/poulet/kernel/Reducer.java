@@ -1,10 +1,12 @@
 package poulet.kernel;
 
-import poulet.PouletException;
 import poulet.kernel.ast.*;
 import poulet.kernel.context.LocalContext;
 import poulet.kernel.decomposition.AbstractionDecomposition;
 import poulet.kernel.decomposition.ApplicationDecomposition;
+
+import java.util.ArrayList;
+import java.util.List;
 
 class Reducer {
     static Expression reduce(Expression expression, LocalContext context) {
@@ -100,11 +102,18 @@ class Reducer {
                 }
             }
 
-
             @Override
             public Expression visit(Fix fix) {
-                Fix.Clause mainClause = fix.getMainClause();
-                applicationDecomposition.function = mainClause.definition;
+                Expression mainClause = fix.getMainClause().definition;
+
+                for (Fix.Clause clause : fix.clauses) {
+                    mainClause.substitute(
+                            clause.symbol,
+                            new Fix(fix.clauses, clause.symbol)
+                    );
+                }
+
+                applicationDecomposition.function = mainClause;
                 abstractionDecomposition.body = applicationDecomposition.expression();
                 return abstractionDecomposition.expression();
             }
@@ -132,18 +141,39 @@ class Reducer {
 
                     @Override
                     public Expression other(Expression expression) {
+                        List<Match.Clause> clauses = new ArrayList<>();
+
+                        for (Match.Clause clause : match.clauses) {
+                            clauses.add(new Match.Clause(
+                                    clause.constructor,
+                                    clause.argumentSymbols,
+                                    reduce(clause.expression, context)
+                            ));
+                        }
+
                         return new Match(
                                 matchExpression,
                                 match.expressionSymbol,
                                 match.argumentSymbols,
-                                match.type,
-                                match.clauses
+                                reduce(match.type, context),
+                                clauses
                         );
                     }
                 });
 
 
                 applicationDecomposition.function = reducedMatch;
+                abstractionDecomposition.body = applicationDecomposition.expression();
+                return abstractionDecomposition.expression();
+            }
+
+            @Override
+            public Expression visit(Prod prod) {
+                applicationDecomposition.function = new Prod(
+                        prod.argumentSymbol,
+                        reduce(prod.argumentType, context),
+                        reduceStep(prod.bodyType, context)
+                );
                 abstractionDecomposition.body = applicationDecomposition.expression();
                 return abstractionDecomposition.expression();
             }
@@ -170,14 +200,13 @@ class Reducer {
     }
 
     static boolean convertible(Expression a, Expression b, LocalContext context) {
-        Expression aReduced = reduce(a.normalizeUniqueSymbols(), context);
-        Expression bReduced = reduce(b.normalizeUniqueSymbols(), context);
+        Expression aReduced = reduce(a, context);
+        Expression bReduced = reduce(b, context);
         return alphaConvertible(aReduced, bReduced) || etaConverible(aReduced, bReduced, context);
     }
 
     private static boolean alphaConvertible(Expression a, Expression b) {
-        // symbols already normalized, so equality equivalent to alpha convertibility
-        return a.equals(b);
+        return a.normalizeUniqueSymbols().equals(b.normalizeUniqueSymbols());
     }
 
     private static boolean etaConverible(Expression a, Expression b, LocalContext context) {

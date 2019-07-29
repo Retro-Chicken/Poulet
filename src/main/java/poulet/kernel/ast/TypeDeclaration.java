@@ -70,15 +70,15 @@ public class TypeDeclaration extends Node {
 
         for (Parameter parameter : parameters) {
             Symbol unique = new UniqueSymbol(parameter.name);
-            Parameter newParameter = new Parameter(unique, parameter.type);
-            newParameters.add(newParameter);
             map.put(parameter.name, unique);
+            Parameter newParameter = new Parameter(unique, parameter.type.makeSymbolsUnique(map));
+            newParameters.add(newParameter);
         }
 
         List<Constructor> newConstructors = new ArrayList<>();
 
         for (Constructor constructor : constructors) {
-            Constructor unique = new Constructor(constructor.name, constructor.definition.makeSymbolsUnique());
+            Constructor unique = new Constructor(constructor.name, constructor.definition.makeSymbolsUnique(map));
             newConstructors.add(unique);
         }
 

@@ -26,6 +26,10 @@ public abstract class Expression extends Node {
         return transformSymbols(UniqueSymbol::new, new HashMap<>());
     }
 
+    Expression makeSymbolsUnique(Map<Symbol, Symbol> unique) {
+        return transformSymbols(UniqueSymbol::new, unique);
+    }
+
     // recursively transform bound variables (e.g., \x : T -> f(x) becomes \x' : T -> f(x') where x' = transformer.apply(x))
     Expression transformSymbols(Function<Symbol, Symbol> transformer) {
         return transformSymbols(transformer, new HashMap<>());
