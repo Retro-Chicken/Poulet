@@ -66,9 +66,9 @@ public class InductiveType extends Expression {
         String s = "" + inductiveType + '[';
         s += parameters.stream().map(Expression::toString).collect(Collectors.joining(", "));
         s += ']';
-        s += '[';
+        s += '(';
         s += arguments.stream().map(Expression::toString).collect(Collectors.joining(", "));
-        s += ']';
+        s += ')';
         return s;
     }
 

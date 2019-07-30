@@ -208,7 +208,30 @@ fix add : nat[] -> nat[] -> nat[] := \n : nat[] -> \m : nat[] ->
         S(n_pred) => nat[].S(add(n_pred, m))
     }
 
-#assert add ~ plus
+ifte_helper : bool[] -> Type1 -> Type1 -> Type1
+    := \p : bool[] -> \t : Type1 -> \f : Type1 ->
+    match p as _() in Type1 {
+        true() => t,
+        false() => f
+    }
+
+ifte : {A : Type1} {B : Type1} {p : bool[]} A -> B -> ifte_helper(p, A, B)
+    := \A : Type1 -> \B : Type1 -> \p : bool[] -> \t : A -> \f : B ->
+    match p as m() in ifte_helper(m, A, B) {
+        true() => t,
+        false() => f
+    }
+
+#reduce ifte(nat[], bool[], bool[].true)
+
+#reduce ifte_helper(bool[].true)
+
+#reduce (\x : nat[] -> \y : nat[] -> y)(n0)
+
+#reduce (\x : bool[] -> \t : nat[] -> match x as _() in nat[] {
+    true() => t,
+    false() => t
+})(bool[].true)
 
 pr2 : {A : Type1} {B : A -> Type1} {s : sigma[A, B]} B(pr1(A, B, s))
     := \A : Type1 -> \B : (A -> Type1) -> \s : sigma[A, B] ->

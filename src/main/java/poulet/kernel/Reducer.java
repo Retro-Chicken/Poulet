@@ -143,9 +143,10 @@ class Reducer {
                             matchingExpression = matchingExpression.substitute(symbol, argument);
                         }
 
-                        applicationDecomposition.function = matchingExpression;
-                        abstractionDecomposition.body = applicationDecomposition.expression();
-                        return abstractionDecomposition.expression();
+                        return matchingExpression;
+                        //applicationDecomposition.function = matchingExpression;
+                        //abstractionDecomposition.body = applicationDecomposition.expression();
+                        //return abstractionDecomposition.expression();
                     }
 
                     @Override
