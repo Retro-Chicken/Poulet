@@ -428,45 +428,8 @@ class Checker {
     }
 
     private static void checkGuarded(Fix fix) {
-        List<Integer> ks = new ArrayList<>();
-        List<Symbol> xs = new ArrayList<>();
-
-        for (Fix.Clause clause : fix.clauses) {
-            // make sure no recursion in types
-            for (Fix.Clause otherClause : fix.clauses) {
-                if (clause.type.occurs(otherClause.symbol)) {
-                    throw new PouletException("no recusion allowed in types of fix clauses");
-                }
-            }
-
-            AbstractionDecomposition abstractionDecomposition = new AbstractionDecomposition(clause.definition);
-
-            if (!(abstractionDecomposition.body instanceof Match))
-                throw new PouletException("body of fix definition must be a match, not a " + abstractionDecomposition.body.getClass().getSimpleName());
-
-            Match match = (Match) abstractionDecomposition.body;
-
-            if (!(match.expression instanceof Var))
-                throw new PouletException("body of fix definition must match on an argument");
-
-            Var var = (Var) match.expression;
-            Integer k = null;
-
-            for (int i = 0; i < abstractionDecomposition.arguments.size(); i++) {
-                Symbol argument = abstractionDecomposition.arguments.get(i);
-
-                if (argument.equals(var.symbol)) {
-                    k = i;
-                    break;
-                }
-            }
-
-            if (k == null)
-                throw new PouletException("" + var + " isn't an argument to the fix function");
-
-            ks.add(k);
-            xs.add(var.symbol);
-        }
+        List<Integer> ks = fix.ks;
+        List<Symbol> xs = fix.xs;
 
         for (int i = 0; i < fix.clauses.size(); i++) {
             Fix.Clause clause = fix.clauses.get(i);

@@ -108,30 +108,7 @@ class Reducer {
                 Expression mainClause = fix.getMainClause().definition;
 
                 // Make sure we've passed the decreasing argument before reducing
-                AbstractionDecomposition clauseDecomposition = new AbstractionDecomposition(mainClause);
-
-                if (!(clauseDecomposition.body instanceof Match))
-                    throw new PouletException("body of fix definition must be a match, not a " + clauseDecomposition.body.getClass().getSimpleName());
-
-                Match match = (Match) clauseDecomposition.body;
-
-                if (!(match.expression instanceof Var))
-                    throw new PouletException("body of fix definition must match on an argument");
-
-                Var var = (Var) match.expression;
-                Integer k = null;
-
-                for (int i = 0; i < clauseDecomposition.arguments.size(); i++) {
-                    Symbol argument = clauseDecomposition.arguments.get(i);
-
-                    if (argument.equals(var.symbol)) {
-                        k = i;
-                        break;
-                    }
-                }
-
-                if(k == null)
-                    throw new PouletException("" + var + " isn't an argument to the fix function");
+                int k = fix.ks.get(fix.getClauseIndex(fix.mainSymbol));
 
                 if(applicationDecomposition.arguments.size() - 1 < k)
                     return applicationDecomposition.expression();
@@ -141,7 +118,7 @@ class Reducer {
                 for (Fix.Clause clause : fix.clauses) {
                     mainClause.substitute(
                             clause.symbol,
-                            new Fix(fix.clauses, clause.symbol)
+                            new Fix(fix.clauses, clause.symbol, fix.ks, fix.xs)
                     );
                 }
 

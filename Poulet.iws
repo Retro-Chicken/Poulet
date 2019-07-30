@@ -3,9 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="ba1efec9-3aa2-471f-93b2-5b40d8defefa" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/Poulet.iws" beforeDir="false" afterPath="$PROJECT_DIR$/Poulet.iws" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/kernel/Kernel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/kernel/Kernel.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/kernel/Checker.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/kernel/Checker.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/poulet/kernel/Reducer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/kernel/Reducer.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Command.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Command.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Fix.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Fix.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.gradle/" />
     <ignored path="$PROJECT_DIR$/build/" />
@@ -60,11 +60,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/samples/scratch.poulet">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="359">
-              <caret line="213" column="39" selection-start-line="213" selection-start-column="39" selection-end-line="213" selection-end-column="39" />
+            <state relative-caret-position="432">
+              <caret line="208" column="5" lean-forward="true" selection-start-line="208" selection-start-column="5" selection-end-line="208" selection-end-column="5" />
             </state>
           </provider>
         </entry>
@@ -72,8 +72,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/poulet/kernel/Checker.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="697">
-              <caret line="464" column="16" lean-forward="true" selection-start-line="464" selection-start-column="16" selection-end-line="464" selection-end-column="95" />
+            <state relative-caret-position="85">
+              <caret line="430" column="33" selection-start-line="430" selection-start-column="33" selection-end-line="430" selection-end-column="33" />
               <folding>
                 <element signature="e#9250#9251#0" expanded="true" />
                 <element signature="e#9300#9301#0" expanded="true" />
@@ -86,27 +86,14 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/poulet/kernel/Reducer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="228">
-              <caret line="144" column="22" lean-forward="true" selection-start-line="144" selection-start-column="22" selection-end-line="144" selection-end-column="22" />
+            <state relative-caret-position="239">
+              <caret line="118" column="42" lean-forward="true" selection-start-line="118" selection-start-column="42" selection-end-line="118" selection-end-column="42" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#10353#10354#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/poulet/kernel/decomposition/ApplicationDecomposition.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="13">
-              <caret line="19" column="34" selection-start-line="19" selection-start-column="34" selection-end-line="19" selection-end-column="34" />
-              <folding>
-                <element signature="e#440#441#0" expanded="true" />
-                <element signature="e#477#478#0" expanded="true" />
+                <element signature="e#9365#9366#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -115,8 +102,21 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Fix.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="510">
-              <caret line="45" column="11" selection-start-line="45" selection-start-column="11" selection-end-line="45" selection-end-column="11" />
+            <state relative-caret-position="108">
+              <caret line="151" column="28" lean-forward="true" selection-start-line="151" selection-start-column="28" selection-end-line="151" selection-end-column="28" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/poulet/kernel/decomposition/ApplicationDecomposition.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="250">
+              <caret line="19" column="34" selection-start-line="19" selection-start-column="34" selection-end-line="19" selection-end-column="34" />
+              <folding>
+                <element signature="e#440#441#0" expanded="true" />
+                <element signature="e#477#478#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -149,7 +149,6 @@
         <option value="$PROJECT_DIR$/src/main/java/poulet/kernel/decomposition/HeadDecomposition.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/ConstructorCall.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/InductiveType.java" />
-        <option value="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Fix.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Abstraction.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/UniqueSymbol.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Var.java" />
@@ -166,10 +165,11 @@
         <option value="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/InductiveDeclaration.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Application.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/TypeDeclaration.java" />
-        <option value="$PROJECT_DIR$/src/main/java/poulet/kernel/Checker.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Command.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/kernel/Kernel.java" />
+        <option value="$PROJECT_DIR$/src/main/java/poulet/kernel/Checker.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/kernel/Reducer.java" />
+        <option value="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Fix.java" />
         <option value="$PROJECT_DIR$/samples/scratch.poulet" />
       </list>
     </option>
@@ -383,7 +383,7 @@
       <window_info id="Favorites" order="6" sideWeight="0.19751166" side_tool="true" weight="0.30424887" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32970452" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.5827011" visible="true" weight="0.56663054" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.5827011" visible="true" weight="0.3206934" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4821151" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -651,9 +651,35 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/kernel/Checker.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="430" column="33" selection-start-line="430" selection-start-column="33" selection-end-line="430" selection-end-column="33" />
+          <folding>
+            <element signature="e#9250#9251#0" expanded="true" />
+            <element signature="e#9300#9301#0" expanded="true" />
+            <element signature="e#9370#9371#0" expanded="true" />
+            <element signature="e#9420#9421#0" expanded="true" />
+            <element signature="e#9492#9493#0" expanded="true" />
+            <element signature="e#9555#9556#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/kernel/Reducer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="239">
+          <caret line="118" column="42" lean-forward="true" selection-start-line="118" selection-start-column="42" selection-end-line="118" selection-end-column="42" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#9365#9366#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/poulet/kernel/decomposition/ApplicationDecomposition.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="13">
+        <state relative-caret-position="250">
           <caret line="19" column="34" selection-start-line="19" selection-start-column="34" selection-end-line="19" selection-end-column="34" />
           <folding>
             <element signature="e#440#441#0" expanded="true" />
@@ -671,41 +697,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Fix.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="510">
-          <caret line="45" column="11" selection-start-line="45" selection-start-column="11" selection-end-line="45" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/kernel/Checker.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="697">
-          <caret line="464" column="16" lean-forward="true" selection-start-line="464" selection-start-column="16" selection-end-line="464" selection-end-column="95" />
-          <folding>
-            <element signature="e#9250#9251#0" expanded="true" />
-            <element signature="e#9300#9301#0" expanded="true" />
-            <element signature="e#9370#9371#0" expanded="true" />
-            <element signature="e#9420#9421#0" expanded="true" />
-            <element signature="e#9492#9493#0" expanded="true" />
-            <element signature="e#9555#9556#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="108">
+          <caret line="151" column="28" lean-forward="true" selection-start-line="151" selection-start-column="28" selection-end-line="151" selection-end-column="28" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/samples/scratch.poulet">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="359">
-          <caret line="213" column="39" selection-start-line="213" selection-start-column="39" selection-end-line="213" selection-end-column="39" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/kernel/Reducer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="228">
-          <caret line="144" column="22" lean-forward="true" selection-start-line="144" selection-start-column="22" selection-end-line="144" selection-end-column="22" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#10353#10354#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="432">
+          <caret line="208" column="5" lean-forward="true" selection-start-line="208" selection-start-column="5" selection-end-line="208" selection-end-column="5" />
         </state>
       </provider>
     </entry>
