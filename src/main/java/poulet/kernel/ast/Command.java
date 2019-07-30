@@ -22,7 +22,14 @@ public class Command extends TopLevel {
 
     @Override
     public String toString() {
-        String argumentString = arguments.stream().map(Expression::toString).collect(Collectors.joining(" "));
+        String argumentString;
+        switch (action) {
+            case ASSERT:
+                argumentString = arguments.stream().map(Expression::toString).collect(Collectors.joining(" ~ "));
+                break;
+            default:
+                argumentString = arguments.stream().map(Expression::toString).collect(Collectors.joining(" "));
+        }
         return "#" + action.toString().toLowerCase() + " " + argumentString;
     }
 

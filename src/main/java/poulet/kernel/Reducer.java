@@ -1,5 +1,6 @@
 package poulet.kernel;
 
+import poulet.PouletException;
 import poulet.kernel.ast.*;
 import poulet.kernel.context.LocalContext;
 import poulet.kernel.decomposition.AbstractionDecomposition;
@@ -105,6 +106,37 @@ class Reducer {
             @Override
             public Expression visit(Fix fix) {
                 Expression mainClause = fix.getMainClause().definition;
+
+                // Make sure we've passed the decreasing argument before reducing
+                AbstractionDecomposition clauseDecomposition = new AbstractionDecomposition(mainClause);
+
+                if (!(clauseDecomposition.body instanceof Match))
+                    throw new PouletException("body of fix definition must be a match, not a " + clauseDecomposition.body.getClass().getSimpleName());
+
+                Match match = (Match) clauseDecomposition.body;
+
+                if (!(match.expression instanceof Var))
+                    throw new PouletException("body of fix definition must match on an argument");
+
+                Var var = (Var) match.expression;
+                Integer k = null;
+
+                for (int i = 0; i < clauseDecomposition.arguments.size(); i++) {
+                    Symbol argument = clauseDecomposition.arguments.get(i);
+
+                    if (argument.equals(var.symbol)) {
+                        k = i;
+                        break;
+                    }
+                }
+
+                if(k == null)
+                    throw new PouletException("" + var + " isn't an argument to the fix function");
+
+                if(applicationDecomposition.arguments.size() - 1 < k)
+                    return applicationDecomposition.expression();
+                if(!(reduce(applicationDecomposition.arguments.get(k), context) instanceof ConstructorCall))
+                    return applicationDecomposition.expression();
 
                 for (Fix.Clause clause : fix.clauses) {
                     mainClause.substitute(
