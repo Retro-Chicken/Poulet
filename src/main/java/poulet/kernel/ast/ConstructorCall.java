@@ -76,7 +76,8 @@ public class ConstructorCall extends Expression {
     public String toString() {
         String parametersString = parameters.stream().map(Expression::toString).collect(Collectors.joining(", "));
         String argumentsString = arguments.stream().map(Expression::toString).collect(Collectors.joining(", "));
-        return "" + inductiveType + "[" + parametersString + "]." + constructor + "[" + argumentsString + "]";
+        return "" + inductiveType + "[" + parametersString + "]" + "." + constructor
+                    + (argumentsString.isEmpty() ? "" : "(" + argumentsString + ")");
     }
 
     @Override

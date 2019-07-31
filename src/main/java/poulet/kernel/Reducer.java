@@ -1,10 +1,9 @@
 package poulet.kernel;
 
-import poulet.PouletException;
 import poulet.kernel.ast.*;
 import poulet.kernel.context.LocalContext;
-import poulet.kernel.decomposition.AbstractionDecomposition;
 import poulet.kernel.decomposition.ApplicationDecomposition;
+import poulet.kernel.decomposition.QuantifierDecomposition;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +28,7 @@ class Reducer {
 
                 System.out.println("END REDUCTION");*/
 
-                return reduceAbstractionTypesAndApplicationArguments(last, context);
+                return reduceQuantifierTypesAndApplicationArguments(last, context);
             }
 
             //steps.add(next);
@@ -37,25 +36,25 @@ class Reducer {
         }
     }
 
-    private static Expression reduceAbstractionTypesAndApplicationArguments(Expression expression, LocalContext context) {
-        AbstractionDecomposition abstractionDecomposition = new AbstractionDecomposition(expression);
-        ApplicationDecomposition applicationDecomposition = new ApplicationDecomposition(abstractionDecomposition.body);
+    private static Expression reduceQuantifierTypesAndApplicationArguments(Expression expression, LocalContext context) {
+        QuantifierDecomposition quantifierDecomposition = new QuantifierDecomposition(expression);
+        ApplicationDecomposition applicationDecomposition = new ApplicationDecomposition(quantifierDecomposition.body);
 
-        for (int i = 0;i < abstractionDecomposition.argumentTypes.size(); i++) {
-            abstractionDecomposition.argumentTypes.set(i, reduce(abstractionDecomposition.argumentTypes.get(i), context));
+        for (int i = 0;i < quantifierDecomposition.argumentTypes.size(); i++) {
+            quantifierDecomposition.argumentTypes.set(i, reduce(quantifierDecomposition.argumentTypes.get(i), context));
         }
 
         for (int i = 0;i < applicationDecomposition.arguments.size(); i++) {
             applicationDecomposition.arguments.set(i, reduce(applicationDecomposition.arguments.get(i), context));
         }
 
-        abstractionDecomposition.body = applicationDecomposition.expression();
-        return abstractionDecomposition.expression();
+        quantifierDecomposition.body = applicationDecomposition.expression();
+        return quantifierDecomposition.expression();
     }
 
     private static Expression reduceStep(Expression expression, LocalContext context) {
-        AbstractionDecomposition abstractionDecomposition = new AbstractionDecomposition(expression);
-        ApplicationDecomposition applicationDecomposition = new ApplicationDecomposition(abstractionDecomposition.body);
+        QuantifierDecomposition quantifierDecomposition = new QuantifierDecomposition(expression);
+        ApplicationDecomposition applicationDecomposition = new ApplicationDecomposition(quantifierDecomposition.body);
         Expression head = applicationDecomposition.function;
 
         return head.accept(new ExpressionVisitor<>() {
@@ -65,8 +64,8 @@ class Reducer {
                         abstraction.argumentSymbol,
                         applicationDecomposition.arguments.remove(0)
                 );
-                abstractionDecomposition.body = applicationDecomposition.expression();
-                return abstractionDecomposition.expression();
+                quantifierDecomposition.body = applicationDecomposition.expression();
+                return quantifierDecomposition.expression();
             }
 
             @Override
@@ -81,8 +80,8 @@ class Reducer {
                     newConstructorCall.arguments.add(reducedArgument);
 
                     applicationDecomposition.function = newConstructorCall;
-                    abstractionDecomposition.body = applicationDecomposition.expression();
-                    return abstractionDecomposition.expression();
+                    quantifierDecomposition.body = applicationDecomposition.expression();
+                    return quantifierDecomposition.expression();
                 }
             }
 
@@ -98,8 +97,8 @@ class Reducer {
                     newInductiveType.arguments.add(reducedArgument);
 
                     applicationDecomposition.function = newInductiveType;
-                    abstractionDecomposition.body = applicationDecomposition.expression();
-                    return abstractionDecomposition.expression();
+                    quantifierDecomposition.body = applicationDecomposition.expression();
+                    return quantifierDecomposition.expression();
                 }
             }
 
@@ -123,8 +122,8 @@ class Reducer {
                 }
 
                 applicationDecomposition.function = mainClause;
-                abstractionDecomposition.body = applicationDecomposition.expression();
-                return abstractionDecomposition.expression();
+                quantifierDecomposition.body = applicationDecomposition.expression();
+                return quantifierDecomposition.expression();
             }
 
             @Override
@@ -173,8 +172,8 @@ class Reducer {
 
 
                 applicationDecomposition.function = reducedMatch;
-                abstractionDecomposition.body = applicationDecomposition.expression();
-                return abstractionDecomposition.expression();
+                quantifierDecomposition.body = applicationDecomposition.expression();
+                return quantifierDecomposition.expression();
             }
 
             @Override
@@ -184,8 +183,8 @@ class Reducer {
                         reduce(prod.argumentType, context),
                         reduceStep(prod.bodyType, context)
                 );
-                abstractionDecomposition.body = applicationDecomposition.expression();
-                return abstractionDecomposition.expression();
+                quantifierDecomposition.body = applicationDecomposition.expression();
+                return quantifierDecomposition.expression();
             }
 
             @Override
@@ -197,13 +196,13 @@ class Reducer {
                     return expression;
                 } else {
                     applicationDecomposition.function = definition;
-                    abstractionDecomposition.body = applicationDecomposition.expression();
-                    return abstractionDecomposition.expression();
+                    quantifierDecomposition.body = applicationDecomposition.expression();
+                    return quantifierDecomposition.expression();
                 }
             }
 
             @Override
-            public Expression other(Expression expression) {
+            public Expression other(Expression exp) {
                 return expression;
             }
         });

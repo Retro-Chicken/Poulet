@@ -358,7 +358,7 @@ class Checker {
             checkType(application.argument, prod.argumentType, context);
             return Reducer.reduce(prod.bodyType.substitute(prod.argumentSymbol, argument), context);
         } else {
-            throw new PouletException("can't apply to " + application.function);
+            throw new PouletException("can't apply to function " + application.function + " of type " + functionType);
         }
     }
 

@@ -4,6 +4,7 @@ import poulet.PouletException;
 import poulet.kernel.ast.*;
 import poulet.kernel.context.GlobalContext;
 import poulet.kernel.context.LocalContext;
+import poulet.kernel.decomposition.QuantifierDecomposition;
 
 public class Kernel {
     private final GlobalContext globalContext;

@@ -63,12 +63,11 @@ public class InductiveType extends Expression {
 
     @Override
     public String toString() {
-        String s = "" + inductiveType + '[';
-        s += parameters.stream().map(Expression::toString).collect(Collectors.joining(", "));
-        s += ']';
-        s += '(';
-        s += arguments.stream().map(Expression::toString).collect(Collectors.joining(", "));
-        s += ')';
+        String parametersString = parameters.stream().map(Expression::toString).collect(Collectors.joining(", "));
+        String argumentsString = arguments.stream().map(Expression::toString).collect(Collectors.joining(", "));
+        String s = "" + inductiveType;
+        s += '[' + parametersString + ']';
+        s += argumentsString.isEmpty() ? "" : '(' + argumentsString + ')';
         return s;
     }
 

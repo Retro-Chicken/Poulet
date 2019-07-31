@@ -202,6 +202,12 @@ pr1 : {A : Type1} {B : A -> Type1} sigma[A, B] -> A
             mk(a, b) => a
         }
 
+pr2 : {A : Type1} {B : A -> Type1} {s : sigma[A, B]} B(pr1(A, B, s))
+    := \A : Type1 -> \B : (A -> Type1) -> \s : sigma[A, B] ->
+        match s as m() in B(pr1(A, B, m)) {
+            mk(a, b) => b
+        }
+
 fix add : nat[] -> nat[] -> nat[] := \n : nat[] -> \m : nat[] ->
     match n as _() in nat[] {
         Z() => m,
@@ -221,20 +227,3 @@ ifte : {A : Type1} {B : Type1} {p : bool[]} A -> B -> ifte_helper(p, A, B)
         true() => t,
         false() => f
     }
-
-#reduce ifte(nat[], bool[], bool[].true)
-
-#reduce ifte_helper(bool[].true)
-
-#reduce (\x : nat[] -> \y : nat[] -> y)(n0)
-
-#reduce (\x : bool[] -> \t : nat[] -> match x as _() in nat[] {
-    true() => t,
-    false() => t
-})(bool[].true)
-
-pr2 : {A : Type1} {B : A -> Type1} {s : sigma[A, B]} B(pr1(A, B, s))
-    := \A : Type1 -> \B : (A -> Type1) -> \s : sigma[A, B] ->
-        match s as _() in B(pr1(A, B, s)) {
-            mk(a, b) => b
-        }
