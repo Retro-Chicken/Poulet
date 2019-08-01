@@ -9,7 +9,7 @@ import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        Program program = KernelASTParser.parse(CharStreams.fromFileName("samples/scratch.poulet"));
+        Program program = KernelASTParser.parse(CharStreams.fromFileName("samples/hott/chapter1.poulet"));
         Kernel kernel = new Kernel();
         kernel.runProgram(program);
     }

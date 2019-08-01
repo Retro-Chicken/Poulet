@@ -227,3 +227,25 @@ ifte : {A : Type1} {B : Type1} {p : bool[]} A -> B -> ifte_helper(p, A, B)
         true() => t,
         false() => f
     }
+
+type zeta (A : Type1) (B : A -> Type1) (C : {a : A} B(a) -> Type1) : Type1 {
+    mk : {a : A} {b : B(a)} C(a, b) -> zeta[A, B, C]
+}
+
+zpr1 : {A : Type1} {B : A -> Type1} {C : {a : A} B(a) -> Type1} zeta[A, B, C] -> A
+    := \A : Type1 -> \B : (A -> Type1) -> \C : ({a : A} B(a) -> Type1) -> \z : zeta[A, B, C] ->
+        match z as _() in A {
+            mk(a, b, c) => a
+        }
+
+zpr2 : {A : Type1} {B : A -> Type1} {C : {a : A} B(a) -> Type1} {z : zeta[A, B, C]} B(zpr1(A, B, C, z))
+    := \A : Type1 -> \B : (A -> Type1) -> \C : ({a : A} B(a) -> Type1) -> \z : zeta[A, B, C] ->
+        match z as m() in B(zpr1(A, B, C, m)) {
+            mk(a, b, c) => b
+        }
+
+zpr3 : {A : Type1} {B : A -> Type1} {C : {a : A} B(a) -> Type1} {z : zeta[A, B, C]} C(zpr1(A, B, C, z), zpr2(A, B, C, z))
+    := \A : Type1 -> \B : (A -> Type1) -> \C : ({a : A} B(a) -> Type1) -> \z : zeta[A, B, C] ->
+        match z as m() in C(zpr1(A, B, C, m), zpr2(A, B, C, m)) {
+            mk(a, b, c) => c
+        }

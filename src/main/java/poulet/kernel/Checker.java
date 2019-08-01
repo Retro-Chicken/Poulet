@@ -237,7 +237,12 @@ class Checker {
         TypeDeclaration typeDeclaration = context.getTypeDeclaration(expressionType.inductiveType);
         ProdDecomposition prodDecomposition = new ProdDecomposition(typeDeclaration.type);
         List<Expression> argumentTypes = new ArrayList<>(prodDecomposition.argumentTypes);
-        argumentTypes.add(expressionType);
+
+        if(match.argumentSymbols.size() != expressionType.arguments.size())
+            throw new PouletException("match must bind all arguments of inductive type in the return type");
+        InductiveType generalType = new InductiveType(expressionType.inductiveType, expressionType.parameters,
+                                                        match.argumentSymbols.stream().map(x -> new Var(x)).collect(Collectors.toList()));
+        argumentTypes.add(generalType);
 
         return new AbstractionDecomposition(argumentSymbols, argumentTypes, match.type).expression();
     }
