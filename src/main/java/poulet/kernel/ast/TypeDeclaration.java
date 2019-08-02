@@ -86,7 +86,7 @@ public class TypeDeclaration extends Node {
                 inductiveDeclaration,
                 name,
                 newParameters,
-                type.makeSymbolsUnique(),
+                type.makeSymbolsUnique(map),
                 newConstructors
         );
     }

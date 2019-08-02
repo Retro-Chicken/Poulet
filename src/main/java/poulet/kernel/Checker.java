@@ -141,12 +141,19 @@ class Checker {
 
                 if (expressionType instanceof InductiveType) {
                     InductiveType inductiveType = (InductiveType) expressionType;
-                    Expression expressionSort = deduceType(inductiveType, context);
                     Expression returnType = convertMatchTypeToAbstraction(match, inductiveType, context);
                     Expression returnSort = deduceType(returnType, context);
 
-                    if (!isAllowedEliminationSort(inductiveType, expressionSort, returnSort, context)) {
-                        throw new PouletException("elimination sort [" + inductiveType + " : " + expressionSort + " | " + returnSort + "] not allowed");
+                    InductiveType withoutArguments = new InductiveType(
+                            inductiveType.inductiveType,
+                            inductiveType.parameters,
+                            new ArrayList<>()
+                    );
+
+                    Expression expressionSort = deduceType(withoutArguments, context);
+
+                    if (!isAllowedEliminationSort(withoutArguments, match.argumentSymbols, expressionSort, returnSort, context)) {
+                        throw new PouletException("elimination sort [" + withoutArguments + " : " + expressionSort + " | " + returnSort + "] not allowed");
                     }
 
                     for (Match.Clause clause : match.clauses) {
@@ -236,12 +243,25 @@ class Checker {
 
         TypeDeclaration typeDeclaration = context.getTypeDeclaration(expressionType.inductiveType);
         ProdDecomposition prodDecomposition = new ProdDecomposition(typeDeclaration.type);
-        List<Expression> argumentTypes = new ArrayList<>(prodDecomposition.argumentTypes);
+        List<Expression> argumentTypes = new ArrayList<>();
 
-        if(match.argumentSymbols.size() != expressionType.arguments.size())
+        for (Expression argumentType : prodDecomposition.argumentTypes) {
+            Expression substituted = argumentType;
+            for (int i = 0; i < typeDeclaration.parameters.size(); i++) {
+                substituted = substituted.substitute(
+                        typeDeclaration.parameters.get(i).name,
+                        expressionType.parameters.get(i)
+                );
+            }
+            argumentTypes.add(substituted);
+        }
+
+        if (match.argumentSymbols.size() != expressionType.arguments.size()) {
             throw new PouletException("match must bind all arguments of inductive type in the return type");
+        }
+
         InductiveType generalType = new InductiveType(expressionType.inductiveType, expressionType.parameters,
-                                                        match.argumentSymbols.stream().map(x -> new Var(x)).collect(Collectors.toList()));
+                match.argumentSymbols.stream().map(Var::new).collect(Collectors.toList()));
         argumentTypes.add(generalType);
 
         return new AbstractionDecomposition(argumentSymbols, argumentTypes, match.type).expression();
@@ -322,7 +342,8 @@ class Checker {
             prodDecomposition.argumentTypes.set(i, newArgumentType);
         }
 
-        List<Expression> arguments = new ArrayList<>(((InductiveType) prodDecomposition.bodyType).arguments);
+        InductiveType head = (InductiveType) Reducer.reduce(prodDecomposition.bodyType, context);
+        List<Expression> arguments = new ArrayList<>(head.arguments);
 
         for (int i = 0; i < arguments.size(); i++) {
             Expression newArgument = arguments.get(i);
@@ -367,21 +388,28 @@ class Checker {
         }
     }
 
-    private static boolean isAllowedEliminationSort(InductiveType inductiveType, Expression a, Expression b, LocalContext context) {
+    private static boolean isAllowedEliminationSort(InductiveType inductiveType, List<Symbol> argumentSymbols, Expression a, Expression b, LocalContext context) {
+        return isAllowedEliminationSort(inductiveType, argumentSymbols, 0, a, b, context);
+    }
+
+    private static boolean isAllowedEliminationSort(InductiveType inductiveType, List<Symbol> argumentSymbols, int i, Expression a, Expression b, LocalContext context) {
         if (a instanceof Prod && b instanceof Prod) {
             Prod aProd = (Prod) a;
             Prod bProd = (Prod) b;
 
             if (Reducer.convertible(aProd.argumentType, bProd.argumentType, context)) {
                 InductiveType newInductiveType = new InductiveType(inductiveType);
-                newInductiveType.arguments.add(new Var());
-                return isAllowedEliminationSort(newInductiveType, aProd.bodyType, bProd.bodyType, context);
+                Symbol argumentSymbol = argumentSymbols.get(i);
+                newInductiveType.arguments.add(new Var(argumentSymbol));
+                return isAllowedEliminationSort(newInductiveType, argumentSymbols, i + 1, aProd.bodyType, bProd.bodyType, context);
             }
         } else if ((a instanceof Set || a instanceof Type) && b instanceof Prod) {
             Prod bProd = (Prod) b;
-            return bProd.bodyType instanceof Sort;
-        } else if (a instanceof Prop) {
-            if (b instanceof Prop) {
+            return Reducer.convertible(bProd.argumentType, inductiveType, context) && bProd.bodyType instanceof Sort;
+        } else if (a instanceof Prop && b instanceof Prod) {
+            Prod bProd = (Prod) b;
+
+            if (Reducer.convertible(bProd.argumentType, inductiveType, context)) {
                 return true;
             }
 
@@ -392,7 +420,9 @@ class Checker {
             } else if (typeDeclaration.constructors.size() == 1) {
                 TypeDeclaration.Constructor constructor = typeDeclaration.constructors.get(0);
                 List<Expression> argumentTypes = new ProdDecomposition(constructor.definition).argumentTypes;
-                return argumentTypes.stream().allMatch(argumentType -> argumentType instanceof Prop);
+                boolean singleton = argumentTypes.stream().allMatch(argumentType -> argumentType instanceof Prop);
+
+                return singleton && Reducer.convertible(bProd.argumentType, inductiveType, context) && bProd.bodyType instanceof Sort;
             }
         }
 
