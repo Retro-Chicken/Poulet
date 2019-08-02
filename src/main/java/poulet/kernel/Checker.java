@@ -18,8 +18,6 @@ import java.util.stream.Collectors;
 class Checker {
     static void checkType(Expression term, Expression type, LocalContext context) {
         Expression deduced = deduceType(term, context);
-        deduced = Reducer.reduce(deduced, context);
-        type = Reducer.reduce(type, context);
 
         // check subtyping for Type(n)
         if (deduced instanceof Type && type instanceof Type) {
@@ -47,7 +45,7 @@ class Checker {
         return term.accept(new ExpressionVisitor<>() {
             @Override
             public Expression visit(Abstraction abstraction) {
-                Expression abstractionType = Reducer.reduce(abstraction.argumentType, context);
+                Expression abstractionType = abstraction.argumentType;
                 LocalContext boundContext = new LocalContext(context);
                 boundContext.assume(abstraction.argumentSymbol, abstractionType);
                 Expression bodyType = deduceType(abstraction.body, boundContext);
@@ -90,7 +88,12 @@ class Checker {
                 int totalArguments = prodDecomposition.arguments.size();
                 int argumentsPassed = constructorCall.arguments.size();
                 prodDecomposition.arguments = prodDecomposition.arguments.subList(argumentsPassed, totalArguments);
-                return Reducer.reduce(prodDecomposition.expression(), parameterContext);
+
+                Expression result = prodDecomposition.expression();
+                for(int i = 0; i < constructorCall.parameters.size(); i++) {
+                    result = result.substitute(typeDeclaration.parameters.get(i).name, constructorCall.parameters.get(i));
+                }
+                return result;
             }
 
             @Override
@@ -132,12 +135,18 @@ class Checker {
                     parameterContext.define(typeDeclaration.parameters.get(i).name, parameter);
                 }
 
-                return Reducer.reduce(typeDeclaration.type, parameterContext);
+                Expression result = typeDeclaration.type;
+                for(int i = 0; i < inductiveType.parameters.size(); i++) {
+                    result = result.substitute(typeDeclaration.parameters.get(i).name, inductiveType.parameters.get(i));
+                }
+
+                return result;
             }
 
             @Override
             public Expression visit(Match match) {
                 Expression expressionType = deduceType(match.expression, context);
+                expressionType = Reducer.reduce(expressionType, context);
 
                 if (expressionType instanceof InductiveType) {
                     InductiveType inductiveType = (InductiveType) expressionType;
@@ -380,9 +389,9 @@ class Checker {
 
         if (functionType instanceof Prod) {
             Prod prod = (Prod) functionType;
-            Expression argument = Reducer.reduce(application.argument, context);
+            Expression argument = application.argument;
             checkType(application.argument, prod.argumentType, context);
-            return Reducer.reduce(prod.bodyType.substitute(prod.argumentSymbol, argument), context);
+            return prod.bodyType.substitute(prod.argumentSymbol, argument);
         } else {
             throw new PouletException("can't apply to function " + application.function + " of type " + functionType);
         }

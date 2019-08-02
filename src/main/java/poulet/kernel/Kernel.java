@@ -48,7 +48,7 @@ public class Kernel {
             }
         } else if (command.action == Command.Action.DEDUCE) {
             Expression term = command.arguments.get(0);
-            System.out.println(term + " : " + deduceType(term));
+            System.out.println(term + " : " + reduce(deduceType(term)));
         } else if (command.action == Command.Action.REDUCE) {
             Expression term = command.arguments.get(0);
             System.out.println(term + " ▹ " + reduce(term));
