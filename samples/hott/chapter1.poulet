@@ -40,7 +40,7 @@ type nat : Type1 {
     S : nat[] -> nat[]
 }
 
-type Eq (A : Type1) : A -> A -> Prop {
+type Eq (A : Type1) : A -> A -> Type1 {
     refl : {x : A} Eq[A](x, x)
 }
 

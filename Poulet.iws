@@ -3,8 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="ba1efec9-3aa2-471f-93b2-5b40d8defefa" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/samples/hott/chapter1.poulet" beforeDir="false" afterPath="$PROJECT_DIR$/samples/hott/chapter1.poulet" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/kernel/Checker.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/kernel/Checker.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/TypeDeclaration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/TypeDeclaration.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.gradle/" />
     <ignored path="$PROJECT_DIR$/build/" />
@@ -59,11 +57,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/poulet/kernel/Checker.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="231">
-              <caret line="154" column="90" selection-start-line="154" selection-start-column="90" selection-end-line="154" selection-end-column="90" />
+            <state relative-caret-position="262">
+              <caret line="345" column="53" selection-start-line="345" selection-start-column="53" selection-end-line="345" selection-end-column="53" />
               <folding>
                 <element signature="e#2204#2205#0" expanded="true" />
                 <element signature="e#2286#2287#0" expanded="true" />
@@ -78,11 +76,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/samples/hott/chapter1.poulet">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="240">
-              <caret line="48" column="10" selection-start-line="48" selection-start-column="10" selection-end-line="48" selection-end-column="10" />
+            <state relative-caret-position="140">
+              <caret line="42" column="17" lean-forward="true" selection-start-line="42" selection-start-column="17" selection-end-line="42" selection-end-column="17" />
             </state>
           </provider>
         </entry>
@@ -139,8 +137,8 @@
         <option value="$PROJECT_DIR$/src/main/java/poulet/Main.java" />
         <option value="$APPLICATION_CONFIG_DIR$/consoles/jshell/jshell_console_1.snippet" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/TypeDeclaration.java" />
-        <option value="$PROJECT_DIR$/samples/hott/chapter1.poulet" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/kernel/Checker.java" />
+        <option value="$PROJECT_DIR$/samples/hott/chapter1.poulet" />
       </list>
     </option>
   </component>
@@ -350,8 +348,8 @@
       <window_info id="Favorites" order="6" sideWeight="0.19751166" side_tool="true" weight="0.30424887" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32970452" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.5827011" weight="0.3903577" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.39657855" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.5827011" visible="true" weight="0.3903577" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.39657855" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -418,7 +416,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-method">
           <url>file://$PROJECT_DIR$/src/main/java/poulet/kernel/Checker.java</url>
-          <line>393</line>
+          <line>394</line>
           <properties class="poulet.kernel.Checker" method="isAllowedEliminationSort">
             <option name="EMULATED" value="true" />
           </properties>
@@ -724,17 +722,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/samples/hott/chapter1.poulet">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="48" column="10" selection-start-line="48" selection-start-column="10" selection-end-line="48" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/poulet/kernel/Checker.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="231">
-          <caret line="154" column="90" selection-start-line="154" selection-start-column="90" selection-end-line="154" selection-end-column="90" />
+        <state relative-caret-position="262">
+          <caret line="345" column="53" selection-start-line="345" selection-start-column="53" selection-end-line="345" selection-end-column="53" />
           <folding>
             <element signature="e#2204#2205#0" expanded="true" />
             <element signature="e#2286#2287#0" expanded="true" />
@@ -745,6 +736,13 @@
             <element signature="e#9492#9493#0" expanded="true" />
             <element signature="e#9555#9556#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/samples/hott/chapter1.poulet">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="140">
+          <caret line="42" column="17" lean-forward="true" selection-start-line="42" selection-start-column="17" selection-end-line="42" selection-end-column="17" />
         </state>
       </provider>
     </entry>
