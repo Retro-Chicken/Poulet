@@ -1,5 +1,7 @@
 package poulet.kernel.ast;
 
+import poulet.parser.Node;
+
 public class Symbol extends Node implements Comparable<Symbol> {
     public final String symbol;
 

@@ -1,7 +1,7 @@
 package poulet.kernel.ast;
 
 import poulet.PouletException;
-import poulet.kernel.decomposition.AbstractionDecomposition;
+import poulet.parser.Node;
 import poulet.util.StringUtil;
 
 import java.util.ArrayList;

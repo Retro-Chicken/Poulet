@@ -1,4 +1,4 @@
-package poulet.kernel.ast;
+package poulet.parser;
 
 public abstract class Node {
 }

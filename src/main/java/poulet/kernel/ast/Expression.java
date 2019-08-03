@@ -1,6 +1,6 @@
 package poulet.kernel.ast;
 
-import poulet.PouletException;
+import poulet.parser.Node;
 
 import java.util.HashMap;
 import java.util.Map;

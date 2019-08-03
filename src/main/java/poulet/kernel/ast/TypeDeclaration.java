@@ -1,5 +1,6 @@
 package poulet.kernel.ast;
 
+import poulet.parser.Node;
 import poulet.util.StringUtil;
 
 import java.util.ArrayList;

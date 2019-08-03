@@ -1,51 +1,53 @@
-type sigma (A : Type1) (B : A -> Type1) : Type1 {
-    mk : {a : A} B(a) -> sigma[A, B]
-}
+Section chapter1 {
+    type sigma (A : Type1) (B : A -> Type1) : Type1 {
+        mk : {a : A} B(a) -> sigma[A, B]
+    }
 
-spr1 : {A : Type1} {B : A -> Type1} sigma[A, B] -> A
-    := \A : Type1 -> \B : (A -> Type1) -> \s : sigma[A, B] ->
-        match s as _() in A {
-            mk(a, b) => a
+    spr1 : {A : Type1} {B : A -> Type1} sigma[A, B] -> A
+        := \A : Type1 -> \B : (A -> Type1) -> \s : sigma[A, B] ->
+            match s as _() in A {
+                mk(a, b) => a
+            }
+
+    spr2 : {A : Type1} {B : A -> Type1} {s : sigma[A, B]} B(spr1(A, B, s))
+        := \A : Type1 -> \B : (A -> Type1) -> \s : sigma[A, B] ->
+            match s as m() in B(spr1(A, B, m)) {
+                mk(a, b) => b
+            }
+
+    type pair (A : Type1) (B : Type1) : Type1 {
+        mk : A -> B -> pair[A, B]
+    }
+
+    pr1 : {A : Type1} {B : Type1} pair[A, B] -> A
+        := \A : Type1 -> \B : Type1 -> \p : pair[A, B] ->
+        match p as _() in A {
+            mk(a,b) => a
         }
 
-spr2 : {A : Type1} {B : A -> Type1} {s : sigma[A, B]} B(spr1(A, B, s))
-    := \A : Type1 -> \B : (A -> Type1) -> \s : sigma[A, B] ->
-        match s as m() in B(spr1(A, B, m)) {
-            mk(a, b) => b
+    pr2 : {A : Type1} {B : Type1} pair[A, B] -> B
+        := \A : Type1 -> \B : Type1 -> \p : pair[A, B] ->
+        match p as _() in B {
+            mk(a,b) => b
         }
 
-type pair (A : Type1) (B : Type1) : Type1 {
-    mk : A -> B -> pair[A, B]
-}
-
-pr1 : {A : Type1} {B : Type1} pair[A, B] -> A
-    := \A : Type1 -> \B : Type1 -> \p : pair[A, B] ->
-    match p as _() in A {
-        mk(a,b) => a
+    type bool : Type1 {
+        true : bool[]
+        false : bool[]
     }
 
-pr2 : {A : Type1} {B : Type1} pair[A, B] -> B
-    := \A : Type1 -> \B : Type1 -> \p : pair[A, B] ->
-    match p as _() in B {
-        mk(a,b) => b
+    type nat : Type1 {
+        Z : nat[]
+        S : nat[] -> nat[]
     }
 
-type bool : Type1 {
-    true : bool[]
-    false : bool[]
-}
-
-type nat : Type1 {
-    Z : nat[]
-    S : nat[] -> nat[]
-}
-
-type Eq (A : Type1) : A -> A -> Type1 {
-    refl : {x : A} Eq[A](x, x)
-}
-
-path_ind : {A : Type1} {C : {x : A} {y : A} Eq[A](x, y) -> Type1} {c : {x : A} C(x, x, Eq[A].refl(x))} ({x : A} {y : A} {p : Eq[A](x, y)} C(x, y, p))
-    := \A : Type1 -> \C : ({x : A} {y : A} Eq[A](x, y) -> Type1) -> \c : ({x : A} C(x, x, Eq[A].refl(x))) -> \x : A -> \y : A -> \p : Eq[A](x, y) ->
-    match p as p0(x0, y0) in C(x0, y0, p0) {
-        refl(w) => c(w)
+    type Eq (A : Type1) : A -> A -> Type1 {
+        refl : {x : A} Eq[A](x, x)
     }
+
+    path_ind : {A : Type1} {C : {x : A} {y : A} Eq[A](x, y) -> Type1} {c : {x : A} C(x, x, Eq[A].refl(x))} ({x : A} {y : A} {p : Eq[A](x, y)} C(x, y, p))
+        := \A : Type1 -> \C : ({x : A} {y : A} Eq[A](x, y) -> Type1) -> \c : ({x : A} C(x, x, Eq[A].refl(x))) -> \x : A -> \y : A -> \p : Eq[A](x, y) ->
+        match p as p0(x0, y0) in C(x0, y0, p0) {
+            refl(w) => c(w)
+        }
+}
