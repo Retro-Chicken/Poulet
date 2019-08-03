@@ -1,17 +1,24 @@
 package poulet.refiner.ast;
 
-import poulet.parser.Node;
+import poulet.kernel.ast.TopLevel;
+import poulet.refiner.imports.ImportHandler;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Import extends Node {
+public class Import extends Sugar {
     public final String importName;
     public final List<String> subSections;
 
     public Import(String importName, List<String> subSections) {
         this.importName = importName;
         this.subSections = subSections;
+    }
+
+    @Override
+    public List<TopLevel> inflate() {
+        return ImportHandler.expand(this).project().topLevels;
     }
 
     @Override

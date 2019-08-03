@@ -1,0 +1,6 @@
+open chapter1
+
+n0 : nat[] := nat[].Z
+n1 : nat[] := nat[].S(n0)
+
+#assert pr1(nat[], nat[], pair[nat[], nat[]].mk(n0, n1)) ~ n0

@@ -6,6 +6,7 @@ import poulet.kernel.ast.*;
 import poulet.parser.KernelASTParser;
 import poulet.parser.RefinerASTParser;
 import poulet.refiner.Refiner;
+import poulet.refiner.imports.ImportHandler;
 
 import java.io.IOException;
 
@@ -16,7 +17,8 @@ public class Main {
         Kernel kernel = new Kernel();
         kernel.runProgram(program);
          */
-        poulet.refiner.ast.Program program = RefinerASTParser.parse(CharStreams.fromFileName("samples/hott/chapter1.poulet"));
+        ImportHandler.directories.add("samples/");
+        poulet.refiner.ast.Program program = RefinerASTParser.parse(CharStreams.fromFileName("samples/hott/chapter2.poulet"));
         Refiner refiner = new Refiner();
         refiner.runProgram(program);
     }

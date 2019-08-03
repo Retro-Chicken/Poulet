@@ -1,15 +1,22 @@
 package poulet.refiner.ast;
 
-import poulet.parser.Node;
+import poulet.kernel.ast.TopLevel;
 import poulet.util.StringUtil;
 
-public class Section extends Node {
+import java.util.List;
+
+public class Section extends Sugar {
     public final String name;
     public final Program program;
 
     public Section(String name, Program program) {
         this.name = name;
         this.program = program;
+    }
+
+    @Override
+    public List<TopLevel> inflate() {
+        return program.project().topLevels;
     }
 
     @Override
