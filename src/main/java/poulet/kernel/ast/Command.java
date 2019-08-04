@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Command extends TopLevel {
+public abstract class Command extends TopLevel {
     public enum Action {
         REDUCE,
         DEDUCE,

@@ -211,6 +211,11 @@ class Reducer {
     static boolean convertible(Expression a, Expression b, LocalContext context) {
         Expression aReduced = reduce(a, context);
         Expression bReduced = reduce(b, context);
+        if (a.toString().equals("T -> A")) {
+            System.out.println(aReduced);
+            System.out.println(bReduced);
+            System.out.println(aReduced.equals(bReduced));
+        }
         return alphaConvertible(aReduced, bReduced) || etaConverible(aReduced, bReduced, context);
     }
 

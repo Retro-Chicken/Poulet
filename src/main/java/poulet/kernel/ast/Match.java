@@ -19,9 +19,9 @@ public class Match extends Expression {
     public final List<Clause> clauses;
 
     public static class Clause extends Node {
-        public Symbol constructor;
-        public List<Symbol> argumentSymbols;
-        public Expression expression;
+        public final Symbol constructor;
+        public final List<Symbol> argumentSymbols;
+        public final Expression expression;
 
         public Clause(Symbol constructor, List<Symbol> argumentSymbols, Expression expression) {
             this.constructor = constructor;

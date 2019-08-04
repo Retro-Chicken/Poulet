@@ -1,0 +1,5 @@
+T : Type1
+A : Type1
+a : A
+
+f : T -> A := let x : A := a in \x : T -> a

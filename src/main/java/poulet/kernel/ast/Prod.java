@@ -5,9 +5,9 @@ import java.util.Map;
 import java.util.function.Function;
 
 public class Prod extends Expression {
-    public Symbol argumentSymbol;
-    public Expression argumentType;
-    public Expression bodyType;
+    public final Symbol argumentSymbol;
+    public final Expression argumentType;
+    public final Expression bodyType;
 
     // non-dependent arrow type
     public Prod(Expression argumentType, Expression bodyType) {

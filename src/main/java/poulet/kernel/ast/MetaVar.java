@@ -10,6 +10,10 @@ public class MetaVar extends Expression {
         this.symbol = symbol;
     }
 
+    public MetaVar() {
+        this.symbol = new UniqueSymbol(new Symbol(""));
+    }
+
     @Override
     public String toString() {
         return "?" + symbol;
