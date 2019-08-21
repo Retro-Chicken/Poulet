@@ -4,49 +4,57 @@ grammar Kernel;
     package poulet.parser.kernel;
 }
 
-program : (definition | toplevel_fix | inductive_types | toplevel_type_declaration | command | assert_eq)+ EOF ;
+program : (definition | toplevel_fix | inductive_types | toplevel_type_declaration | command)+ ;
 
-assert_eq : '#assert' expression '~' expression ;
+definition : name=symbol ':' type=expression (':=' def=expression)? ;
 
-definition : symbol ':' expression (':=' expression)? ;
+toplevel_fix : 'fix' def=definition ;
 
-toplevel_fix : 'fix' definition ;
+command : REDUCE args+=expression | DEDUCE args+=expression | ASSERT args+=expression '~' args+=expression ;
 
-command : REDUCE expression | DEDUCE expression | ASSERT expression '~' expression ;
+inductive_types : 'inductive' '{' declarations+=type_declaration* '}' ;
 
-inductive_types : 'inductive' '{' type_declaration* '}' ;
+toplevel_type_declaration : declaration=type_declaration ;
 
-toplevel_type_declaration : type_declaration ;
+type_declaration : 'type' name=symbol parameters+=parameter* ':' type=expression '{' constructors+=constructor* '}' ;
 
-type_declaration : 'type' symbol parameter* ':' expression '{' constructor* '}' ;
+parameter : '(' name=symbol ':' type=expression ')' ;
 
-parameter : '(' symbol ':' expression ')' ;
-
-expression : sort | variable | abstraction | expression '(' (expression ',')* expression ')' | pi_type | match | inductive_type | constructor_call | fix | '(' expression ')' | <assoc=right> expression '->' expression ;
+expression : sort #ExpSort
+        | variable #ExpVariable
+        | abstraction #ExpAbstraction
+        | function=expression '(' (args+=expression ',')* args+=expression ')' #Application
+        | pi_type #ExpPiType
+        | match #ExpMatch
+        | inductive_type #InductiveType
+        | constructor_call #ConstructorCall
+        | fix #ExpFix
+        | '(' body=expression ')' #Parentheses
+        | <assoc=right> domain=expression '->' codomain=expression #Function ;
 
 sort : 'Prop' | 'Set' | TYPE ;
 
 TYPE : 'Type'[0-9]+ ;
 
-constructor_call : inductive_type '.' symbol ;
+constructor_call : type=inductive_type '.' constructorName=symbol ;
 
-inductive_type : symbol '[' ((expression ',')* expression)? ']' ;
+inductive_type : typeName=symbol '[' ((parameters+=expression ',')* parameters+=expression)? ']' ;
 
-variable : symbol ;
+variable : name=symbol ;
 
-abstraction : '\\' symbol ':' expression '->' expression ;
+abstraction : '\\' name=symbol ':' type=expression '->' body=expression ;
 
-pi_type : '{' symbol ':' expression '}' expression ;
+pi_type : '{' name=symbol ':' type=expression '}' body=expression ;
 
-constructor : symbol ':' expression ;
+constructor : name=symbol ':' type=expression ;
 
-match : 'match' expression 'as' symbol '(' ((symbol ',')* symbol)? ')' 'in' expression '{' ((match_clause ',')* match_clause)? '}';
+match : 'match' exp=expression 'as' name=symbol '(' ((argNames+=symbol ',')* argNames+=symbol)? ')' 'in' type=expression '{' ((clauses+=match_clause ',')* clauses+=match_clause)? '}' ;
 
-match_clause : symbol '(' ((symbol ',')* symbol)? ')' '=>' expression ;
+match_clause : constructorName=symbol '(' ((argNames+=symbol ',')* argNames+=symbol)? ')' '=>' exp=expression ;
 
-fix : 'fix' '{' fix_definition* '}' '.' symbol ;
+fix : 'fix' '{' definitions+=fix_definition* '}' '.' export=symbol ;
 
-fix_definition : symbol ':' expression ':=' expression ;
+fix_definition : name=symbol ':' type=expression ':=' def=expression ;
 
 symbol : SYMBOL ;
 

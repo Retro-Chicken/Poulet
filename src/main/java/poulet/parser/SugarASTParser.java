@@ -136,7 +136,7 @@ public class SugarASTParser extends RefinerBaseVisitor<Node> {
     }
 
     @Override
-    public Prod visitPiType(RefinerParser.PiTypeContext ctx) {
+    public Prod visitExpPiType(RefinerParser.ExpPiTypeContext ctx) {
         return this.visitPi_type(ctx.pi_type());
     }
 
@@ -217,6 +217,31 @@ public class SugarASTParser extends RefinerBaseVisitor<Node> {
     @Override
     public Var visitVariable(RefinerParser.VariableContext ctx) {
         return new Var(this.visitSymbol(ctx.name));
+    }
+
+    @Override
+    public Fix visitExpFix(RefinerParser.ExpFixContext ctx) {
+        return this.visitFix(ctx.fix());
+    }
+
+    @Override
+    public Var visitExpVariable(RefinerParser.ExpVariableContext ctx) {
+        return this.visitVariable(ctx.variable());
+    }
+
+    @Override
+    public Abstraction visitExpAbstraction(RefinerParser.ExpAbstractionContext ctx) {
+        return this.visitAbstraction(ctx.abstraction());
+    }
+
+    @Override
+    public Sort visitExpSort(RefinerParser.ExpSortContext ctx) {
+        return this.visitSort(ctx.sort());
+    }
+
+    @Override
+    public Match visitExpMatch(RefinerParser.ExpMatchContext ctx) {
+        return this.visitMatch(ctx.match());
     }
 
     @Override
