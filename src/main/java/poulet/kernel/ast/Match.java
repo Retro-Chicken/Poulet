@@ -1,6 +1,7 @@
 package poulet.kernel.ast;
 
 import poulet.PouletException;
+import poulet.parser.KernelAST;
 import poulet.parser.Node;
 import poulet.util.StringUtil;
 
@@ -18,7 +19,7 @@ public class Match extends Expression {
     public final Expression type;
     public final List<Clause> clauses;
 
-    public static class Clause extends Node {
+    public static class Clause extends KernelAST {
         public Symbol constructor;
         public List<Symbol> argumentSymbols;
         public Expression expression;

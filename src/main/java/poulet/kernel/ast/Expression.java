@@ -1,12 +1,12 @@
 package poulet.kernel.ast;
 
-import poulet.parser.Node;
+import poulet.parser.KernelAST;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-public abstract class Expression extends Node {
+public abstract class Expression extends KernelAST {
     public abstract <T> T accept(ExpressionVisitor<T> visitor);
 
     // recursively replace Var(name) with transformation(name)

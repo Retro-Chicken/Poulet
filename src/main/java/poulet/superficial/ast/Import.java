@@ -6,7 +6,7 @@ import poulet.superficial.imports.ImportHandler;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Import extends Sugar {
+public class Import extends Multiline {
     public final String importName;
     public final List<String> subSections;
 
@@ -16,8 +16,8 @@ public class Import extends Sugar {
     }
 
     @Override
-    public List<TopLevel> inflate() {
-        return ImportHandler.expand(this).project().topLevels;
+    public List<Sugar> inflate() {
+        return ImportHandler.expand(this).nodes;
     }
 
     @Override

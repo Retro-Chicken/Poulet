@@ -1,8 +1,8 @@
-package poulet.kernel.ast;
+package poulet.superficial.ast.expressions;
 
-import poulet.parser.KernelAST;
+import poulet.superficial.ast.Inline;
 
-public class Symbol extends KernelAST implements Comparable<Symbol> {
+public class Symbol extends Inline.Projectable implements Comparable<Symbol> {
     public final String symbol;
 
     public Symbol(String symbol) {
@@ -34,7 +34,8 @@ public class Symbol extends KernelAST implements Comparable<Symbol> {
         return symbol.hashCode();
     }
 
-    Symbol rename(String symbol) {
-        return new Symbol(symbol);
+    @Override
+    public poulet.kernel.ast.Symbol project() {
+        return new poulet.kernel.ast.Symbol(symbol);
     }
 }

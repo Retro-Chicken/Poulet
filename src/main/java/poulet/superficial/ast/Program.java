@@ -1,16 +1,18 @@
 package poulet.superficial.ast;
 
 import poulet.kernel.ast.TopLevel;
+import poulet.parser.KernelAST;
 import poulet.parser.Node;
+import poulet.superficial.Desugar;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Program extends Node {
-    public final List<Node> nodes;
+public class Program extends Sugar {
+    public final List<Sugar> nodes;
 
-    public Program(List<Node> nodes) {
+    public Program(List<Sugar> nodes) {
         this.nodes = nodes;
     }
 
@@ -33,11 +35,12 @@ public class Program extends Node {
 
     public poulet.kernel.ast.Program project() {
         List<TopLevel> topLevels = new ArrayList<>();
-        for(Node node : nodes) {
-            if(node instanceof TopLevel) {
-                topLevels.add((TopLevel) node);
-            } else if(node instanceof Sugar) {
-                topLevels.addAll(((Sugar) node).inflate());
+        for(Sugar node : nodes) {
+            if(node instanceof Multiline) {
+                for(KernelAST line : Desugar.desugar((Multiline) node))
+                    topLevels.add((TopLevel) line);
+            } else if(node instanceof Inline) {
+                topLevels.add((TopLevel) Desugar.desugar((Inline) node));
             }
         }
         return new poulet.kernel.ast.Program(topLevels);

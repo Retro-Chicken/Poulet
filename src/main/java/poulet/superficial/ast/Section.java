@@ -5,7 +5,7 @@ import poulet.util.StringUtil;
 
 import java.util.List;
 
-public class Section extends Sugar {
+public class Section extends Multiline {
     public final String name;
     public final Program program;
 
@@ -15,8 +15,8 @@ public class Section extends Sugar {
     }
 
     @Override
-    public List<TopLevel> inflate() {
-        return program.project().topLevels;
+    public List<Sugar> inflate() {
+        return program.nodes;
     }
 
     @Override

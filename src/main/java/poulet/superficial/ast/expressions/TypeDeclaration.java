@@ -1,23 +1,19 @@
-package poulet.kernel.ast;
+package poulet.superficial.ast.expressions;
 
-import poulet.parser.KernelAST;
-import poulet.parser.Node;
+import poulet.superficial.ast.Inline;
 import poulet.util.StringUtil;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
-public class TypeDeclaration extends KernelAST {
+public class TypeDeclaration extends Inline.Projectable {
     public InductiveDeclaration inductiveDeclaration;
     public final Symbol name;
     public final List<Parameter> parameters;
     public final Expression type;
     public final List<Constructor> constructors;
 
-    public static class Parameter extends KernelAST {
+    public static class Parameter extends Inline.Projectable {
         public final Symbol name;
         public final Expression type;
 
@@ -30,9 +26,14 @@ public class TypeDeclaration extends KernelAST {
         public String toString() {
             return "(" + name + " : " + type + ")";
         }
+
+        @Override
+        public poulet.kernel.ast.TypeDeclaration.Parameter project() {
+            return new poulet.kernel.ast.TypeDeclaration.Parameter(name.project(), type.project());
+        }
     }
 
-    public static class Constructor extends KernelAST {
+    public static class Constructor extends Inline.Projectable {
         public final Symbol name;
         public final Expression definition;
 
@@ -44,6 +45,11 @@ public class TypeDeclaration extends KernelAST {
         @Override
         public String toString() {
             return String.format("%s : %s", name, definition);
+        }
+
+        @Override
+        public poulet.kernel.ast.TypeDeclaration.Constructor project() {
+            return new poulet.kernel.ast.TypeDeclaration.Constructor(name.project(), definition.project());
         }
     }
 
@@ -66,30 +72,14 @@ public class TypeDeclaration extends KernelAST {
         return s;
     }
 
-    public TypeDeclaration makeSymbolsUnique() {
-        List<Parameter> newParameters = new ArrayList<>();
-        Map<Symbol, Symbol> map = new HashMap<>();
-
-        for (Parameter parameter : parameters) {
-            Symbol unique = new UniqueSymbol(parameter.name);
-            map.put(parameter.name, unique);
-            Parameter newParameter = new Parameter(unique, parameter.type.makeSymbolsUnique(map));
-            newParameters.add(newParameter);
-        }
-
-        List<Constructor> newConstructors = new ArrayList<>();
-
-        for (Constructor constructor : constructors) {
-            Constructor unique = new Constructor(constructor.name, constructor.definition.makeSymbolsUnique(map));
-            newConstructors.add(unique);
-        }
-
-        return new TypeDeclaration(
-                inductiveDeclaration,
-                name,
-                newParameters,
-                type.makeSymbolsUnique(map),
-                newConstructors
+    @Override
+    public poulet.kernel.ast.TypeDeclaration project() {
+        return new poulet.kernel.ast.TypeDeclaration(
+                inductiveDeclaration.project(),
+                name.project(),
+                parameters.stream().map(Parameter::project).collect(Collectors.toList()),
+                type.project(),
+                constructors.stream().map(Constructor::project).collect(Collectors.toList())
         );
     }
 }

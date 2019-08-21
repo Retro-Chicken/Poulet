@@ -4,20 +4,21 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
-import poulet.kernel.ast.*;
 import poulet.parser.superficial.SuperficialBaseVisitor;
 import poulet.parser.superficial.SuperficialLexer;
 import poulet.parser.superficial.SuperficialParser;
 import poulet.superficial.ast.Import;
 import poulet.superficial.ast.Program;
 import poulet.superficial.ast.Section;
+import poulet.superficial.ast.Sugar;
+import poulet.superficial.ast.expressions.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class SuperficialASTParser extends SuperficialBaseVisitor<Node> {
+public class SuperficialASTParser extends SuperficialBaseVisitor<Sugar> {
     public static Program parse(CharStream stream) {
         SuperficialLexer lexer = new SuperficialLexer(stream);
         SuperficialParser parser = new SuperficialParser(new CommonTokenStream(lexer));
@@ -26,7 +27,7 @@ public class SuperficialASTParser extends SuperficialBaseVisitor<Node> {
 
     @Override
     public Program visitProgram(SuperficialParser.ProgramContext ctx) {
-        List<Node> nodes = new ArrayList<>();
+        List<Sugar> nodes = new ArrayList<>();
         for(ParseTree node : ctx.children) {
             nodes.add(this.visit(node));
         }
