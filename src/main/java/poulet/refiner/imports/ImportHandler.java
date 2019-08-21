@@ -2,7 +2,7 @@ package poulet.refiner.imports;
 
 import org.antlr.v4.runtime.CharStreams;
 import poulet.PouletException;
-import poulet.parser.RefinerASTParser;
+import poulet.parser.SugarASTParser;
 import poulet.refiner.ast.Import;
 import poulet.refiner.ast.Program;
 import poulet.refiner.ast.Section;
@@ -31,7 +31,7 @@ public class ImportHandler {
             }
 
         try {
-            Program program = RefinerASTParser.parse(CharStreams.fromFileName(pathResult));
+            Program program = SugarASTParser.parse(CharStreams.fromFileName(pathResult));
             for(int i = 0; i < include.subSections.size(); i++) {
                 Section section = program.getSection(include.subSections.get(i));
                 if(section == null)

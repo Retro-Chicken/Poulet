@@ -1,10 +1,7 @@
 package poulet;
 
 import org.antlr.v4.runtime.CharStreams;
-import poulet.kernel.Kernel;
-import poulet.kernel.ast.*;
-import poulet.parser.KernelASTParser;
-import poulet.parser.RefinerASTParser;
+import poulet.parser.SugarASTParser;
 import poulet.refiner.Refiner;
 import poulet.refiner.imports.ImportHandler;
 
@@ -18,7 +15,7 @@ public class Main {
         kernel.runProgram(program);
          */
         ImportHandler.directories.add("samples/");
-        poulet.refiner.ast.Program program = RefinerASTParser.parse(CharStreams.fromFileName("samples/hott/chapter2.poulet"));
+        poulet.refiner.ast.Program program = SugarASTParser.parse(CharStreams.fromFileName("samples/hott/chapter2.poulet"));
         Refiner refiner = new Refiner();
         refiner.runProgram(program);
     }
