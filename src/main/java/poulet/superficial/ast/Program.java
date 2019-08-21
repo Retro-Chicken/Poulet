@@ -1,4 +1,4 @@
-package poulet.refiner.ast;
+package poulet.superficial.ast;
 
 import poulet.kernel.ast.TopLevel;
 import poulet.parser.Node;

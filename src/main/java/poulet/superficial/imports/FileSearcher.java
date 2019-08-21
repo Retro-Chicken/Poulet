@@ -1,4 +1,4 @@
-package poulet.refiner.imports;
+package poulet.superficial.imports;
 
 import poulet.PouletException;
 

@@ -2,10 +2,21 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ba1efec9-3aa2-471f-93b2-5b40d8defefa" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/src/main/antlr/poulet/parser/kernel/Kernel.g4" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/antlr/poulet/parser/kernel/Kernel.g4" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/Superficial.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Import.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Program.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Section.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Sugar.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/imports/FileSearcher.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/imports/ImportHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/generated-src/antlr/main/poulet/parser/refiner/RefinerBaseListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/build/generated-src/antlr/main/poulet/parser/refiner/RefinerBaseListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/generated-src/antlr/main/poulet/parser/refiner/RefinerBaseVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/build/generated-src/antlr/main/poulet/parser/refiner/RefinerBaseVisitor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/generated-src/antlr/main/poulet/parser/refiner/RefinerLexer.java" beforeDir="false" afterPath="$PROJECT_DIR$/build/generated-src/antlr/main/poulet/parser/refiner/RefinerLexer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/generated-src/antlr/main/poulet/parser/refiner/RefinerListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/build/generated-src/antlr/main/poulet/parser/refiner/RefinerListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/generated-src/antlr/main/poulet/parser/refiner/RefinerParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/build/generated-src/antlr/main/poulet/parser/refiner/RefinerParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/generated-src/antlr/main/poulet/parser/refiner/RefinerVisitor.java" beforeDir="false" afterPath="$PROJECT_DIR$/build/generated-src/antlr/main/poulet/parser/refiner/RefinerVisitor.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/antlr/poulet/parser/refiner/Refiner.g4" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/antlr/poulet/parser/refiner/Refiner.g4" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/poulet/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/parser/KernelASTParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/parser/KernelASTParser.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/poulet/parser/SugarASTParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/parser/SugarASTParser.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.gradle/" />
@@ -67,55 +78,13 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/poulet/parser/SugarASTParser.java">
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/Superficial.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="119">
-              <caret line="221" column="4" lean-forward="true" selection-start-line="221" selection-start-column="4" selection-end-line="244" selection-end-column="5" />
+            <state relative-caret-position="136">
+              <caret line="8" column="45" lean-forward="true" selection-start-line="8" selection-start-column="45" selection-end-line="8" selection-end-column="45" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#4863#4864#0" expanded="true" />
-                <element signature="e#4897#4898#0" expanded="true" />
-                <element signature="e#5354#5355#0" expanded="true" />
-                <element signature="e#5396#5397#0" expanded="true" />
-                <element signature="e#5834#5835#0" expanded="true" />
-                <element signature="e#5884#5885#0" expanded="true" />
-                <element signature="e#2857#2858#0" expanded="true" />
-                <element signature="e#2904#2905#0" expanded="true" />
-                <element signature="e#8253#8254#0" expanded="true" />
-                <element signature="e#8298#8299#0" expanded="true" />
-                <element signature="e#8386#8387#0" expanded="true" />
-                <element signature="e#8436#8437#0" expanded="true" />
-                <element signature="e#8663#8664#0" expanded="true" />
-                <element signature="e#8709#8710#0" expanded="true" />
-                <element signature="e#8791#8792#0" expanded="true" />
-                <element signature="e#8838#8839#0" expanded="true" />
-                <element signature="e#3906#3907#0" expanded="true" />
-                <element signature="e#3951#3952#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/poulet/parser/KernelASTParser.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2516">
-              <caret line="232" column="44" selection-start-line="232" selection-start-column="44" selection-end-line="232" selection-end-column="44" />
-              <folding>
-                <element signature="imports" expanded="true" />
-                <element signature="e#4774#4775#0" expanded="true" />
-                <element signature="e#4829#4830#0" expanded="true" />
-                <element signature="e#7601#7602#0" expanded="true" />
-                <element signature="e#7659#7660#0" expanded="true" />
-                <element signature="e#7746#7747#0" expanded="true" />
-                <element signature="e#7793#7794#0" expanded="true" />
-                <element signature="e#7880#7881#0" expanded="true" />
-                <element signature="e#7937#7938#0" expanded="true" />
-                <element signature="e#8181#8182#0" expanded="true" />
-                <element signature="e#8230#8231#0" expanded="true" />
-                <element signature="e#8313#8314#0" expanded="true" />
-                <element signature="e#8364#8365#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -124,8 +93,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/antlr/poulet/parser/refiner/Refiner.g4">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="363">
-              <caret line="66" column="20" lean-forward="true" selection-start-line="66" selection-start-column="20" selection-end-line="66" selection-end-column="20" />
+            <state relative-caret-position="1326">
+              <caret line="78" column="33" lean-forward="true" selection-start-line="78" selection-start-column="33" selection-end-line="78" selection-end-column="33" />
               <folding>
                 <element signature="e#18#64#1" expanded="true" />
               </folding>
@@ -145,11 +114,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/poulet/Main.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="391">
-              <caret line="23" column="40" lean-forward="true" selection-start-line="23" selection-start-column="40" selection-end-line="23" selection-end-column="40" />
+            <state relative-caret-position="238">
+              <caret line="14" lean-forward="true" selection-start-line="14" selection-end-line="14" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -254,6 +223,8 @@
         <option value="$PROJECT_DIR$/src/main/antlr/poulet/parser/kernel/Kernel.g4" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/parser/KernelASTParser.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/Main.java" />
+        <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/Refiner.java" />
+        <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/Superficial.java" />
       </list>
     </option>
   </component>
@@ -353,64 +324,7 @@
               <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
               <item name="java" type="462c0819:PsiDirectoryNode" />
               <item name="poulet" type="462c0819:PsiDirectoryNode" />
-              <item name="kernel" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="poulet" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Poulet" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="poulet" type="462c0819:PsiDirectoryNode" />
-              <item name="kernel" type="462c0819:PsiDirectoryNode" />
-              <item name="decomposition" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="poulet" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Poulet" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="poulet" type="462c0819:PsiDirectoryNode" />
-              <item name="parser" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="poulet" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Poulet" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="poulet" type="462c0819:PsiDirectoryNode" />
-              <item name="refiner" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="poulet" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Poulet" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="poulet" type="462c0819:PsiDirectoryNode" />
-              <item name="refiner" type="462c0819:PsiDirectoryNode" />
-              <item name="ast" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="poulet" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Poulet" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="poulet" type="462c0819:PsiDirectoryNode" />
-              <item name="refiner" type="462c0819:PsiDirectoryNode" />
-              <item name="imports" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="poulet" type="b2602c69:ProjectViewProjectNode" />
-              <item name="Poulet" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="poulet" type="462c0819:PsiDirectoryNode" />
-              <item name="util" type="462c0819:PsiDirectoryNode" />
+              <item name="superficial" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -540,9 +454,8 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
-    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.8024883" visible="true" weight="0.25799572" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.8024883" visible="true" weight="0.25799572" />
       <window_info id="Structure" order="1" sideWeight="0.5013928" side_tool="true" weight="0.2336874" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
@@ -550,8 +463,8 @@
       <window_info id="UI Designer" order="5" />
       <window_info id="Favorites" order="6" sideWeight="0.19751166" side_tool="true" weight="0.30424887" />
       <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Find" order="1" weight="0.32970452" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.5827011" visible="true" weight="0.3217768" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32936078" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.5827011" weight="0.3217768" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39657855" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -826,7 +739,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/refiner/ast/Sugar.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Sugar.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="136">
           <caret line="8" column="45" lean-forward="true" selection-start-line="8" selection-start-column="45" selection-end-line="8" selection-end-column="45" />
@@ -836,7 +749,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/refiner/ast/Section.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Section.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="306">
           <caret line="18" column="43" selection-start-line="18" selection-start-column="43" selection-end-line="18" selection-end-column="43" />
@@ -850,7 +763,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/refiner/ast/Import.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Import.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="340">
           <caret line="20" column="62" selection-start-line="20" selection-start-column="62" selection-end-line="20" selection-end-column="62" />
@@ -862,7 +775,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/refiner/imports/FileSearcher.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/imports/FileSearcher.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="561">
           <caret line="45" column="9" selection-start-line="45" selection-start-column="9" selection-end-line="45" selection-end-column="9" />
@@ -876,16 +789,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="68">
           <caret line="8" column="6" selection-start-line="8" selection-start-column="6" selection-end-line="8" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/refiner/Refiner.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="85">
-          <caret line="5" column="22" lean-forward="true" selection-start-line="5" selection-start-column="22" selection-end-line="5" selection-end-column="22" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -903,7 +806,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/refiner/imports/ImportHandler.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/imports/ImportHandler.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="552">
           <caret line="33" column="44" selection-start-line="33" selection-start-column="44" selection-end-line="33" selection-end-column="44" />
@@ -955,7 +858,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/refiner/ast/Program.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Program.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="246">
           <caret line="30" column="17" selection-start-line="30" selection-start-column="17" selection-end-line="30" selection-end-column="17" />
@@ -969,16 +872,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-17">
           <caret line="20" column="1" lean-forward="true" selection-start-line="20" selection-start-column="1" selection-end-line="20" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/antlr/poulet/parser/refiner/Refiner.g4">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="363">
-          <caret line="66" column="20" lean-forward="true" selection-start-line="66" selection-start-column="20" selection-end-line="66" selection-end-column="20" />
-          <folding>
-            <element signature="e#18#64#1" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1022,7 +915,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/poulet/parser/KernelASTParser.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2516">
+        <state relative-caret-position="3842">
           <caret line="232" column="44" selection-start-line="232" selection-start-column="44" selection-end-line="232" selection-end-column="44" />
           <folding>
             <element signature="imports" expanded="true" />
@@ -1042,10 +935,30 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/antlr/poulet/parser/refiner/Refiner.g4">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1326">
+          <caret line="78" column="33" lean-forward="true" selection-start-line="78" selection-start-column="33" selection-end-line="78" selection-end-column="33" />
+          <folding>
+            <element signature="e#18#64#1" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/poulet/Main.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="391">
-          <caret line="23" column="40" lean-forward="true" selection-start-line="23" selection-start-column="40" selection-end-line="23" selection-end-column="40" />
+        <state relative-caret-position="238">
+          <caret line="14" lean-forward="true" selection-start-line="14" selection-end-line="14" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/Superficial.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="136">
+          <caret line="8" column="45" lean-forward="true" selection-start-line="8" selection-start-column="45" selection-end-line="8" selection-end-column="45" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>

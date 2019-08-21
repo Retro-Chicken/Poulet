@@ -4,8 +4,8 @@ import org.antlr.v4.runtime.CharStreams;
 import poulet.kernel.Kernel;
 import poulet.parser.KernelASTParser;
 import poulet.parser.SugarASTParser;
-import poulet.refiner.Refiner;
-import poulet.refiner.imports.ImportHandler;
+import poulet.superficial.Superficial;
+import poulet.superficial.imports.ImportHandler;
 
 import java.io.IOException;
 
@@ -20,8 +20,8 @@ public class Main {
 
         System.out.println("Testing Sugar on " + args[1] + "...");
         ImportHandler.directories.add("samples/");
-        poulet.refiner.ast.Program sugarProgram = SugarASTParser.parse(CharStreams.fromFileName(args[1]));
-        Refiner refiner = new Refiner();
-        refiner.runProgram(sugarProgram);
+        poulet.superficial.ast.Program sugarProgram = SugarASTParser.parse(CharStreams.fromFileName(args[1]));
+        Superficial superficial = new Superficial();
+        superficial.runProgram(sugarProgram);
     }
 }

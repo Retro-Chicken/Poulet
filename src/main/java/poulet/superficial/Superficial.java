@@ -1,9 +1,9 @@
-package poulet.refiner;
+package poulet.superficial;
 
 import poulet.kernel.Kernel;
-import poulet.refiner.ast.Program;
+import poulet.superficial.ast.Program;
 
-public class Refiner {
+public class Superficial {
     public void runProgram(Program program) {
         Kernel kernel = new Kernel();
         kernel.runProgram(program.project());

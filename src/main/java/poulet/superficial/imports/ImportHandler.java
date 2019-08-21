@@ -1,11 +1,11 @@
-package poulet.refiner.imports;
+package poulet.superficial.imports;
 
 import org.antlr.v4.runtime.CharStreams;
 import poulet.PouletException;
 import poulet.parser.SugarASTParser;
-import poulet.refiner.ast.Import;
-import poulet.refiner.ast.Program;
-import poulet.refiner.ast.Section;
+import poulet.superficial.ast.Import;
+import poulet.superficial.ast.Program;
+import poulet.superficial.ast.Section;
 
 import java.io.File;
 import java.io.IOException;

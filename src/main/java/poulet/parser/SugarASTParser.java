@@ -8,9 +8,9 @@ import poulet.kernel.ast.*;
 import poulet.parser.refiner.RefinerBaseVisitor;
 import poulet.parser.refiner.RefinerLexer;
 import poulet.parser.refiner.RefinerParser;
-import poulet.refiner.ast.Import;
-import poulet.refiner.ast.Program;
-import poulet.refiner.ast.Section;
+import poulet.superficial.ast.Import;
+import poulet.superficial.ast.Program;
+import poulet.superficial.ast.Section;
 
 import java.util.ArrayList;
 import java.util.Arrays;

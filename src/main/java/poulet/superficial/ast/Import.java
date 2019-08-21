@@ -1,9 +1,8 @@
-package poulet.refiner.ast;
+package poulet.superficial.ast;
 
 import poulet.kernel.ast.TopLevel;
-import poulet.refiner.imports.ImportHandler;
+import poulet.superficial.imports.ImportHandler;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 

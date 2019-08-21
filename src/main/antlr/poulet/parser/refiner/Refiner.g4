@@ -1,7 +1,7 @@
 grammar Refiner;
 
 @header {
-    package poulet.parser.refiner;
+    package poulet.parser.superficial;
 }
 
 program : (open | section | definition | toplevel_fix | inductive_types | toplevel_type_declaration | command)+ ;
