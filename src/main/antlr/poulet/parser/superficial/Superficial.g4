@@ -1,4 +1,4 @@
-grammar Refiner;
+grammar Superficial;
 
 @header {
     package poulet.parser.superficial;
@@ -77,3 +77,7 @@ SYMBOL : [a-zA-Z_][a-zA-Z0-9_]* ;
 INTEGER : [0-9]+ ;
 
 WHITESPACE : [ \t\r\n]+ -> skip ;
+
+COMMENT : '/*' .*? ('*/' | EOF) -> skip ;
+
+LINE_COMMENT : '//' ~[\r\n]* -> skip ;

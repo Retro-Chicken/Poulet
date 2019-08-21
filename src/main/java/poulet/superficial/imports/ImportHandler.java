@@ -2,7 +2,7 @@ package poulet.superficial.imports;
 
 import org.antlr.v4.runtime.CharStreams;
 import poulet.PouletException;
-import poulet.parser.SugarASTParser;
+import poulet.parser.SuperficialASTParser;
 import poulet.superficial.ast.Import;
 import poulet.superficial.ast.Program;
 import poulet.superficial.ast.Section;
@@ -31,7 +31,7 @@ public class ImportHandler {
             }
 
         try {
-            Program program = SugarASTParser.parse(CharStreams.fromFileName(pathResult));
+            Program program = SuperficialASTParser.parse(CharStreams.fromFileName(pathResult));
             for(int i = 0; i < include.subSections.size(); i++) {
                 Section section = program.getSection(include.subSections.get(i));
                 if(section == null)

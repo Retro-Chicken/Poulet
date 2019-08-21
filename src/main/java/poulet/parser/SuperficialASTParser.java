@@ -5,9 +5,9 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ParseTree;
 import poulet.kernel.ast.*;
-import poulet.parser.refiner.RefinerBaseVisitor;
-import poulet.parser.refiner.RefinerLexer;
-import poulet.parser.refiner.RefinerParser;
+import poulet.parser.superficial.SuperficialBaseVisitor;
+import poulet.parser.superficial.SuperficialLexer;
+import poulet.parser.superficial.SuperficialParser;
 import poulet.superficial.ast.Import;
 import poulet.superficial.ast.Program;
 import poulet.superficial.ast.Section;
@@ -17,15 +17,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class SugarASTParser extends RefinerBaseVisitor<Node> {
+public class SuperficialASTParser extends SuperficialBaseVisitor<Node> {
     public static Program parse(CharStream stream) {
-        RefinerLexer lexer = new RefinerLexer(stream);
-        RefinerParser parser = new RefinerParser(new CommonTokenStream(lexer));
-        return new SugarASTParser().visitProgram(parser.program());
+        SuperficialLexer lexer = new SuperficialLexer(stream);
+        SuperficialParser parser = new SuperficialParser(new CommonTokenStream(lexer));
+        return new SuperficialASTParser().visitProgram(parser.program());
     }
 
     @Override
-    public Program visitProgram(RefinerParser.ProgramContext ctx) {
+    public Program visitProgram(SuperficialParser.ProgramContext ctx) {
         List<Node> nodes = new ArrayList<>();
         for(ParseTree node : ctx.children) {
             nodes.add(this.visit(node));
@@ -34,17 +34,17 @@ public class SugarASTParser extends RefinerBaseVisitor<Node> {
     }
 
     @Override
-    public Section visitSection(RefinerParser.SectionContext ctx) {
+    public Section visitSection(SuperficialParser.SectionContext ctx) {
         return new Section(ctx.sectionName.getText(), this.visitProgram(ctx.prgm));
     }
 
     @Override
-    public Import visitOpen(RefinerParser.OpenContext ctx) {
+    public Import visitOpen(SuperficialParser.OpenContext ctx) {
         return new Import(ctx.fileName.getText(), ctx.subSections.stream().map(Token::getText).collect(Collectors.toList()));
     }
 
     @Override
-    public Definition visitDefinition(RefinerParser.DefinitionContext ctx) {
+    public Definition visitDefinition(SuperficialParser.DefinitionContext ctx) {
         if(ctx.def == null)
             return new Definition(this.visitSymbol(ctx.name), this.visitExpression(ctx.type));
         else
@@ -52,7 +52,7 @@ public class SugarASTParser extends RefinerBaseVisitor<Node> {
     }
 
     @Override
-    public Definition visitToplevel_fix(RefinerParser.Toplevel_fixContext ctx) {
+    public Definition visitToplevel_fix(SuperficialParser.Toplevel_fixContext ctx) {
         Definition definition = this.visitDefinition(ctx.def);
 
         Fix.Clause clause = new Fix.Clause(
@@ -73,7 +73,7 @@ public class SugarASTParser extends RefinerBaseVisitor<Node> {
     }
 
     @Override
-    public Command visitCommand(RefinerParser.CommandContext ctx) {
+    public Command visitCommand(SuperficialParser.CommandContext ctx) {
         List<Expression> arguments = ctx.args.stream().map(this::visitExpression).collect(Collectors.toList());
 
         if (ctx.REDUCE() != null) {
@@ -97,7 +97,7 @@ public class SugarASTParser extends RefinerBaseVisitor<Node> {
     }
 
     @Override
-    public InductiveDeclaration visitInductive_types(RefinerParser.Inductive_typesContext ctx) {
+    public InductiveDeclaration visitInductive_types(SuperficialParser.Inductive_typesContext ctx) {
         List<TypeDeclaration> declarations = ctx.declarations.stream().map(this::visitType_declaration).collect(Collectors.toList());
         InductiveDeclaration inductiveDeclaration = new InductiveDeclaration(declarations);
         for (TypeDeclaration typeDeclaration : inductiveDeclaration.typeDeclarations) {
@@ -107,7 +107,7 @@ public class SugarASTParser extends RefinerBaseVisitor<Node> {
     }
 
     @Override
-    public InductiveDeclaration visitToplevel_type_declaration(RefinerParser.Toplevel_type_declarationContext ctx) {
+    public InductiveDeclaration visitToplevel_type_declaration(SuperficialParser.Toplevel_type_declarationContext ctx) {
         TypeDeclaration typeDeclaration = this.visitType_declaration(ctx.declaration);
         InductiveDeclaration inductiveDeclaration = new InductiveDeclaration(Arrays.asList(typeDeclaration));
         typeDeclaration.inductiveDeclaration = inductiveDeclaration;
@@ -115,7 +115,7 @@ public class SugarASTParser extends RefinerBaseVisitor<Node> {
     }
 
     @Override
-    public TypeDeclaration visitType_declaration(RefinerParser.Type_declarationContext ctx) {
+    public TypeDeclaration visitType_declaration(SuperficialParser.Type_declarationContext ctx) {
         Symbol name = this.visitSymbol(ctx.name);
         List<TypeDeclaration.Parameter> parameters = ctx.parameters.stream().map(this::visitParameter).collect(Collectors.toList());
         List<TypeDeclaration.Constructor> constructors = ctx.constructors.stream().map(this::visitConstructor).collect(Collectors.toList());
@@ -124,44 +124,44 @@ public class SugarASTParser extends RefinerBaseVisitor<Node> {
         return typeDeclaration;
     }
 
-    public Expression visitExpression(RefinerParser.ExpressionContext ctx) {
+    public Expression visitExpression(SuperficialParser.ExpressionContext ctx) {
         return (Expression) this.visit(ctx);
     }
 
     @Override
-    public TypeDeclaration.Parameter visitParameter(RefinerParser.ParameterContext ctx) {
+    public TypeDeclaration.Parameter visitParameter(SuperficialParser.ParameterContext ctx) {
         Symbol symbol = this.visitSymbol(ctx.name);
         Expression type = this.visitExpression(ctx.type);
         return new TypeDeclaration.Parameter(symbol, type);
     }
 
     @Override
-    public Prod visitExpPiType(RefinerParser.ExpPiTypeContext ctx) {
+    public Prod visitExpPiType(SuperficialParser.ExpPiTypeContext ctx) {
         return this.visitPi_type(ctx.pi_type());
     }
 
     @Override
-    public Prod visitPi_type(RefinerParser.Pi_typeContext ctx) {
+    public Prod visitPi_type(SuperficialParser.Pi_typeContext ctx) {
         return new Prod(this.visitSymbol(ctx.name), this.visitExpression(ctx.type), this.visitExpression(ctx.body));
     }
 
     @Override
-    public Prod visitFunction(RefinerParser.FunctionContext ctx) {
+    public Prod visitFunction(SuperficialParser.FunctionContext ctx) {
         return new Prod(new Symbol("_"), this.visitExpression(ctx.domain), this.visitExpression(ctx.codomain));
     }
 
     @Override
-    public InductiveType visitInductiveType(RefinerParser.InductiveTypeContext ctx) {
+    public InductiveType visitInductiveType(SuperficialParser.InductiveTypeContext ctx) {
         return this.visitInductive_type(ctx.inductive_type());
     }
 
     @Override
-    public ConstructorCall visitConstructorCall(RefinerParser.ConstructorCallContext ctx) {
+    public ConstructorCall visitConstructorCall(SuperficialParser.ConstructorCallContext ctx) {
         return this.visitConstructor_call(ctx.constructor_call());
     }
 
     @Override
-    public Application visitApplication(RefinerParser.ApplicationContext ctx) {
+    public Application visitApplication(SuperficialParser.ApplicationContext ctx) {
         Expression function = this.visitExpression(ctx.function);
         List<Expression> arguments = ctx.args.stream().map(this::visitExpression).collect(Collectors.toList());
         Application application = new Application(
@@ -180,12 +180,12 @@ public class SugarASTParser extends RefinerBaseVisitor<Node> {
     }
 
     @Override
-    public Expression visitParentheses(RefinerParser.ParenthesesContext ctx) {
+    public Expression visitParentheses(SuperficialParser.ParenthesesContext ctx) {
         return this.visitExpression(ctx.body);
     }
 
     @Override
-    public Sort visitSort(RefinerParser.SortContext ctx) {
+    public Sort visitSort(SuperficialParser.SortContext ctx) {
         String text = ctx.children.get(0).getText();
 
         if (text.equals("Prop")) {
@@ -201,63 +201,63 @@ public class SugarASTParser extends RefinerBaseVisitor<Node> {
     }
 
     @Override
-    public ConstructorCall visitConstructor_call(RefinerParser.Constructor_callContext ctx) {
+    public ConstructorCall visitConstructor_call(SuperficialParser.Constructor_callContext ctx) {
         InductiveType inductiveType = this.visitInductive_type(ctx.type);
         Symbol constructor = this.visitSymbol(ctx.constructorName);
         return new ConstructorCall(inductiveType.inductiveType, inductiveType.parameters, constructor, new ArrayList<>());
     }
 
     @Override
-    public InductiveType visitInductive_type(RefinerParser.Inductive_typeContext ctx) {
+    public InductiveType visitInductive_type(SuperficialParser.Inductive_typeContext ctx) {
         Symbol type = this.visitSymbol(ctx.typeName);
         List<Expression> parameters = ctx.parameters.stream().map(this::visitExpression).collect(Collectors.toList());
         return new InductiveType(type, parameters, new ArrayList<>());
     }
 
     @Override
-    public Var visitVariable(RefinerParser.VariableContext ctx) {
+    public Var visitVariable(SuperficialParser.VariableContext ctx) {
         return new Var(this.visitSymbol(ctx.name));
     }
 
     @Override
-    public Fix visitExpFix(RefinerParser.ExpFixContext ctx) {
+    public Fix visitExpFix(SuperficialParser.ExpFixContext ctx) {
         return this.visitFix(ctx.fix());
     }
 
     @Override
-    public Var visitExpVariable(RefinerParser.ExpVariableContext ctx) {
+    public Var visitExpVariable(SuperficialParser.ExpVariableContext ctx) {
         return this.visitVariable(ctx.variable());
     }
 
     @Override
-    public Abstraction visitExpAbstraction(RefinerParser.ExpAbstractionContext ctx) {
+    public Abstraction visitExpAbstraction(SuperficialParser.ExpAbstractionContext ctx) {
         return this.visitAbstraction(ctx.abstraction());
     }
 
     @Override
-    public Sort visitExpSort(RefinerParser.ExpSortContext ctx) {
+    public Sort visitExpSort(SuperficialParser.ExpSortContext ctx) {
         return this.visitSort(ctx.sort());
     }
 
     @Override
-    public Match visitExpMatch(RefinerParser.ExpMatchContext ctx) {
+    public Match visitExpMatch(SuperficialParser.ExpMatchContext ctx) {
         return this.visitMatch(ctx.match());
     }
 
     @Override
-    public Abstraction visitAbstraction(RefinerParser.AbstractionContext ctx) {
+    public Abstraction visitAbstraction(SuperficialParser.AbstractionContext ctx) {
         return new Abstraction(this.visitSymbol(ctx.name), this.visitExpression(ctx.type), this.visitExpression(ctx.body));
     }
 
     @Override
-    public TypeDeclaration.Constructor visitConstructor(RefinerParser.ConstructorContext ctx) {
+    public TypeDeclaration.Constructor visitConstructor(SuperficialParser.ConstructorContext ctx) {
         Symbol name = this.visitSymbol(ctx.name);
         Expression definition = this.visitExpression(ctx.type);
         return new TypeDeclaration.Constructor(name, definition);
     }
 
     @Override
-    public Match visitMatch(RefinerParser.MatchContext ctx) {
+    public Match visitMatch(SuperficialParser.MatchContext ctx) {
         Expression expression = this.visitExpression(ctx.exp);
         Symbol expressionSymbol = this.visitSymbol(ctx.name);
         List<Symbol> argumentSymbols = ctx.argNames.stream().map(this::visitSymbol).collect(Collectors.toList());
@@ -268,7 +268,7 @@ public class SugarASTParser extends RefinerBaseVisitor<Node> {
     }
 
     @Override
-    public Match.Clause visitMatch_clause(RefinerParser.Match_clauseContext ctx) {
+    public Match.Clause visitMatch_clause(SuperficialParser.Match_clauseContext ctx) {
         Symbol expressionSymbol = this.visitSymbol(ctx.constructorName);
         List<Symbol> argumentSymbols = ctx.argNames.stream().map(this::visitSymbol).collect(Collectors.toList());
         Expression expression = this.visitExpression(ctx.exp);
@@ -277,7 +277,7 @@ public class SugarASTParser extends RefinerBaseVisitor<Node> {
     }
 
     @Override
-    public Fix visitFix(RefinerParser.FixContext ctx) {
+    public Fix visitFix(SuperficialParser.FixContext ctx) {
         List<Fix.Clause> clauses = ctx.definitions.stream().map(def -> {
             Definition definition = this.visitFix_definition(def);
             return new Fix.Clause(
@@ -291,12 +291,12 @@ public class SugarASTParser extends RefinerBaseVisitor<Node> {
     }
 
     @Override
-    public Definition visitFix_definition(RefinerParser.Fix_definitionContext ctx) {
+    public Definition visitFix_definition(SuperficialParser.Fix_definitionContext ctx) {
         return new Definition(this.visitSymbol(ctx.name), this.visitExpression(ctx.type), this.visitExpression(ctx.def));
     }
 
     @Override
-    public Symbol visitSymbol(RefinerParser.SymbolContext ctx) {
+    public Symbol visitSymbol(SuperficialParser.SymbolContext ctx) {
         return new Symbol(ctx.getText());
     }
 }

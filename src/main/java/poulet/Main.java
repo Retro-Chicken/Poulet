@@ -3,7 +3,7 @@ package poulet;
 import org.antlr.v4.runtime.CharStreams;
 import poulet.kernel.Kernel;
 import poulet.parser.KernelASTParser;
-import poulet.parser.SugarASTParser;
+import poulet.parser.SuperficialASTParser;
 import poulet.superficial.Superficial;
 import poulet.superficial.imports.ImportHandler;
 
@@ -18,9 +18,9 @@ public class Main {
         Kernel kernel = new Kernel();
         kernel.runProgram(kernelProgram);
 
-        System.out.println("Testing Sugar on " + args[1] + "...");
+        System.out.println("Testing Superficial on " + args[1] + "...");
         ImportHandler.directories.add("samples/");
-        poulet.superficial.ast.Program sugarProgram = SugarASTParser.parse(CharStreams.fromFileName(args[1]));
+        poulet.superficial.ast.Program sugarProgram = SuperficialASTParser.parse(CharStreams.fromFileName(args[1]));
         Superficial superficial = new Superficial();
         superficial.runProgram(sugarProgram);
     }
