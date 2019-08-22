@@ -1,10 +1,14 @@
-grammar Kernel;
+grammar Superficial;
 
 @header {
-    package poulet.parser.kernel;
+    package poulet.parser.superficial;
 }
 
-program : (definition | toplevel_fix | inductive_types | toplevel_type_declaration | command)+ ;
+program : (open | section | definition | toplevel_fix | inductive_types | toplevel_type_declaration | command)+ ;
+
+section : 'Section' sectionName=SYMBOL '{' prgm=program '}' ;
+
+open : 'open' fileName=SYMBOL ('.' subSections+=SYMBOL)* ;
 
 definition : name=symbol ':' type=expression (':=' def=expression)? ;
 
@@ -30,7 +34,9 @@ expression : sort #ExpSort
         | constructor_call #ConstructorCall
         | fix #ExpFix
         | '(' body=expression ')' #Parentheses
-        | <assoc=right> domain=expression '->' codomain=expression #Function ;
+        | <assoc=right> domain=expression '->' codomain=expression #Function
+        | 'let' name=symbol ':=' value=expression 'in' body=expression #LetIn
+        | body=expression 'where' name=symbol ':=' value=expression #Where ;
 
 sort : 'Prop' | 'Set' | TYPE ;
 
@@ -73,3 +79,7 @@ SYMBOL : [a-zA-Z_][a-zA-Z0-9_]* ;
 INTEGER : [0-9]+ ;
 
 WHITESPACE : [ \t\r\n]+ -> skip ;
+
+COMMENT : '/*' .*? ('*/' | EOF) -> skip ;
+
+LINE_COMMENT : '//' ~[\r\n]* -> skip ;

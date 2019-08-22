@@ -1,5 +1,7 @@
 package poulet.kernel.ast;
 
-public abstract class TopLevel extends Node {
+import poulet.parser.KernelNode;
+
+public abstract class TopLevel extends KernelNode {
     public abstract TopLevel makeSymbolsUnique();
 }

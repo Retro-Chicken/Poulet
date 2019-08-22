@@ -1,6 +1,7 @@
-package poulet.kernel.ast;
+package poulet.superficial.ast.expressions;
 
-import java.util.ArrayList;
+import poulet.superficial.Desugar;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,13 +34,23 @@ public class Command extends TopLevel {
     }
 
     @Override
-    public TopLevel makeSymbolsUnique() {
-        List<Expression> unique = new ArrayList<>();
-
-        for (Expression argument : arguments) {
-            unique.add(argument.makeSymbolsUnique());
+    public poulet.kernel.ast.Command project() {
+        poulet.kernel.ast.Command.Action action;
+        switch (this.action) {
+            case REDUCE:
+                action = poulet.kernel.ast.Command.Action.REDUCE;
+                break;
+            case DEDUCE:
+                action = poulet.kernel.ast.Command.Action.DEDUCE;
+                break;
+            case ASSERT:
+                action = poulet.kernel.ast.Command.Action.ASSERT;
+                break;
+            default:
+                action = null;
+                break;
         }
-
-        return new Command(action, unique);
+        return new poulet.kernel.ast.Command(action,
+                arguments.stream().map(Desugar::desugar).collect(Collectors.toList()));
     }
 }
