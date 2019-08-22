@@ -11,7 +11,7 @@ public class UniqueSymbol extends Symbol {
 
     public UniqueSymbol(Symbol symbol) {
         super(symbol.symbol);
-        this.id = nextId++;
+        this.id = symbol instanceof UniqueSymbol ? ((UniqueSymbol) symbol).id : nextId++;
     }
 
     private UniqueSymbol(String symbol, int id) {

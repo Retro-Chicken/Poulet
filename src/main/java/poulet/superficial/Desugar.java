@@ -1,6 +1,7 @@
 package poulet.superficial;
 
 import poulet.parser.KernelNode;
+import poulet.superficial.ast.expressions.TopLevel;
 import poulet.superficial.ast.inlines.Inline;
 import poulet.superficial.ast.multilines.Multiline;
 import poulet.parser.SuperficialNode;
@@ -37,5 +38,9 @@ public class Desugar {
         else if(expression instanceof Expression.Transformable)
             return desugar(((Expression.Transformable) expression).transform());
         return null;
+    }
+
+    public static poulet.kernel.ast.TopLevel desugar(TopLevel topLevel) {
+        return topLevel.project();
     }
 }

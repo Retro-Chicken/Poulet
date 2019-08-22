@@ -33,7 +33,7 @@ public class Command extends TopLevel {
     }
 
     @Override
-    public TopLevel makeSymbolsUnique() {
+    public Command makeSymbolsUnique() {
         List<Expression> unique = new ArrayList<>();
 
         for (Expression argument : arguments) {

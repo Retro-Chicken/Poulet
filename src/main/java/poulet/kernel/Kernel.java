@@ -19,22 +19,26 @@ public class Kernel {
 
         for (TopLevel topLevel : unique.topLevels) {
             try {
-                if (topLevel instanceof Command) {
-                    runCommand((Command) topLevel);
-                } else if (topLevel instanceof Definition) {
-                    Definition definition = (Definition) topLevel;
-                    if (definition.definition == null) {
-                        assume(definition.name, definition.type);
-                    } else {
-                        define(definition.name, definition.type, definition.definition);
-                    }
-                } else if (topLevel instanceof InductiveDeclaration) {
-                    declareInductive((InductiveDeclaration) topLevel);
-                }
+                handleTopLevel(topLevel);
             } catch (PouletException e) {
                 e.printStackTrace();
                 System.err.println("\n on line: " + topLevel);
             }
+        }
+    }
+
+    public void handleTopLevel(TopLevel topLevel) {
+        if (topLevel instanceof Command) {
+            runCommand((Command) topLevel);
+        } else if (topLevel instanceof Definition) {
+            Definition definition = (Definition) topLevel;
+            if (definition.definition == null) {
+                assume(definition.name, definition.type);
+            } else {
+                define(definition.name, definition.type, definition.definition);
+            }
+        } else if (topLevel instanceof InductiveDeclaration) {
+            declareInductive((InductiveDeclaration) topLevel);
         }
     }
 

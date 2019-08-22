@@ -49,4 +49,15 @@ public class Program extends SuperficialNode {
         }
         return new poulet.kernel.ast.Program(topLevels);
     }
+
+    public Program inflate() {
+        List<SuperficialNode> result = new ArrayList<>(nodes);
+        for(int i = 0; i < result.size(); i++) {
+            if(result.get(i) instanceof Multiline) {
+                result.addAll(i, ((Multiline) result.remove(i)).inflate());
+                i--;
+            }
+        }
+        return new Program(result);
+    }
 }

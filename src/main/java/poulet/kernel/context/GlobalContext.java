@@ -1,5 +1,6 @@
 package poulet.kernel.context;
 
+import poulet.PouletException;
 import poulet.kernel.ast.*;
 import poulet.util.StringUtil;
 
@@ -34,7 +35,10 @@ public class GlobalContext extends Context {
     }
 
     public TypeDeclaration getTypeDeclaration(Symbol symbol) {
-        return typeDeclarations.getOrDefault(symbol, null);
+        TypeDeclaration result = typeDeclarations.getOrDefault(symbol, null);
+        if(result == null)
+            throw new PouletException("Cannot find TypeDeclaration under name " + symbol);
+        return result;
     }
 
     public TypeDeclaration.Constructor getConstructor(Symbol inductiveType, Symbol constructor) {

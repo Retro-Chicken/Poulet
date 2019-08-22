@@ -14,7 +14,7 @@ public class InductiveDeclaration extends TopLevel {
     }
 
     @Override
-    public TopLevel makeSymbolsUnique() {
+    public InductiveDeclaration makeSymbolsUnique() {
         List<TypeDeclaration> unique = new ArrayList<>();
 
         for (TypeDeclaration typeDeclaration : typeDeclarations) {
