@@ -21,6 +21,11 @@ public class Prod extends Expression.Projectable {
     }
 
     @Override
+    public <T> T accept(ExpressionVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof Prod) {
             Prod other = (Prod) obj;

@@ -1,6 +1,7 @@
-package poulet.superficial.ast;
+package poulet.superficial.ast.multilines;
 
 import poulet.parser.SuperficialNode;
+import poulet.superficial.ast.Program;
 import poulet.util.StringUtil;
 
 import java.util.List;

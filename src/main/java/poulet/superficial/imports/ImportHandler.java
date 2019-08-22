@@ -3,9 +3,9 @@ package poulet.superficial.imports;
 import org.antlr.v4.runtime.CharStreams;
 import poulet.PouletException;
 import poulet.parser.SuperficialASTParser;
-import poulet.superficial.ast.Import;
+import poulet.superficial.ast.multilines.Import;
 import poulet.superficial.ast.Program;
-import poulet.superficial.ast.Section;
+import poulet.superficial.ast.multilines.Section;
 
 import java.io.File;
 import java.io.IOException;

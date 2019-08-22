@@ -8,6 +8,11 @@ public class Type extends Sort {
     }
 
     @Override
+    public <T> T accept(ExpressionVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
+
+    @Override
     public String toString() {
         return "Type" + level;
     }

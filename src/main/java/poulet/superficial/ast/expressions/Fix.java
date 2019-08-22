@@ -53,6 +53,11 @@ public class Fix extends Expression.Projectable {
     }
 
     @Override
+    public <T> T accept(ExpressionVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
+
+    @Override
     public String toString() {
         String clausesString = clauses.stream().map(Clause::toString).collect(Collectors.joining("\n"));
         return "fix {\n" + clausesString + "\n}." + mainSymbol;

@@ -16,6 +16,11 @@ public class Application extends Expression.Projectable {
     }
 
     @Override
+    public <T> T accept(ExpressionVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
+
+    @Override
     public String toString() {
         ApplicationDecomposition applicationDecomposition = new ApplicationDecomposition(this);
         String arguments = applicationDecomposition.arguments.stream().map(Objects::toString).collect(Collectors.joining(", "));

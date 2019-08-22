@@ -1,7 +1,7 @@
 package poulet.superficial.ast.expressions;
 
 import poulet.superficial.Desugar;
-import poulet.superficial.ast.Inline;
+import poulet.superficial.ast.inlines.Inline;
 import poulet.util.StringUtil;
 
 import java.util.List;
@@ -61,6 +61,11 @@ public class Match extends Expression.Projectable {
         this.argumentSymbols = argumentSymbols;
         this.type = type;
         this.clauses = clauses;
+    }
+
+    @Override
+    public <T> T accept(ExpressionVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 
     @Override

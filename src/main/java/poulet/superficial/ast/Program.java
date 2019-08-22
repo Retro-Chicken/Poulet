@@ -5,6 +5,9 @@ import poulet.parser.KernelNode;
 import poulet.parser.Node;
 import poulet.parser.SuperficialNode;
 import poulet.superficial.Desugar;
+import poulet.superficial.ast.inlines.Inline;
+import poulet.superficial.ast.multilines.Multiline;
+import poulet.superficial.ast.multilines.Section;
 
 import java.util.ArrayList;
 import java.util.List;

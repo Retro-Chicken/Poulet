@@ -1,8 +1,8 @@
 package poulet.superficial;
 
 import poulet.parser.KernelNode;
-import poulet.superficial.ast.Inline;
-import poulet.superficial.ast.Multiline;
+import poulet.superficial.ast.inlines.Inline;
+import poulet.superficial.ast.multilines.Multiline;
 import poulet.parser.SuperficialNode;
 import poulet.superficial.ast.expressions.Expression;
 

@@ -17,6 +17,11 @@ public class InductiveType extends Expression.Projectable {
     }
 
     @Override
+    public <T> T accept(ExpressionVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
+
+    @Override
     public String toString() {
         String parametersString = parameters.stream().map(Expression::toString).collect(Collectors.joining(", "));
         String argumentsString = arguments.stream().map(Expression::toString).collect(Collectors.joining(", "));

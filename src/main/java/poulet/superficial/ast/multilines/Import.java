@@ -1,4 +1,4 @@
-package poulet.superficial.ast;
+package poulet.superficial.ast.multilines;
 
 import poulet.parser.SuperficialNode;
 import poulet.superficial.imports.ImportHandler;

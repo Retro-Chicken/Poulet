@@ -7,9 +7,11 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import poulet.parser.superficial.SuperficialBaseVisitor;
 import poulet.parser.superficial.SuperficialLexer;
 import poulet.parser.superficial.SuperficialParser;
-import poulet.superficial.ast.Import;
+import poulet.superficial.ast.inlines.LetIn;
+import poulet.superficial.ast.inlines.Where;
+import poulet.superficial.ast.multilines.Import;
 import poulet.superficial.ast.Program;
-import poulet.superficial.ast.Section;
+import poulet.superficial.ast.multilines.Section;
 import poulet.superficial.ast.expressions.*;
 
 import java.util.ArrayList;
@@ -298,5 +300,15 @@ public class SuperficialASTParser extends SuperficialBaseVisitor<SuperficialNode
     @Override
     public Symbol visitSymbol(SuperficialParser.SymbolContext ctx) {
         return new Symbol(ctx.getText());
+    }
+
+    @Override
+    public Where visitWhere(SuperficialParser.WhereContext ctx) {
+        return new Where(this.visitSymbol(ctx.name), this.visitExpression(ctx.value), this.visitExpression(ctx.body));
+    }
+
+    @Override
+    public LetIn visitLetIn(SuperficialParser.LetInContext ctx) {
+        return new LetIn(this.visitSymbol(ctx.name), this.visitExpression(ctx.value), this.visitExpression(ctx.body));
     }
 }

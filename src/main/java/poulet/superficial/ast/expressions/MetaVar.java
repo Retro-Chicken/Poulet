@@ -8,6 +8,11 @@ public class MetaVar extends Expression.Projectable {
     }
 
     @Override
+    public <T> T accept(ExpressionVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
+
+    @Override
     public String toString() {
         return "?" + symbol;
     }

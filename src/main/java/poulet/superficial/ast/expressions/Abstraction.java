@@ -14,6 +14,11 @@ public class Abstraction extends Expression.Projectable {
     }
 
     @Override
+    public <T> T accept(ExpressionVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
+
+    @Override
     public String toString() {
         if (argumentType instanceof Prod) {
             Prod prod = (Prod) argumentType;

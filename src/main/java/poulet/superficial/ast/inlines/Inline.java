@@ -1,4 +1,4 @@
-package poulet.superficial.ast;
+package poulet.superficial.ast.inlines;
 
 import poulet.parser.KernelNode;
 import poulet.parser.SuperficialNode;

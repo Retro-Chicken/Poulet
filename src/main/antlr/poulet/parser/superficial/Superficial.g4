@@ -34,7 +34,9 @@ expression : sort #ExpSort
         | constructor_call #ConstructorCall
         | fix #ExpFix
         | '(' body=expression ')' #Parentheses
-        | <assoc=right> domain=expression '->' codomain=expression #Function ;
+        | <assoc=right> domain=expression '->' codomain=expression #Function
+        | 'let' name=symbol ':=' value=expression 'in' body=expression #LetIn
+        | body=expression 'where' name=symbol ':=' value=expression #Where ;
 
 sort : 'Prop' | 'Set' | TYPE ;
 

@@ -1,7 +1,7 @@
 package poulet.superficial.ast.expressions;
 
 import poulet.superficial.Desugar;
-import poulet.superficial.ast.Inline;
+import poulet.superficial.ast.inlines.Inline;
 import poulet.util.StringUtil;
 
 import java.util.List;
