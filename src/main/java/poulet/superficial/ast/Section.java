@@ -1,6 +1,6 @@
 package poulet.superficial.ast;
 
-import poulet.kernel.ast.TopLevel;
+import poulet.parser.SuperficialNode;
 import poulet.util.StringUtil;
 
 import java.util.List;
@@ -15,7 +15,7 @@ public class Section extends Multiline {
     }
 
     @Override
-    public List<Sugar> inflate() {
+    public List<SuperficialNode> inflate() {
         return program.nodes;
     }
 

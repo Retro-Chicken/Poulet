@@ -1,5 +1,7 @@
 package poulet.superficial.ast.expressions;
 
+import poulet.superficial.Desugar;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,6 +51,6 @@ public class Command extends TopLevel {
                 break;
         }
         return new poulet.kernel.ast.Command(action,
-                arguments.stream().map(Expression::project).collect(Collectors.toList()));
+                arguments.stream().map(Desugar::desugar).collect(Collectors.toList()));
     }
 }

@@ -1,6 +1,6 @@
 package poulet.superficial.ast.expressions;
 
-public class Var extends Expression {
+public class Var extends Expression.Projectable {
     public final Symbol symbol;
 
     public Var(Symbol symbol) {

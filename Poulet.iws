@@ -2,43 +2,30 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ba1efec9-3aa2-471f-93b2-5b40d8defefa" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/parser/KernelAST.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/Desugar.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Inline.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Multiline.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Abstraction.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Application.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Command.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/ConstructorCall.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Definition.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Expression.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Fix.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/InductiveDeclaration.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/InductiveType.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Match.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/MetaVar.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Prod.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Prop.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Set.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Sort.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Symbol.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/TopLevel.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Type.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/TypeDeclaration.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Var.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/decomposition/ApplicationDecomposition.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Poulet.iws" beforeDir="false" afterPath="$PROJECT_DIR$/Poulet.iws" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Expression.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Expression.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Match.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Match.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Symbol.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Symbol.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/TopLevel.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/TopLevel.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/TypeDeclaration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/TypeDeclaration.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/poulet/parser/SuperficialASTParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/parser/SuperficialASTParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/superficial/Desugar.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/Desugar.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Import.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Import.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Inline.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Inline.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Multiline.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Multiline.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Program.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Program.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Section.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Section.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Sugar.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Sugar.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Sugar.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/parser/SuperficialAST.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Abstraction.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Abstraction.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Application.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Application.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Command.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Command.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/ConstructorCall.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/ConstructorCall.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Definition.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Definition.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Expression.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Expression.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Fix.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Fix.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/InductiveDeclaration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/InductiveDeclaration.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/InductiveType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/InductiveType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Match.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Match.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/MetaVar.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/MetaVar.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Prod.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Prod.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Sort.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Sort.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/TypeDeclaration.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/TypeDeclaration.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Var.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Var.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.gradle/" />
     <ignored path="$PROJECT_DIR$/build/" />
@@ -99,68 +86,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/Desugar.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="296">
-              <caret line="21" column="32" selection-start-line="21" selection-start-column="32" selection-end-line="21" selection-end-column="32" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Import.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="238">
-              <caret line="19" column="47" selection-start-line="19" selection-start-column="47" selection-end-line="19" selection-end-column="47" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/InductiveDeclaration.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="51">
-              <caret line="26" column="5" lean-forward="true" selection-start-line="26" selection-start-column="5" selection-end-line="26" selection-end-column="5" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/TypeDeclaration.java">
+        <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Var.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="166">
-              <caret line="73" lean-forward="true" selection-start-line="73" selection-end-line="73" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/poulet/parser/KernelASTParser.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="147">
-              <caret line="91" column="56" selection-start-line="91" selection-start-column="47" selection-end-line="91" selection-end-column="56" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Section.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="238">
-              <caret line="18" column="29" selection-start-line="18" selection-start-column="29" selection-end-line="18" selection-end-column="29" />
+            <state relative-caret-position="34">
+              <caret line="2" column="47" selection-start-line="2" selection-start-column="47" selection-end-line="2" selection-end-column="47" />
             </state>
           </provider>
         </entry>
@@ -214,7 +144,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/main/java/poulet/refiner/imports/FileSearcher.java" />
         <option value="$PROJECT_DIR$/samples/hott/chapter2.poulet" />
         <option value="$PROJECT_DIR$/build.gradle" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/parser/RefinerASTParser.java" />
@@ -235,36 +164,37 @@
         <option value="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Kernel.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Expression.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/TopLevel.java" />
-        <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Inline.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/parser/KernelAST.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Symbol.java" />
-        <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Expression.java" />
-        <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Abstraction.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Symbol.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/decomposition/ApplicationDecomposition.java" />
+        <option value="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/TypeDeclaration.java" />
+        <option value="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Match.java" />
+        <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Prop.java" />
+        <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Set.java" />
+        <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Type.java" />
+        <option value="$PROJECT_DIR$/src/main/java/poulet/parser/SuperficialASTParser.java" />
+        <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Program.java" />
+        <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Import.java" />
+        <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Section.java" />
+        <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/Desugar.java" />
+        <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Expression.java" />
+        <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Abstraction.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Application.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Command.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/ConstructorCall.java" />
+        <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Inline.java" />
+        <option value="$PROJECT_DIR$/src/main/java/poulet/parser/SuperficialAST.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Definition.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Fix.java" />
-        <option value="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/TypeDeclaration.java" />
-        <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/TypeDeclaration.java" />
+        <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/InductiveDeclaration.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/InductiveType.java" />
-        <option value="$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Match.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Match.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/MetaVar.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Prod.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Sort.java" />
-        <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Prop.java" />
-        <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Set.java" />
-        <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Type.java" />
+        <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/TypeDeclaration.java" />
         <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Var.java" />
-        <option value="$PROJECT_DIR$/src/main/java/poulet/parser/SuperficialASTParser.java" />
-        <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/Desugar.java" />
-        <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Program.java" />
-        <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Section.java" />
-        <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Import.java" />
-        <option value="$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/InductiveDeclaration.java" />
       </list>
     </option>
   </component>
@@ -541,7 +471,7 @@
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.8024883" visible="true" weight="0.26066098" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.8024883" visible="true" weight="0.26066098" />
       <window_info id="Structure" order="1" sideWeight="0.5013928" side_tool="true" weight="0.2336874" />
       <window_info id="Designer" order="2" />
       <window_info id="Image Layers" order="3" />
@@ -550,7 +480,7 @@
       <window_info id="Favorites" order="6" sideWeight="0.19751166" side_tool="true" weight="0.30424887" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32936078" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.5827011" visible="true" weight="0.43661973" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.5827011" visible="true" weight="0.31419286" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39657855" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -636,29 +566,6 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/Main.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="204">
-          <caret line="12" column="63" selection-start-line="12" selection-start-column="63" selection-end-line="12" selection-end-column="63" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Program.java">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Expression.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="1" selection-start-line="1" selection-end-line="1" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/poulet/kernel/ast/TopLevel.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="17">
@@ -670,46 +577,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="17">
           <caret line="1" selection-start-line="1" selection-end-line="1" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Abstraction.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="765">
-          <caret line="47" column="10" lean-forward="true" selection-start-line="47" selection-start-column="10" selection-end-line="47" selection-end-column="10" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Symbol.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" selection-start-line="2" selection-end-line="2" />
-          <folding>
-            <element signature="e#244#245#0" expanded="true" />
-            <element signature="e#280#281#0" expanded="true" />
-            <element signature="e#326#327#0" expanded="true" />
-            <element signature="e#355#356#0" expanded="true" />
-            <element signature="e#632#633#0" expanded="true" />
-            <element signature="e#691#692#0" expanded="true" />
-            <element signature="e#734#735#0" expanded="true" />
-            <element signature="e#774#775#0" expanded="true" />
-            <element signature="e#839#840#0" expanded="true" />
-            <element signature="e#866#867#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Expression.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="17">
-          <caret line="1" selection-start-line="1" selection-end-line="1" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Inline.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="153">
-          <caret line="9" column="30" selection-start-line="9" selection-start-column="30" selection-end-line="9" selection-end-column="30" />
         </state>
       </provider>
     </entry>
@@ -741,16 +608,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Application.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="799">
-          <caret line="49" column="5" selection-start-line="49" selection-start-column="5" selection-end-line="49" selection-end-column="5" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Application.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="306">
@@ -758,30 +615,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Command.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="527">
-          <caret line="31" column="5" lean-forward="true" selection-start-line="31" selection-start-column="5" selection-end-line="31" selection-end-column="5" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Command.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="153">
           <caret line="11" column="5" lean-forward="true" selection-start-line="11" selection-start-column="5" selection-end-line="11" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/ConstructorCall.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1037">
-          <caret line="61" column="38" lean-forward="true" selection-start-line="61" selection-start-column="38" selection-end-line="61" selection-end-column="38" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -799,37 +636,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Definition.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="510">
-          <caret line="32" column="84" lean-forward="true" selection-start-line="32" selection-start-column="84" selection-end-line="32" selection-end-column="84" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Fix.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="637">
-          <caret line="78" column="5" selection-start-line="78" selection-start-column="5" selection-end-line="78" selection-end-column="5" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Fix.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="510">
           <caret line="147" column="4" selection-start-line="147" selection-start-column="4" selection-end-line="156" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/InductiveType.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" selection-start-line="2" selection-end-line="2" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -840,31 +650,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Match.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" selection-start-line="2" selection-end-line="2" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Match.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="357">
           <caret line="87" column="4" lean-forward="true" selection-start-line="87" selection-start-column="4" selection-end-line="104" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/MetaVar.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="425">
-          <caret line="31" column="61" selection-start-line="31" selection-start-column="61" selection-end-line="31" selection-end-column="61" />
-          <folding>
-            <element signature="e#647#648#0" expanded="true" />
-            <element signature="e#674#675#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -875,13 +664,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Prod.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="867">
-          <caret line="55" column="34" selection-start-line="55" selection-start-column="34" selection-end-line="55" selection-end-column="34" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Prod.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="561">
@@ -889,39 +671,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Prop.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="15" column="44" selection-start-line="15" selection-start-column="44" selection-end-line="15" selection-end-column="44" />
-          <folding>
-            <element signature="e#334#335#0" expanded="true" />
-            <element signature="e#361#362#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Sort.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="43" selection-start-column="43" selection-end-column="43" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Prop.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="34">
           <caret line="2" column="13" selection-start-line="2" selection-start-column="13" selection-end-line="2" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Set.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="15" column="18" selection-start-line="15" selection-start-column="18" selection-end-line="15" selection-end-column="18" />
-          <folding>
-            <element signature="e#331#332#0" expanded="true" />
-            <element signature="e#358#359#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -939,32 +692,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Type.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
-          <caret line="26" column="49" selection-start-line="26" selection-start-column="49" selection-end-line="26" selection-end-column="49" />
-          <folding>
-            <element signature="e#545#546#0" expanded="true" />
-            <element signature="e#572#573#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Type.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="34">
           <caret line="2" column="13" selection-start-line="2" selection-start-column="13" selection-end-line="2" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Var.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="425">
-          <caret line="31" column="57" selection-start-line="31" selection-start-column="57" selection-end-line="31" selection-end-column="57" />
-          <folding>
-            <element signature="e#647#648#0" expanded="true" />
-            <element signature="e#674#675#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -989,27 +720,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/Desugar.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="296">
-          <caret line="21" column="32" selection-start-line="21" selection-start-column="32" selection-end-line="21" selection-end-column="32" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Program.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="270">
           <caret line="40" column="51" selection-start-line="40" selection-start-column="51" selection-end-line="40" selection-end-column="51" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Section.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="18" column="29" selection-start-line="18" selection-start-column="29" selection-end-line="18" selection-end-column="29" />
         </state>
       </provider>
     </entry>
@@ -1027,10 +741,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/parser/KernelASTParser.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/kernel/ast/Expression.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="147">
-          <caret line="91" column="56" selection-start-line="91" selection-start-column="47" selection-end-line="91" selection-end-column="56" />
+        <state relative-caret-position="136">
+          <caret line="8" column="22" selection-start-line="8" selection-start-column="22" selection-end-line="8" selection-end-column="22" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -1039,28 +753,219 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Import.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="238">
-          <caret line="19" column="47" selection-start-line="19" selection-start-column="47" selection-end-line="19" selection-end-column="47" />
+        <state relative-caret-position="34">
+          <caret line="2" selection-start-line="2" selection-end-line="2" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/parser/KernelASTParser.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1513">
+          <caret line="91" column="56" selection-start-line="91" selection-start-column="47" selection-end-line="91" selection-end-column="56" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Section.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="34">
+          <caret line="2" selection-start-line="2" selection-end-line="2" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Abstraction.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="782">
+          <caret line="48" column="37" selection-start-line="48" selection-start-column="37" selection-end-line="48" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Application.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="415">
+          <caret line="48" column="41" selection-start-line="48" selection-start-column="41" selection-end-line="48" selection-end-column="41" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Expression.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="51">
+          <caret line="3" lean-forward="true" selection-start-line="3" selection-end-line="3" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Command.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="483">
+          <caret line="53" column="58" selection-start-line="53" selection-start-column="58" selection-end-line="53" selection-end-column="58" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/ConstructorCall.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1105">
+          <caret line="65" column="10" lean-forward="true" selection-start-line="65" selection-start-column="10" selection-end-line="65" selection-end-column="10" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/parser/SuperficialAST.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="51">
+          <caret line="3" selection-start-line="3" selection-end-line="3" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/Desugar.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="472">
+          <caret line="38" column="20" selection-start-line="38" selection-start-column="20" selection-end-line="38" selection-end-column="20" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/Inline.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="11" column="5" selection-start-line="11" selection-start-column="5" selection-end-line="11" selection-end-column="5" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Definition.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="544">
+          <caret line="34" column="89" selection-start-line="34" selection-start-column="89" selection-end-line="34" selection-end-column="89" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Fix.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1445">
+          <caret line="87" column="10" lean-forward="true" selection-start-line="87" selection-start-column="10" selection-end-line="87" selection-end-column="10" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/InductiveDeclaration.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="51">
-          <caret line="26" column="5" lean-forward="true" selection-start-line="26" selection-start-column="5" selection-end-line="26" selection-end-column="5" />
+        <state relative-caret-position="714">
+          <caret line="44" column="22" lean-forward="true" selection-start-line="44" selection-start-column="22" selection-end-line="44" selection-end-column="22" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/TypeDeclaration.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/InductiveType.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="166">
-          <caret line="73" lean-forward="true" selection-start-line="73" selection-end-line="73" />
+        <state relative-caret-position="364">
+          <caret line="53" column="51" lean-forward="true" selection-start-line="53" selection-start-column="51" selection-end-line="53" selection-end-column="51" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Match.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="425">
+          <caret line="116" column="37" selection-start-line="116" selection-start-column="37" selection-end-line="116" selection-end-column="37" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/MetaVar.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="34">
+          <caret line="2" column="51" selection-start-line="2" selection-start-column="51" selection-end-line="2" selection-end-column="51" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Prod.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="415">
+          <caret line="57" column="41" selection-start-line="57" selection-start-column="41" selection-end-line="57" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Sort.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="34">
+          <caret line="2" column="57" selection-start-line="2" selection-start-column="57" selection-end-line="2" selection-end-column="57" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Prop.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="34">
+          <caret line="2" column="30" selection-start-line="2" selection-start-column="30" selection-end-line="2" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Set.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="15" column="18" selection-start-line="15" selection-start-column="18" selection-end-line="15" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Symbol.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="68">
+          <caret line="4" column="13" selection-start-line="4" selection-start-column="13" selection-end-line="4" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/TopLevel.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="68">
+          <caret line="4" column="22" selection-start-line="4" selection-start-column="22" selection-end-line="4" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Type.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="357">
+          <caret line="26" column="49" selection-start-line="26" selection-start-column="49" selection-end-line="26" selection-end-column="49" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/TypeDeclaration.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="398">
+          <caret line="81" column="37" selection-start-line="81" selection-start-column="37" selection-end-line="81" selection-end-column="37" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/poulet/superficial/ast/expressions/Var.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="34">
+          <caret line="2" column="47" selection-start-line="2" selection-start-column="47" selection-end-line="2" selection-end-column="47" />
         </state>
       </provider>
     </entry>

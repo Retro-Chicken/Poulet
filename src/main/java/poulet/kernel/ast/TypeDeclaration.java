@@ -1,7 +1,6 @@
 package poulet.kernel.ast;
 
-import poulet.parser.KernelAST;
-import poulet.parser.Node;
+import poulet.parser.KernelNode;
 import poulet.util.StringUtil;
 
 import java.util.ArrayList;
@@ -10,14 +9,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class TypeDeclaration extends KernelAST {
+public class TypeDeclaration extends KernelNode {
     public InductiveDeclaration inductiveDeclaration;
     public final Symbol name;
     public final List<Parameter> parameters;
     public final Expression type;
     public final List<Constructor> constructors;
 
-    public static class Parameter extends KernelAST {
+    public static class Parameter extends KernelNode {
         public final Symbol name;
         public final Expression type;
 
@@ -32,7 +31,7 @@ public class TypeDeclaration extends KernelAST {
         }
     }
 
-    public static class Constructor extends KernelAST {
+    public static class Constructor extends KernelNode {
         public final Symbol name;
         public final Expression definition;
 

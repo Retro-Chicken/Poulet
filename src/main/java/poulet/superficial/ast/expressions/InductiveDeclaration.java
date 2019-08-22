@@ -1,5 +1,6 @@
 package poulet.superficial.ast.expressions;
 
+import poulet.superficial.Desugar;
 import poulet.util.StringUtil;
 
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class InductiveDeclaration extends TopLevel {
                     null,
                     declaration.name.project(),
                     declaration.parameters.stream().map(TypeDeclaration.Parameter::project).collect(Collectors.toList()),
-                    declaration.type.project(),
+                    Desugar.desugar(declaration.type),
                     declaration.constructors.stream().map(TypeDeclaration.Constructor::project).collect(Collectors.toList())
             ));
         }

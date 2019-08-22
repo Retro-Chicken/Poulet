@@ -1,6 +1,6 @@
 package poulet.superficial.ast.expressions;
 
-public class MetaVar extends Expression {
+public class MetaVar extends Expression.Projectable {
     public final Symbol symbol;
 
     public MetaVar(Symbol symbol) {

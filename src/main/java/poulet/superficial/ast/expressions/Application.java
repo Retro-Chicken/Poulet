@@ -1,11 +1,12 @@
 package poulet.superficial.ast.expressions;
 
+import poulet.superficial.Desugar;
 import poulet.superficial.decomposition.ApplicationDecomposition;
 
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class Application extends Expression {
+public class Application extends Expression.Projectable {
     public final Expression function;
     public final Expression argument;
 
@@ -44,8 +45,8 @@ public class Application extends Expression {
     @Override
     public poulet.kernel.ast.Expression project() {
         return new poulet.kernel.ast.Application(
-                function.project(),
-                argument.project()
+                Desugar.desugar(function),
+                Desugar.desugar(argument)
         );
     }
 }

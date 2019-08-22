@@ -13,7 +13,7 @@ public class Main {
     public static void main(String[] args) throws IOException {
         args = new String[]{"samples/scratch.poulet", "samples/hott/chapter2.poulet"};
 
-        System.out.println("Testing KernelAST on " + args[0] + "...");
+        System.out.println("Testing KernelNode on " + args[0] + "...");
         poulet.kernel.ast.Program kernelProgram = KernelASTParser.parse(CharStreams.fromFileName(args[0]));
         Kernel kernel = new Kernel();
         kernel.runProgram(kernelProgram);

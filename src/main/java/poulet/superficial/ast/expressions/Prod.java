@@ -1,6 +1,8 @@
 package poulet.superficial.ast.expressions;
 
-public class Prod extends Expression {
+import poulet.superficial.Desugar;
+
+public class Prod extends Expression.Projectable {
     public Symbol argumentSymbol;
     public Expression argumentType;
     public Expression bodyType;
@@ -52,8 +54,8 @@ public class Prod extends Expression {
     public poulet.kernel.ast.Prod project() {
         return new poulet.kernel.ast.Prod(
                 argumentSymbol.project(),
-                argumentType.project(),
-                bodyType.project()
+                Desugar.desugar(argumentType),
+                Desugar.desugar(bodyType)
         );
     }
 }

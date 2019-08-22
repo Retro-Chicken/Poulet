@@ -1,9 +1,11 @@
 package poulet.superficial.ast.expressions;
 
+import poulet.superficial.Desugar;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ConstructorCall extends Expression {
+public class ConstructorCall extends Expression.Projectable {
     public final Symbol inductiveType;
     public final List<Expression> parameters;
     public final Symbol constructor;
@@ -58,9 +60,9 @@ public class ConstructorCall extends Expression {
     public poulet.kernel.ast.ConstructorCall project() {
         return new poulet.kernel.ast.ConstructorCall(
                 inductiveType.project(),
-                parameters.stream().map(Expression::project).collect(Collectors.toList()),
+                parameters.stream().map(Desugar::desugar).collect(Collectors.toList()),
                 constructor.project(),
-                arguments.stream().map(Expression::project).collect(Collectors.toList())
+                arguments.stream().map(Desugar::desugar).collect(Collectors.toList())
         );
     }
 }

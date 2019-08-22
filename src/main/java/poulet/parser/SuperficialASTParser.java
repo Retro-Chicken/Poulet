@@ -10,7 +10,6 @@ import poulet.parser.superficial.SuperficialParser;
 import poulet.superficial.ast.Import;
 import poulet.superficial.ast.Program;
 import poulet.superficial.ast.Section;
-import poulet.superficial.ast.Sugar;
 import poulet.superficial.ast.expressions.*;
 
 import java.util.ArrayList;
@@ -18,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class SuperficialASTParser extends SuperficialBaseVisitor<Sugar> {
+public class SuperficialASTParser extends SuperficialBaseVisitor<SuperficialNode> {
     public static Program parse(CharStream stream) {
         SuperficialLexer lexer = new SuperficialLexer(stream);
         SuperficialParser parser = new SuperficialParser(new CommonTokenStream(lexer));
@@ -27,7 +26,7 @@ public class SuperficialASTParser extends SuperficialBaseVisitor<Sugar> {
 
     @Override
     public Program visitProgram(SuperficialParser.ProgramContext ctx) {
-        List<Sugar> nodes = new ArrayList<>();
+        List<SuperficialNode> nodes = new ArrayList<>();
         for(ParseTree node : ctx.children) {
             nodes.add(this.visit(node));
         }

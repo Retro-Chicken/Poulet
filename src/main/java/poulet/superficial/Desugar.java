@@ -1,16 +1,16 @@
 package poulet.superficial;
 
-import poulet.kernel.ast.TopLevel;
-import poulet.parser.KernelAST;
+import poulet.parser.KernelNode;
 import poulet.superficial.ast.Inline;
 import poulet.superficial.ast.Multiline;
-import poulet.superficial.ast.Sugar;
+import poulet.parser.SuperficialNode;
+import poulet.superficial.ast.expressions.Expression;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Desugar {
-    public static KernelAST desugar(Inline inlineSugar) {
+    public static KernelNode desugar(Inline inlineSugar) {
         if(inlineSugar instanceof Inline.Projectable) {
             return ((Inline.Projectable) inlineSugar).project();
         } else if(inlineSugar instanceof Inline.Transformable) {
@@ -19,9 +19,9 @@ public class Desugar {
         return null;
     }
 
-    public static List<KernelAST> desugar(Multiline multilineSugar) {
-        List<KernelAST> result = new ArrayList<>();
-        for(Sugar sugar : multilineSugar.inflate()) {
+    public static List<KernelNode> desugar(Multiline multilineSugar) {
+        List<KernelNode> result = new ArrayList<>();
+        for(SuperficialNode sugar : multilineSugar.inflate()) {
             if(sugar instanceof Inline) {
                 result.add(desugar((Inline) sugar));
             } else if(sugar instanceof Multiline) {
@@ -29,5 +29,13 @@ public class Desugar {
             }
         }
         return result;
+    }
+
+    public static poulet.kernel.ast.Expression desugar(Expression expression) {
+        if(expression instanceof Expression.Projectable)
+            return ((Expression.Projectable) expression).project();
+        else if(expression instanceof Expression.Transformable)
+            return desugar(((Expression.Transformable) expression).transform());
+        return null;
     }
 }

@@ -1,5 +1,7 @@
 package poulet.superficial.ast.expressions;
 
+import poulet.superficial.Desugar;
+
 public class Definition extends TopLevel {
     public final Symbol name;
     public final Expression type;
@@ -28,8 +30,8 @@ public class Definition extends TopLevel {
     @Override
     public poulet.kernel.ast.Definition project() {
         if(definition != null)
-            return new poulet.kernel.ast.Definition(name.project(), type.project(), definition.project());
+            return new poulet.kernel.ast.Definition(name.project(), Desugar.desugar(type), Desugar.desugar(definition));
         else
-            return new poulet.kernel.ast.Definition(name.project(), type.project());
+            return new poulet.kernel.ast.Definition(name.project(), Desugar.desugar(type));
     }
 }

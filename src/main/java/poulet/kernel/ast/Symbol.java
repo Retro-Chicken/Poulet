@@ -1,8 +1,8 @@
 package poulet.kernel.ast;
 
-import poulet.parser.KernelAST;
+import poulet.parser.KernelNode;
 
-public class Symbol extends KernelAST implements Comparable<Symbol> {
+public class Symbol extends KernelNode implements Comparable<Symbol> {
     public final String symbol;
 
     public Symbol(String symbol) {

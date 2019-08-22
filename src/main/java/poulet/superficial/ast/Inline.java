@@ -1,12 +1,13 @@
 package poulet.superficial.ast;
 
-import poulet.parser.KernelAST;
+import poulet.parser.KernelNode;
+import poulet.parser.SuperficialNode;
 
-public abstract class Inline extends Sugar {
+public abstract class Inline extends SuperficialNode {
     public static abstract class Transformable extends Inline {
         public abstract Inline transform();
     }
     public static abstract class Projectable extends Inline {
-        public abstract KernelAST project();
+        public abstract KernelNode project();
     }
 }

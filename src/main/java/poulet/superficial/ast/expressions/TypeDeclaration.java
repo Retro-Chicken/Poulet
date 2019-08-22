@@ -1,5 +1,6 @@
 package poulet.superficial.ast.expressions;
 
+import poulet.superficial.Desugar;
 import poulet.superficial.ast.Inline;
 import poulet.util.StringUtil;
 
@@ -29,7 +30,7 @@ public class TypeDeclaration extends Inline.Projectable {
 
         @Override
         public poulet.kernel.ast.TypeDeclaration.Parameter project() {
-            return new poulet.kernel.ast.TypeDeclaration.Parameter(name.project(), type.project());
+            return new poulet.kernel.ast.TypeDeclaration.Parameter(name.project(), Desugar.desugar(type));
         }
     }
 
@@ -49,7 +50,7 @@ public class TypeDeclaration extends Inline.Projectable {
 
         @Override
         public poulet.kernel.ast.TypeDeclaration.Constructor project() {
-            return new poulet.kernel.ast.TypeDeclaration.Constructor(name.project(), definition.project());
+            return new poulet.kernel.ast.TypeDeclaration.Constructor(name.project(), Desugar.desugar(definition));
         }
     }
 
@@ -78,7 +79,7 @@ public class TypeDeclaration extends Inline.Projectable {
                 inductiveDeclaration.project(),
                 name.project(),
                 parameters.stream().map(Parameter::project).collect(Collectors.toList()),
-                type.project(),
+                Desugar.desugar(type),
                 constructors.stream().map(Constructor::project).collect(Collectors.toList())
         );
     }

@@ -1,12 +1,13 @@
 package poulet.superficial.ast.expressions;
 
+import poulet.superficial.Desugar;
 import poulet.superficial.ast.Inline;
 import poulet.util.StringUtil;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Match extends Expression {
+public class Match extends Expression.Projectable {
     public final Expression expression;
     public final Symbol expressionSymbol;
     public final List<Symbol> argumentSymbols;
@@ -49,7 +50,7 @@ public class Match extends Expression {
             return new poulet.kernel.ast.Match.Clause(
                     constructor.project(),
                     argumentSymbols.stream().map(Symbol::project).collect(Collectors.toList()),
-                    expression.project()
+                    Desugar.desugar(expression)
             );
         }
     }
@@ -110,10 +111,10 @@ public class Match extends Expression {
     @Override
     public poulet.kernel.ast.Match project() {
         return new poulet.kernel.ast.Match(
-                expression.project(),
+                Desugar.desugar(expression),
                 expressionSymbol.project(),
                 argumentSymbols.stream().map(Symbol::project).collect(Collectors.toList()),
-                type.project(),
+                Desugar.desugar(type),
                 clauses.stream().map(Clause::project).collect(Collectors.toList())
         );
     }

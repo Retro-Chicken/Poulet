@@ -1,6 +1,8 @@
 package poulet.superficial.ast.expressions;
 
-public class Abstraction extends Expression {
+import poulet.superficial.Desugar;
+
+public class Abstraction extends Expression.Projectable {
     public final Symbol argumentSymbol;
     public final Expression argumentType;
     public final Expression body;
@@ -43,8 +45,8 @@ public class Abstraction extends Expression {
     public poulet.kernel.ast.Abstraction project() {
         return new poulet.kernel.ast.Abstraction(
                 argumentSymbol.project(),
-                argumentType.project(),
-                body.project()
+                Desugar.desugar(argumentType),
+                Desugar.desugar(body)
         );
     }
 }

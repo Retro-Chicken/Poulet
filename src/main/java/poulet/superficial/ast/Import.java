@@ -1,6 +1,6 @@
 package poulet.superficial.ast;
 
-import poulet.kernel.ast.TopLevel;
+import poulet.parser.SuperficialNode;
 import poulet.superficial.imports.ImportHandler;
 
 import java.util.List;
@@ -16,7 +16,7 @@ public class Import extends Multiline {
     }
 
     @Override
-    public List<Sugar> inflate() {
+    public List<SuperficialNode> inflate() {
         return ImportHandler.expand(this).nodes;
     }
 

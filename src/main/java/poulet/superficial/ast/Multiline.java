@@ -1,7 +1,9 @@
 package poulet.superficial.ast;
 
+import poulet.parser.SuperficialNode;
+
 import java.util.List;
 
-public abstract class Multiline extends Sugar {
-    public abstract List<Sugar> inflate();
+public abstract class Multiline extends SuperficialNode {
+    public abstract List<SuperficialNode> inflate();
 }

@@ -1,9 +1,11 @@
 package poulet.superficial.ast.expressions;
 
+import poulet.superficial.Desugar;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Fix extends Expression {
+public class Fix extends Expression.Projectable {
     public final List<Clause> clauses;
     public final Symbol mainSymbol;
 
@@ -39,8 +41,8 @@ public class Fix extends Expression {
         public poulet.kernel.ast.Fix.Clause project() {
             return new poulet.kernel.ast.Fix.Clause(
                     symbol.project(),
-                    type.project(),
-                    definition.project()
+                    Desugar.desugar(type),
+                    Desugar.desugar(definition)
             );
         }
     }
