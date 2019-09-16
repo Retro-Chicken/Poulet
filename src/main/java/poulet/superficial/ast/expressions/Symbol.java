@@ -1,5 +1,6 @@
 package poulet.superficial.ast.expressions;
 
+import poulet.parser.SuperficialNode;
 import poulet.superficial.ast.inlines.Inline;
 
 public class Symbol extends Inline.Projectable implements Comparable<Symbol> {

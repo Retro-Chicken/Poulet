@@ -11,6 +11,7 @@ import poulet.superficial.ast.inlines.LetIn;
 import poulet.superficial.ast.inlines.Where;
 import poulet.superficial.ast.multilines.Import;
 import poulet.superficial.ast.Program;
+import poulet.superficial.ast.multilines.Proof;
 import poulet.superficial.ast.multilines.Section;
 import poulet.superficial.ast.expressions.*;
 
@@ -310,5 +311,15 @@ public class SuperficialASTParser extends SuperficialBaseVisitor<SuperficialNode
     @Override
     public LetIn visitLetIn(SuperficialParser.LetInContext ctx) {
         return new LetIn(this.visitSymbol(ctx.name), this.visitExpression(ctx.value), this.visitExpression(ctx.body));
+    }
+
+    @Override
+    public Proof visitProof(SuperficialParser.ProofContext ctx) {
+        return new Proof(
+                this.visitSymbol(ctx.name),
+                this.visitExpression(ctx.type),
+                this.visitExpression(ctx.def),
+                ctx.lemmas.stream().map(this::visitDefinition).collect(Collectors.toList())
+        );
     }
 }

@@ -34,4 +34,10 @@ public class Definition extends TopLevel {
         else
             return new poulet.kernel.ast.Definition(name.project(), Desugar.desugar(type));
     }
+
+    @Override
+    public Definition makeSymbolsUnique() {
+        Expression uniqueDefinition = definition == null ? null : definition.makeSymbolsUnique();
+        return new Definition(name, type.makeSymbolsUnique(), uniqueDefinition);
+    }
 }

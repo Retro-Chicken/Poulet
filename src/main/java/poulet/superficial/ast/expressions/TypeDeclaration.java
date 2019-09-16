@@ -4,7 +4,10 @@ import poulet.superficial.Desugar;
 import poulet.superficial.ast.inlines.Inline;
 import poulet.util.StringUtil;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class TypeDeclaration extends Inline.Projectable {
@@ -81,6 +84,33 @@ public class TypeDeclaration extends Inline.Projectable {
                 parameters.stream().map(Parameter::project).collect(Collectors.toList()),
                 Desugar.desugar(type),
                 constructors.stream().map(Constructor::project).collect(Collectors.toList())
+        );
+    }
+
+    public TypeDeclaration makeSymbolsUnique() {
+        List<Parameter> newParameters = new ArrayList<>();
+        Map<Symbol, Symbol> map = new HashMap<>();
+
+        for (Parameter parameter : parameters) {
+            Symbol unique = new UniqueSymbol(parameter.name);
+            map.put(parameter.name, unique);
+            Parameter newParameter = new Parameter(unique, parameter.type.makeSymbolsUnique(map));
+            newParameters.add(newParameter);
+        }
+
+        List<Constructor> newConstructors = new ArrayList<>();
+
+        for (Constructor constructor : constructors) {
+            Constructor unique = new Constructor(constructor.name, constructor.definition.makeSymbolsUnique(map));
+            newConstructors.add(unique);
+        }
+
+        return new TypeDeclaration(
+                inductiveDeclaration,
+                name,
+                newParameters,
+                type.makeSymbolsUnique(map),
+                newConstructors
         );
     }
 }

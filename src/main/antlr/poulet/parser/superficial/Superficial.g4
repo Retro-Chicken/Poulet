@@ -4,13 +4,15 @@ grammar Superficial;
     package poulet.parser.superficial;
 }
 
-program : (open | section | definition | toplevel_fix | inductive_types | toplevel_type_declaration | command)+ ;
+program : (open | section | definition | proof | toplevel_fix | inductive_types | toplevel_type_declaration | command)+ ;
 
 section : 'Section' sectionName=SYMBOL '{' prgm=program '}' ;
 
 open : 'open' fileName=SYMBOL ('.' subSections+=SYMBOL)* ;
 
 definition : name=symbol ':' type=expression (':=' def=expression)? ;
+
+proof : name=symbol ':' type=expression ':=' 'Proof' '{' (lemmas+=definition ',')* def=expression '}' ;
 
 toplevel_fix : 'fix' def=definition ;
 

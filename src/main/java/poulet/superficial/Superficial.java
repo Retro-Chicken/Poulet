@@ -9,6 +9,7 @@ import poulet.superficial.ast.expressions.*;
 public class Superficial {
     public void runProgram(Program program) {
         Kernel kernel = new Kernel();
+        program = program.makeSymbolsUnique();
         program = program.inflate();
 
         for (SuperficialNode node : program.nodes) {
@@ -16,7 +17,7 @@ public class Superficial {
                 if (node instanceof Command) {
                     runCommand((Command) node, kernel);
                 } else if (node instanceof TopLevel) {
-                    kernel.handleTopLevel(doctorTopLevel((TopLevel) node));
+                    kernel.handleTopLevel(Desugar.desugar((TopLevel) node));
                 }
             } catch (PouletException e) {
                 e.printStackTrace();
@@ -30,23 +31,15 @@ public class Superficial {
             Expression a = command.arguments.get(0);
             Expression b = command.arguments.get(1);
 
-            if (!kernel.convertible(doctorExpression(a), doctorExpression(b))) {
+            if (!kernel.convertible(Desugar.desugar(a), Desugar.desugar(b))) {
                 throw new PouletException("assertion " + a + " ~ " + b + " failed");
             }
         } else if (command.action == Command.Action.DEDUCE) {
             Expression term = command.arguments.get(0);
-            System.out.println(term + " : " + kernel.reduce(kernel.deduceType(doctorExpression(term))));
+            System.out.println(term + " : " + kernel.reduce(kernel.deduceType(Desugar.desugar(term))));
         } else if (command.action == Command.Action.REDUCE) {
             Expression term = command.arguments.get(0);
-            System.out.println(term + " ▹ " + kernel.reduce(doctorExpression(term)));
+            System.out.println(term + " ▹ " + kernel.reduce(Desugar.desugar(term)));
         }
-    }
-
-    private poulet.kernel.ast.TopLevel doctorTopLevel(TopLevel topLevel) {
-        return Desugar.desugar(topLevel).makeSymbolsUnique();
-    }
-
-    private poulet.kernel.ast.Expression doctorExpression(Expression expression) {
-        return Desugar.desugar(expression).makeSymbolsUnique();
     }
 }

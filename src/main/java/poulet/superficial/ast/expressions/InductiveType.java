@@ -2,7 +2,10 @@ package poulet.superficial.ast.expressions;
 
 import poulet.superficial.Desugar;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class InductiveType extends Expression.Projectable {
@@ -14,6 +17,47 @@ public class InductiveType extends Expression.Projectable {
         this.inductiveType = inductiveType;
         this.parameters = parameters;
         this.arguments = arguments;
+    }
+
+    @Override
+    public InductiveType transformVars(Function<Var, Expression> transformation) {
+        List<Expression> newParameters = new ArrayList<>();
+
+        for (Expression parameter : parameters) {
+            newParameters.add(parameter.transformVars(transformation));
+        }
+
+        List<Expression> newArguments = new ArrayList<>();
+
+        for (Expression argument : arguments) {
+            newArguments.add(argument.transformVars(transformation));
+        }
+        return new InductiveType(
+                inductiveType,
+                newParameters,
+                newArguments
+        );
+    }
+
+    @Override
+    public InductiveType transformSymbols(Function<Symbol, Symbol> transformer, Map<Symbol, Symbol> unique) {
+        List<Expression> newParameters = new ArrayList<>();
+
+        for (Expression parameter : parameters) {
+            newParameters.add(parameter.transformSymbols(transformer, unique));
+        }
+
+        List<Expression> newArguments = new ArrayList<>();
+
+        for (Expression argument : arguments) {
+            newArguments.add(argument.transformSymbols(transformer, unique));
+        }
+
+        return new InductiveType(
+                inductiveType,
+                newParameters,
+                newArguments
+        );
     }
 
     @Override

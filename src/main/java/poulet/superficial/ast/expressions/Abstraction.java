@@ -2,6 +2,10 @@ package poulet.superficial.ast.expressions;
 
 import poulet.superficial.Desugar;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+
 public class Abstraction extends Expression.Projectable {
     public final Symbol argumentSymbol;
     public final Expression argumentType;
@@ -11,6 +15,28 @@ public class Abstraction extends Expression.Projectable {
         this.argumentSymbol = argumentSymbol;
         this.argumentType = argumentType;
         this.body = body;
+    }
+
+    @Override
+    public Abstraction transformVars(Function<Var, Expression> transformation) {
+        return new Abstraction(
+                argumentSymbol,
+                argumentType.transformVars(transformation),
+                body.transformVars(transformation)
+        );
+    }
+
+    @Override
+    public Abstraction transformSymbols(Function<Symbol, Symbol> transformer, Map<Symbol, Symbol> unique) {
+        Map<Symbol, Symbol> newUnique = new HashMap<>(unique);
+        Symbol uniqueArgumentSymbol = transformer.apply(argumentSymbol);
+        newUnique.put(argumentSymbol, uniqueArgumentSymbol);
+
+        return new Abstraction(
+                uniqueArgumentSymbol,
+                argumentType.transformSymbols(transformer, unique),
+                body.transformSymbols(transformer, newUnique)
+        );
     }
 
     @Override

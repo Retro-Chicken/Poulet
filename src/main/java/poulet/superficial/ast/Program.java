@@ -60,4 +60,9 @@ public class Program extends SuperficialNode {
         }
         return new Program(result);
     }
+
+    @Override
+    public Program makeSymbolsUnique() {
+        return new Program(nodes.stream().map(x -> x.makeSymbolsUnique()).collect(Collectors.toList()));
+    }
 }

@@ -2,6 +2,7 @@ package poulet.superficial.ast.expressions;
 
 import poulet.superficial.Desugar;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,5 +53,16 @@ public class Command extends TopLevel {
         }
         return new poulet.kernel.ast.Command(action,
                 arguments.stream().map(Desugar::desugar).collect(Collectors.toList()));
+    }
+
+    @Override
+    public Command makeSymbolsUnique() {
+        List<Expression> unique = new ArrayList<>();
+
+        for (Expression argument : arguments) {
+            unique.add(argument.makeSymbolsUnique());
+        }
+
+        return new Command(action, unique);
     }
 }

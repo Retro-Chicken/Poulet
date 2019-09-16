@@ -10,6 +10,8 @@ public class Import extends Multiline {
     public final String importName;
     public final List<String> subSections;
 
+    private boolean FLAG_UNIQUE = false;
+
     public Import(String importName, List<String> subSections) {
         this.importName = importName;
         this.subSections = subSections;
@@ -17,7 +19,17 @@ public class Import extends Multiline {
 
     @Override
     public List<SuperficialNode> inflate() {
-        return ImportHandler.expand(this).nodes;
+        List<SuperficialNode> result = ImportHandler.expand(this).nodes;
+        if(FLAG_UNIQUE)
+            return result.stream().map(x -> x.makeSymbolsUnique()).collect(Collectors.toList());
+        else
+            return result;
+    }
+
+    @Override
+    public Import makeSymbolsUnique() {
+        FLAG_UNIQUE = true;
+        return this;
     }
 
     @Override

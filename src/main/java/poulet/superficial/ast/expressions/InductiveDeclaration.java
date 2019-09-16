@@ -44,4 +44,21 @@ public class InductiveDeclaration extends TopLevel {
             declaration.inductiveDeclaration = result;
         return result;
     }
+
+    @Override
+    public InductiveDeclaration makeSymbolsUnique() {
+        List<TypeDeclaration> unique = new ArrayList<>();
+
+        for (TypeDeclaration typeDeclaration : typeDeclarations) {
+            unique.add(typeDeclaration.makeSymbolsUnique());
+        }
+
+        InductiveDeclaration inductiveDeclaration = new InductiveDeclaration(unique);
+
+        for (TypeDeclaration typeDeclaration : inductiveDeclaration.typeDeclarations) {
+            typeDeclaration.inductiveDeclaration = inductiveDeclaration;
+        }
+
+        return inductiveDeclaration;
+    }
 }

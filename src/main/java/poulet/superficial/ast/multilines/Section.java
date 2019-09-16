@@ -21,6 +21,11 @@ public class Section extends Multiline {
     }
 
     @Override
+    public Section makeSymbolsUnique() {
+        return new Section(name, program.makeSymbolsUnique());
+    }
+
+    @Override
     public String toString() {
         return "Section " + name + " {\n" + StringUtil.indent(program.toString(), 2) + "\n}";
     }

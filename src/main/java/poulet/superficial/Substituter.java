@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 public class Substituter {
     public static Expression substitute(Expression base, Symbol symbol, Expression substitute) {
-        return base.accept(new ExpressionVisitor<>() {
+        return base.accept(new ExpressionVisitor<Expression>() {
             @Override
             public Abstraction visit(Abstraction abstraction) {
                 return new Abstraction(

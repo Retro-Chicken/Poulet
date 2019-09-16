@@ -3,7 +3,9 @@ package poulet.superficial.ast.expressions;
 import poulet.superficial.Desugar;
 import poulet.superficial.decomposition.ApplicationDecomposition;
 
+import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Application extends Expression.Projectable {
@@ -13,6 +15,22 @@ public class Application extends Expression.Projectable {
     public Application(Expression function, Expression argument) {
         this.function = function;
         this.argument = argument;
+    }
+
+    @Override
+    public Application transformVars(Function<Var, Expression> transformation) {
+        return new Application(
+                function.transformVars(transformation),
+                argument.transformVars(transformation)
+        );
+    }
+
+    @Override
+    public Application transformSymbols(Function<Symbol, Symbol> transformer, Map<Symbol, Symbol> unique) {
+        return new Application(
+                function.transformSymbols(transformer, unique),
+                argument.transformSymbols(transformer, unique)
+        );
     }
 
     @Override

@@ -1,8 +1,13 @@
 package poulet.superficial.ast.expressions;
 
+import poulet.PouletException;
 import poulet.superficial.Desugar;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Fix extends Expression.Projectable {
@@ -50,6 +55,56 @@ public class Fix extends Expression.Projectable {
     public Fix(List<Clause> clauses, Symbol mainSymbol) {
         this.clauses = clauses;
         this.mainSymbol = mainSymbol;
+    }
+
+    @Override
+    public Fix transformVars(Function<Var, Expression> transformation) {
+        List<Clause> newClauses = new ArrayList<>();
+
+        for (Clause clause : clauses) {
+            newClauses.add(new Clause(
+                    clause.symbol,
+                    clause.type.transformVars(transformation),
+                    clause.definition.transformVars(transformation)
+            ));
+        }
+
+        return new Fix(
+                clauses,
+                mainSymbol
+        );
+    }
+
+    @Override
+    public Fix transformSymbols(Function<Symbol, Symbol> transformer, Map<Symbol, Symbol> unique) {
+        Symbol uniqueMainSymbol = null;
+        Map<Symbol, Symbol> newUnique = new HashMap<>(unique);
+
+        for (Clause clause : clauses) {
+            Symbol uniqueSymbol = transformer.apply(clause.symbol);
+            newUnique.put(clause.symbol, uniqueSymbol);
+
+            if (clause.symbol.equals(mainSymbol)) {
+                uniqueMainSymbol = uniqueSymbol;
+            }
+        }
+
+        if (uniqueMainSymbol == null) {
+            throw new PouletException("function " + mainSymbol + " not defined in " + this);
+        }
+
+        List<Clause> newClauses = new ArrayList<>();
+
+        for (Clause clause : clauses) {
+            Clause newClause = new Clause(
+                    newUnique.get(clause.symbol),
+                    clause.type.transformSymbols(transformer, unique),
+                    clause.definition.transformSymbols(transformer, unique)
+            );
+            newClauses.add(newClause);
+        }
+
+        return new Fix(newClauses, uniqueMainSymbol);
     }
 
     @Override

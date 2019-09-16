@@ -1,4 +1,4 @@
-package poulet.kernel.ast;
+package poulet.superficial.ast.expressions;
 
 public class UniqueSymbol extends Symbol {
     public final int id;
@@ -12,11 +12,6 @@ public class UniqueSymbol extends Symbol {
     public UniqueSymbol(Symbol symbol) {
         super(symbol.symbol);
         this.id = symbol instanceof UniqueSymbol ? ((UniqueSymbol) symbol).id : nextId++;
-    }
-
-    public UniqueSymbol(String symbol, int id) {
-        super(symbol);
-        this.id = id;
     }
 
     @Override
@@ -35,7 +30,7 @@ public class UniqueSymbol extends Symbol {
     }
 
     @Override
-    Symbol rename(String symbol) {
-        return new UniqueSymbol(symbol, id);
+    public poulet.kernel.ast.UniqueSymbol project() {
+        return new poulet.kernel.ast.UniqueSymbol(symbol, id);
     }
 }

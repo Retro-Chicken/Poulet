@@ -4,7 +4,11 @@ import poulet.superficial.Desugar;
 import poulet.superficial.ast.inlines.Inline;
 import poulet.util.StringUtil;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Match extends Expression.Projectable {
@@ -61,6 +65,71 @@ public class Match extends Expression.Projectable {
         this.argumentSymbols = argumentSymbols;
         this.type = type;
         this.clauses = clauses;
+    }
+
+    @Override
+    public Match transformVars(Function<Var, Expression> transformation) {
+        List<Clause> newClauses = new ArrayList<>();
+
+        for (Clause clause : clauses) {
+            newClauses.add(new Clause(
+                    clause.constructor,
+                    clause.argumentSymbols,
+                    clause.expression.transformVars(transformation)
+            ));
+        }
+
+        return new Match(
+                expression.transformVars(transformation),
+                expressionSymbol,
+                argumentSymbols,
+                type.transformVars(transformation),
+                newClauses
+        );
+    }
+
+    @Override
+    public Match transformSymbols(Function<Symbol, Symbol> transformer, Map<Symbol, Symbol> unique) {
+        Map<Symbol, Symbol> newUnique = new HashMap<>(unique);
+        Symbol newExpressionSymbol = transformer.apply(expressionSymbol);
+        newUnique.put(expressionSymbol, newExpressionSymbol);
+
+        List<Symbol> newArgumentSymbols = new ArrayList<>();
+        for (Symbol argumentSymbol : argumentSymbols) {
+            Symbol newArgumentSymbol = transformer.apply(argumentSymbol);
+            newArgumentSymbols.add(newArgumentSymbol);
+            newUnique.put(argumentSymbol, newArgumentSymbol);
+        }
+
+        Expression newType = type.transformSymbols(transformer, newUnique);
+
+        List<Match.Clause> newClauses = new ArrayList<>();
+
+        for (Match.Clause clause : clauses) {
+            Map<Symbol, Symbol> clauseNewUnique = new HashMap<>(unique);
+
+            List<Symbol> clauseArgumentSymbols = new ArrayList<>();
+            for (Symbol clauseArgumentSymbol : clause.argumentSymbols) {
+                Symbol newClauseArgumentSymbol = transformer.apply(clauseArgumentSymbol);
+                clauseArgumentSymbols.add(newClauseArgumentSymbol);
+                clauseNewUnique.put(clauseArgumentSymbol, newClauseArgumentSymbol);
+            }
+
+            Match.Clause newClause = new Match.Clause(
+                    clause.constructor,
+                    clauseArgumentSymbols,
+                    clause.expression.transformSymbols(transformer, clauseNewUnique)
+            );
+            newClauses.add(newClause);
+        }
+
+        return new Match(
+                expression.transformSymbols(transformer, unique),
+                newExpressionSymbol,
+                newArgumentSymbols,
+                newType,
+                newClauses
+        );
     }
 
     @Override

@@ -1,10 +1,23 @@
 package poulet.superficial.ast.expressions;
 
+import java.util.Map;
+import java.util.function.Function;
+
 public class MetaVar extends Expression.Projectable {
     public final Symbol symbol;
 
     public MetaVar(Symbol symbol) {
         this.symbol = symbol;
+    }
+
+    @Override
+    public Expression transformVars(Function<Var, Expression> transformation) {
+        return this;
+    }
+
+    @Override
+    public MetaVar transformSymbols(Function<Symbol, Symbol> transformer, Map<Symbol, Symbol> unique) {
+        return this;
     }
 
     @Override

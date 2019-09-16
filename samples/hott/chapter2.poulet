@@ -9,3 +9,8 @@ n1 : nat[] := nat[].S(n0)
 #assert (\y : nat[] -> x)(n1) where x := n0 ~ n0
 
 #reduce let x := n0 in x
+
+theorem1 : nat[] -> nat[] -> nat[] := Proof {
+    f : nat[] -> nat[] := \n : nat[] -> n,
+    \m : nat[] -> f
+}
