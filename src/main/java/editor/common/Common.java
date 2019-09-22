@@ -86,6 +86,7 @@ public class Common {
 	public static final char S = 'S';
 	public static final char P = 'P';
 	public static final char T = 'T';
+	public static final char R = 'R';
 	public static final char SPACE = ' ';
 
 	// notepad\src\main\resources\images
@@ -118,7 +119,7 @@ public class Common {
 	public static final String ACCESS_URL = "Access URL : ";
 
 	public static final String FONT_LUCIDA_CONSOLE = "Lucida Console";
-	public static final String FONT_TYPE = "Lucida Console";
+	public static final String FONT_TYPE = "Monospaced";
 	public static final int FONT_SIZE = 14;
 	public static final int FONT_NUM = 148;
 	public static final int FONT_SIZE_NUM = 4;

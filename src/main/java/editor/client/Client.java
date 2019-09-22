@@ -4,6 +4,7 @@
 package editor.client;
 
 import editor.common.Common;
+import editor.poulet.PouletUI;
 import editor.ui.MainUI;
 
 /**
@@ -16,7 +17,13 @@ public class Client {
 		start();
 	}
 
-	public static MainUI start() {
+	public static PouletUI start() {
+		PouletUI ui = new PouletUI(Common.TITLE);
+		ui.init();
+		return ui;
+	}
+
+	public static MainUI startBasic() {
 		MainUI ui = new MainUI(Common.TITLE);
 		ui.init();
 		return ui;

@@ -34,30 +34,30 @@ public class MainUI extends NotepadUI {
 
 	private static final long serialVersionUID = 1L;
 
-	JMenuBar menuBar;
-	JSeparator line;
+	protected JMenuBar menuBar;
+	protected JSeparator line;
 	// Menus
-	JMenu file, edit, format, view, help, viewHelp;
+	protected JMenu file, edit, format, view, help, viewHelp;
 	// PopupMenu
-	JPopupMenu textAreaPopupMenu;
+	protected JPopupMenu textAreaPopupMenu;
 	// File Items
-	JMenuItem news, open, save, saveAs, properties, exit;
+	protected JMenuItem news, open, save, saveAs, properties, exit;
 	// Edit Items
-	JMenuItem undo, copy, paste, cut, find, findNext, replace, selectAll, timeDate;
+	protected JMenuItem undo, copy, paste, cut, find, findNext, replace, selectAll, timeDate;
 	// PopupMenu
-	JMenuItem popUndo, popCopy, popPaste, popCut, popSelectAll, popTimeDate;
+	protected JMenuItem popUndo, popCopy, popPaste, popCut, popSelectAll, popTimeDate;
 	// Format Items
-	JMenuItem wordWrap, resetFont, font, fontSize, fontStyle;
+	protected JMenuItem wordWrap, resetFont, font, fontSize, fontStyle;
 	// View Items
-	JMenuItem skin;
+	protected JMenuItem skin;
 	// Help Items
-	JMenuItem about, homePage, source;
+	protected JMenuItem about, homePage, source;
 	// textArea
 	public static JTextArea textArea;
 	// textArea font
-	Font textAreaFont;
+	protected Font textAreaFont;
 	// textArea scroll
-	JScrollPane textAreaScroll;
+	protected JScrollPane textAreaScroll;
 	
 	public static UndoManager undoManager;
 	
@@ -71,18 +71,18 @@ public class MainUI extends NotepadUI {
 	public static int fontNum = Common.FONT_NUM;
 	public static int fontSizeNum = Common.FONT_SIZE_NUM;
 	public static int fontStyleNum = Common.FONT_STYLE_NUM;
-	public static String findWhat = Common.EMPTY;	
-	
-	private void setMainUIXY() {
+	public static String findWhat = Common.EMPTY;
+
+	protected void setMainUIXY() {
 		pointX = getMainUIX();
 		pointY = getMainUIY();
 	}
 	
-	private int getMainUIY() {
+	protected int getMainUIY() {
 		return (int) getLocation().getY();
 	}
 
-	private int getMainUIX() {
+	protected int getMainUIX() {
 		return (int) getLocation().getX();
 	}
 
@@ -93,7 +93,10 @@ public class MainUI extends NotepadUI {
 
 	public void init() {
 		initMenu();
+
 		initTextArea();
+		this.add(textAreaScroll);
+
 		this.setResizable(true);
 		this.setBounds(new Rectangle(150, 100, 800, 550));
 		this.setVisible(true);
@@ -106,8 +109,8 @@ public class MainUI extends NotepadUI {
 		
 		setMainUIXY();
 	}
-	
-	private void initMenu() {
+
+	protected void initMenu() {
 		menuBar = new JMenuBar();
 		menuFile();
 		menuEdit();
@@ -119,7 +122,7 @@ public class MainUI extends NotepadUI {
 		setDisabledMenuAtCreating(false);
 	}
 
-	private void menuFile() {
+	protected void menuFile() {
 		file = new JMenu(Common.FILE);
 
 		news = new JMenuItem(Common.NEW);
@@ -159,7 +162,7 @@ public class MainUI extends NotepadUI {
 		menuBar.add(file);
 	}
 
-	private void menuEdit() {
+	protected void menuEdit() {
 		edit = new JMenu(Common.EDIT);
 
 		undo = new JMenuItem(Common.UNDO);
@@ -219,7 +222,7 @@ public class MainUI extends NotepadUI {
 		menuBar.add(edit);
 	}
 
-	private void initTextAreaPopupMenu() {
+	protected void initTextAreaPopupMenu() {
 		textAreaPopupMenu = new JPopupMenu();
 		
 		popUndo = new JMenuItem(Common.UNDO);
@@ -253,7 +256,7 @@ public class MainUI extends NotepadUI {
 		textAreaPopupMenu.add(popTimeDate);
 	}
 
-	private void menuFormat() {
+	protected void menuFormat() {
 		format = new JMenu(Common.FORMAT);
 
 		wordWrap = new JMenuItem(Common.WORD_WRAP);
@@ -283,7 +286,7 @@ public class MainUI extends NotepadUI {
 		menuBar.add(format);
 	}
 
-	private void menuView() {
+	protected void menuView() {
 		view = new JMenu(Common.VIEW);
 
 		skin = new JMenuItem(Common.SKIN);
@@ -293,7 +296,7 @@ public class MainUI extends NotepadUI {
 		menuBar.add(view);
 	}
 
-	private void menuHelp() {
+	protected void menuHelp() {
 		help = new JMenu(Common.Help);
 
 		viewHelp = new JMenu(Common.VIEW_HELP);
@@ -317,11 +320,11 @@ public class MainUI extends NotepadUI {
 		menuBar.add(help);
 	}
 
-	private void initUndoManager(){
+	protected void initUndoManager(){
 		undoManager = new UndoManager();
 	}
-	
-	private void setDisabledMenuAtCreating(boolean b){
+
+	protected void setDisabledMenuAtCreating(boolean b){
 		undo.setEnabled(b);
 		popUndo.setEnabled(b);
 		cut.setEnabled(b);
@@ -331,15 +334,15 @@ public class MainUI extends NotepadUI {
 		find.setEnabled(b);	
 		findNext.setEnabled(b);
 	}
-	
-	private void setDisabledMenuAtSelecting(boolean b){
+
+	protected void setDisabledMenuAtSelecting(boolean b){
 		cut.setEnabled(b);
 		popCut.setEnabled(b);
 		copy.setEnabled(b);
 		popCopy.setEnabled(b);
 	}
-	
-	private void initTextArea() {
+
+	protected void initTextArea() {
 		textArea = new JTextArea(Common.EMPTY);
 		textArea.setLineWrap(lineWrap);
 		//lineWrap = true;
@@ -398,10 +401,9 @@ public class MainUI extends NotepadUI {
 			}
 		});
 		textAreaScroll = new JScrollPane(textArea);
-		this.add(textAreaScroll);
 	}
-	
-	private void isSelectedText() {
+
+	protected void isSelectedText() {
 		textArea.setFocusable(true);
 		String selectText = textArea.getSelectedText();
 		if(null != selectText){
@@ -419,7 +421,7 @@ public class MainUI extends NotepadUI {
 		actionForHelpItem(e);
 	}
 
-	private void actionForFileItem(ActionEvent e) {
+	protected void actionForFileItem(ActionEvent e) {
 		if (e.getSource() == news) {
 			FileMenuUtil.news(MainUI.this);
 		} else if (e.getSource() == open) {
@@ -438,7 +440,7 @@ public class MainUI extends NotepadUI {
 		}
 	}
 
-	private void actionForEditItem(ActionEvent e) {
+	protected void actionForEditItem(ActionEvent e) {
 		if (e.getSource() == undo) {
 			EditMenuUtil.undo();
 		} else if (e.getSource() == popUndo) {
@@ -477,7 +479,7 @@ public class MainUI extends NotepadUI {
 		}
 	}
 
-	private void actionForFormatItem(ActionEvent e) {
+	protected void actionForFormatItem(ActionEvent e) {
 		if (e.getSource() == wordWrap) {
 			FormatMenuUtil.wordWrap();
 		} else if(e.getSource() == resetFont){
@@ -498,7 +500,7 @@ public class MainUI extends NotepadUI {
 		}
 	}
 
-	private void actionForViewItem(ActionEvent e) {
+	protected void actionForViewItem(ActionEvent e) {
 		if (e.getSource() == skin) {
 			setMainUIXY();
 			ViewMenuUtil view = new ViewMenuUtil(Common.EMPTY);
@@ -506,7 +508,7 @@ public class MainUI extends NotepadUI {
 		}
 	}
 
-	private void actionForHelpItem(ActionEvent e) {
+	protected void actionForHelpItem(ActionEvent e) {
 		if (e.getSource() == homePage) {
 			//log.debug(Common.NOTEPAD_HOME_PAGE);
 			NotepadUtil.accessURL(Common.NOTEPAD_PUBLISHED_PAGE);

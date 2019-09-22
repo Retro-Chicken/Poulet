@@ -6,16 +6,24 @@ import poulet.kernel.context.GlobalContext;
 import poulet.kernel.context.LocalContext;
 import poulet.kernel.ast.TopLevel;
 
+import java.io.PrintWriter;
+
 public class Kernel {
     private final GlobalContext globalContext;
 
+    private final PrintWriter out;
+
     public Kernel() {
+        this(new PrintWriter(System.out));
+    }
+
+    public Kernel(PrintWriter out) {
+        this.out = out;
         globalContext = new GlobalContext();
     }
 
     public void runProgram(Program program) {
         Program unique = program.makeSymbolsUnique();
-        //System.out.println(unique);
 
         for (TopLevel topLevel : unique.topLevels) {
             try {
@@ -52,10 +60,10 @@ public class Kernel {
             }
         } else if (command.action == Command.Action.DEDUCE) {
             Expression term = command.arguments.get(0);
-            System.out.println(term + " : " + reduce(deduceType(term)));
+            out.println(term + " : " + reduce(deduceType(term)));
         } else if (command.action == Command.Action.REDUCE) {
             Expression term = command.arguments.get(0);
-            System.out.println(term + " ▹ " + reduce(term));
+            out.println(term + " ▹ " + reduce(term));
         }
     }
 
