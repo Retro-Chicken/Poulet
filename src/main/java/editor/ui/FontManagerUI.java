@@ -74,7 +74,7 @@ public class FontManagerUI extends MainUI {
 		fontJComboBox.setSelectedIndex(fontNum);
 		fontJComboBox.addActionListener(this);
 
-		descJlabel.setText(Common.DESCRIPTION_WITH_COLOR);
+		descJlabel.setText(Common.DESCRIPTION_WITH_COLON);
 
 		currentFontDescJLabel.setFont(new Font(FontManagerUI.FONT_TYPE, fontStyleNum, FontManagerUI.FONT_SIZE));
 		currentFontDescJLabel.setText(Common.THIS_IS_A_SAMPLE);

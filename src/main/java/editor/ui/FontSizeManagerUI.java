@@ -69,7 +69,7 @@ public class FontSizeManagerUI extends MainUI {
 		fontSizeJComboBox.setSelectedIndex(fontSizeNum);
 		fontSizeJComboBox.addActionListener(this);
 
-		descJlabel.setText(Common.DESCRIPTION_WITH_COLOR);
+		descJlabel.setText(Common.DESCRIPTION_WITH_COLON);
 
 		currentFontSizeDescJLabel.setFont(new Font(FontManagerUI.FONT_TYPE, fontStyleNum, FontManagerUI.FONT_SIZE));
 		currentFontSizeDescJLabel.setText(Common.SAMPLE);

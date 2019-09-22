@@ -43,7 +43,7 @@ import org.jvnet.substance.watermark.SubstanceBubblesWatermark;
  * The basic class extends <code>java.awt.JFrame</code>, there are three methods provided:<br>
  * <code>getSkin()</code> to change the frame skin.<br>
  * and there are 21 skins to provided. And the<br> 
- * default skin is <code>MagmaSkin</code> .You can change value to change <br>
+ * default skin is <code>Coffee Creme</code> .You can change value to change <br>
  * skin if possible. and you should call the method <code>setJUI()</code> to refresh the page when you change the value.
  * @author Hongten
  * @created Nov 19, 2014
@@ -51,8 +51,6 @@ import org.jvnet.substance.watermark.SubstanceBubblesWatermark;
 public class JUI extends JFrame {
 
 	private static final long serialVersionUID = 1L;
-	
-	//Logger log = Logger.getLogger(JUI.class);
 
 	static SubstanceAbstractSkin skin;
 	static int skinNum = Common.DEFAULT_SKIN_NUM;

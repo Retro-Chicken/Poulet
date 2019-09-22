@@ -45,7 +45,7 @@ public class NotepadUtil {
 	}
 	
 	/**
-	 * @param path i.e. com/b510/resources/images/hongten.png
+	 * @param path i.e. src/main/java/editor/images/rclogo.png
 	 * @return i.e. png
 	 */
 	public static String getPostfix(String path) {

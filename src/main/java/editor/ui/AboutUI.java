@@ -9,13 +9,11 @@ import java.awt.event.WindowEvent;
 import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
 import editor.common.Common;
@@ -47,8 +45,7 @@ public class AboutUI extends MainUI {
 	
 	//static Logger log = Logger.getLogger(AboutUI.class);
 
-	private JLabel descriptionLabel;
-	private JButton hongtenButton;
+	private JButton aboutButton;
 	private JTable aboutUITable;
 	private JPanel mainPanel;
 	private JScrollPane rightScrollPane;
@@ -77,19 +74,18 @@ public class AboutUI extends MainUI {
 
 	private void initComponents() {
 		initElement();
-		initHongtenButton();
+		initAboutButton();
 		initAboutUITable();
-		initDescriptionLabel();
 		mainPanelLayout();
 	}
 
-	private void initHongtenButton() {
-		hongtenButton.setIcon(new ImageIcon(this.getClass().getClassLoader().getResource(Common.HONGTEN_PIC)));
-		hongtenButton.setToolTipText(Common.ABOUT_NOTEPAD);
+	private void initAboutButton() {
+		aboutButton.setIcon(new ImageIcon("src/main/java/editor/" + Common.RC_LOGO));
+		aboutButton.setToolTipText(Common.ABOUT_NOTEPAD);
 	}
 
 	private void initAboutUITable() {
-		Object[][] values = new Object[][] { { Common.AUTHOR, Common.AUTHOR_NAME }, { Common.APPLICATION_NAME, Common.NOTEPAD_APP }, { Common.APPLICATION_DESCRIPTION, Common.APPLICATION_DESCRIPTION_DETAIL }, { Common.VERSION, Common.VERSION_VALUE }, { Common.BLOG, Common.HOME_PAGE } };
+		Object[][] values = new Object[][] { { Common.AUTHOR, Common.AUTHOR_NAME }, { Common.APPLICATION_NAME, Common.NOTEPAD_APP }, { Common.APPLICATION_DESCRIPTION, Common.APPLICATION_DESCRIPTION_DETAIL }, { Common.VERSION, Common.VERSION_VALUE }, { Common.HOME_PAGE, Common.HOME_PAGE_URL} };
 
 		String[] titles = new String[] { Common.ITEM, Common.DESCRIPTION };
 
@@ -138,7 +134,7 @@ public class AboutUI extends MainUI {
 	private void matchUrlOperation() {
 		int id = aboutUITable.getSelectedRow();
 		String url = (String) aboutUITable.getValueAt(id, 1);
-		if (url.equals(Common.HOME_PAGE)) {
+		if (url.equals(Common.HOME_PAGE_URL)) {
 			askAccessBlogOperation();
 		}
 	}
@@ -146,24 +142,17 @@ public class AboutUI extends MainUI {
 	// Show a dialog to access URL request.
 	// You will access the URL if you click 'Yes'.
 	protected void askAccessBlogOperation() {
-		int option = JOptionPane.showConfirmDialog(AboutUI.this, Common.ACCESS_URL + Common.HOME_PAGE + Common.BLANK + Common.QUESTION_MARK, Common.ACCESS_URL_REQUEST, JOptionPane.YES_NO_OPTION);
+		int option = JOptionPane.showConfirmDialog(AboutUI.this, Common.ACCESS_URL + Common.HOME_PAGE_URL + Common.BLANK + Common.QUESTION_MARK, Common.ACCESS_URL_REQUEST, JOptionPane.YES_NO_OPTION);
 		if (option == JOptionPane.YES_OPTION) {
-			NotepadUtil.accessURL(Common.HOME_PAGE);
+			NotepadUtil.accessURL(Common.HOME_PAGE_URL);
 		}
-	}
-
-	private void initDescriptionLabel() {
-		descriptionLabel.setFont(new java.awt.Font(Common.FONT_LUCIDA_CONSOLE, 1, 18));
-		descriptionLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		descriptionLabel.setText(Common.AUTHOR_DESC);
 	}
 
 	private void initElement() {
 		mainPanel = new JPanel();
-		hongtenButton = new JButton();
+		aboutButton = new JButton();
 		rightScrollPane = new JScrollPane();
 		aboutUITable = new JTable();
-		descriptionLabel = new JLabel();
 	}
 	
 	public void setHelpMenuUtil(HelpMenuUtil helpMenuUtil){
@@ -176,13 +165,48 @@ public class AboutUI extends MainUI {
 	private void mainPanelLayout() {
 		GroupLayout mainPanelLayout = new GroupLayout(mainPanel);
 		mainPanel.setLayout(mainPanelLayout);
-		mainPanelLayout.setHorizontalGroup(mainPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(mainPanelLayout.createSequentialGroup().addContainerGap().addGroup(mainPanelLayout.createParallelGroup(GroupLayout.Alignment.TRAILING).addComponent(hongtenButton).addComponent(descriptionLabel, GroupLayout.PREFERRED_SIZE, 265, GroupLayout.PREFERRED_SIZE)).addGap(18, 18, 18).addComponent(rightScrollPane, GroupLayout.PREFERRED_SIZE, 243, GroupLayout.PREFERRED_SIZE).addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
-		mainPanelLayout.setVerticalGroup(mainPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(mainPanelLayout.createSequentialGroup().addContainerGap().addGroup(mainPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING, false).addComponent(rightScrollPane, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE).addGroup(mainPanelLayout.createSequentialGroup().addComponent(hongtenButton, GroupLayout.PREFERRED_SIZE, 256, GroupLayout.PREFERRED_SIZE).addGap(18, 18, 18).addComponent(descriptionLabel, GroupLayout.PREFERRED_SIZE, 31, GroupLayout.PREFERRED_SIZE))).addGap(0, 0, Short.MAX_VALUE)));
+		mainPanelLayout.setHorizontalGroup(
+				mainPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+				.addGroup(
+						mainPanelLayout.createSequentialGroup().addContainerGap()
+						.addComponent(aboutButton)
+						.addGap(18, 18, 18)
+						.addComponent(rightScrollPane, GroupLayout.PREFERRED_SIZE, 243, GroupLayout.PREFERRED_SIZE)
+						.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+				)
+		);
+		mainPanelLayout.setVerticalGroup(
+				mainPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+				.addGroup(
+						mainPanelLayout.createSequentialGroup().addContainerGap()
+						.addGroup(
+								mainPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
+								.addComponent(rightScrollPane, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+								.addComponent(aboutButton, GroupLayout.PREFERRED_SIZE, 256, GroupLayout.PREFERRED_SIZE)
+						).addGap(0, 0, Short.MAX_VALUE)
+				)
+		);
 
 		GroupLayout layout = new GroupLayout(getContentPane());
 		getContentPane().setLayout(layout);
-		layout.setHorizontalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(layout.createSequentialGroup().addContainerGap().addComponent(mainPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addContainerGap()));
-		layout.setVerticalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(layout.createSequentialGroup().addContainerGap().addComponent(mainPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addContainerGap()));
+		layout.setHorizontalGroup(
+				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+				.addGroup(
+						layout.createSequentialGroup()
+						.addContainerGap()
+						.addComponent(mainPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+						.addContainerGap()
+				)
+		);
+		layout.setVerticalGroup(
+				layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+				.addGroup(
+						layout.createSequentialGroup()
+						.addContainerGap()
+						.addComponent(mainPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+						.addContainerGap()
+				)
+		);
 
 		pack();
 	}

@@ -31,5 +31,6 @@ public class NotepadUI extends JUI implements ActionListener {
 	}
 
 	public void actionPerformed(ActionEvent e) {
+
 	}
 }

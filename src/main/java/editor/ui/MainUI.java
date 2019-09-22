@@ -24,13 +24,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
-import javax.swing.event.CaretEvent;
-import javax.swing.event.CaretListener;
-import javax.swing.event.UndoableEditEvent;
-import javax.swing.event.UndoableEditListener;
 import javax.swing.undo.UndoManager;
-
-//import org.apache.log4j.Logger;
 
 /**
  * @author Hongten
@@ -40,12 +34,10 @@ public class MainUI extends NotepadUI {
 
 	private static final long serialVersionUID = 1L;
 
-	//static Logger log = Logger.getLogger(MainUI.class);
-
 	JMenuBar menuBar;
 	JSeparator line;
 	// Menus
-	JMenu file, edit, format, view, help, viewHelp, source;
+	JMenu file, edit, format, view, help, viewHelp;
 	// PopupMenu
 	JPopupMenu textAreaPopupMenu;
 	// File Items
@@ -59,7 +51,7 @@ public class MainUI extends NotepadUI {
 	// View Items
 	JMenuItem skin;
 	// Help Items
-	JMenuItem about, homePage, skinPage, sourceCode, sourceCodeDownload, api;
+	JMenuItem about, homePage, source;
 	// textArea
 	public static JTextArea textArea;
 	// textArea font
@@ -116,7 +108,7 @@ public class MainUI extends NotepadUI {
 	}
 	
 	private void initMenu() {
-		menuBar();
+		menuBar = new JMenuBar();
 		menuFile();
 		menuEdit();
 		menuFormat();
@@ -127,31 +119,27 @@ public class MainUI extends NotepadUI {
 		setDisabledMenuAtCreating(false);
 	}
 
-	private void menuBar() {
-		menuBar = new JMenuBar();
-	}
-
 	private void menuFile() {
 		file = new JMenu(Common.FILE);
 
 		news = new JMenuItem(Common.NEW);
 		news.addActionListener(this);
-		news.setAccelerator(KeyStroke.getKeyStroke(Common.N, InputEvent.CTRL_MASK));
+		news.setAccelerator(KeyStroke.getKeyStroke(Common.N, InputEvent.CTRL_DOWN_MASK));
 		file.add(news);
 
 		open = new JMenuItem(Common.OPEN);
 		open.addActionListener(this);
-		open.setAccelerator(KeyStroke.getKeyStroke(Common.O, InputEvent.CTRL_MASK));
+		open.setAccelerator(KeyStroke.getKeyStroke(Common.O, InputEvent.CTRL_DOWN_MASK));
 		file.add(open);
 
 		save = new JMenuItem(Common.SAVE);
 		save.addActionListener(this);
-		save.setAccelerator(KeyStroke.getKeyStroke(Common.S, InputEvent.CTRL_MASK));
+		save.setAccelerator(KeyStroke.getKeyStroke(Common.S, InputEvent.CTRL_DOWN_MASK));
 		file.add(save);
 
 		saveAs = new JMenuItem(Common.SAVE_AS);
 		saveAs.addActionListener(this);
-		saveAs.setAccelerator(KeyStroke.getKeyStroke(Common.S, InputEvent.CTRL_MASK + InputEvent.SHIFT_MASK));
+		saveAs.setAccelerator(KeyStroke.getKeyStroke(Common.S, InputEvent.CTRL_DOWN_MASK + InputEvent.SHIFT_DOWN_MASK));
 		file.add(saveAs);
 
 		line = new JSeparator();
@@ -176,7 +164,7 @@ public class MainUI extends NotepadUI {
 
 		undo = new JMenuItem(Common.UNDO);
 		undo.addActionListener(this);
-		undo.setAccelerator(KeyStroke.getKeyStroke(Common.Z, InputEvent.CTRL_MASK));
+		undo.setAccelerator(KeyStroke.getKeyStroke(Common.Z, InputEvent.CTRL_DOWN_MASK));
 		edit.add(undo);
 
 		line = new JSeparator();
@@ -184,17 +172,17 @@ public class MainUI extends NotepadUI {
 
 		cut = new JMenuItem(Common.CUT);
 		cut.addActionListener(this);
-		cut.setAccelerator(KeyStroke.getKeyStroke(Common.X, InputEvent.CTRL_MASK));
+		cut.setAccelerator(KeyStroke.getKeyStroke(Common.X, InputEvent.CTRL_DOWN_MASK));
 		edit.add(cut);
 		
 		copy = new JMenuItem(Common.COPY);
 		copy.addActionListener(this);
-		copy.setAccelerator(KeyStroke.getKeyStroke(Common.C, InputEvent.CTRL_MASK));
+		copy.setAccelerator(KeyStroke.getKeyStroke(Common.C, InputEvent.CTRL_DOWN_MASK));
 		edit.add(copy);
 
 		paste = new JMenuItem(Common.PASTE);
 		paste.addActionListener(this);
-		paste.setAccelerator(KeyStroke.getKeyStroke(Common.V, InputEvent.CTRL_MASK));
+		paste.setAccelerator(KeyStroke.getKeyStroke(Common.V, InputEvent.CTRL_DOWN_MASK));
 		edit.add(paste);
 
 		line = new JSeparator();
@@ -202,17 +190,17 @@ public class MainUI extends NotepadUI {
 
 		find = new JMenuItem(Common.FIND);
 		find.addActionListener(this);
-		find.setAccelerator(KeyStroke.getKeyStroke(Common.F, InputEvent.CTRL_MASK));
+		find.setAccelerator(KeyStroke.getKeyStroke(Common.F, InputEvent.CTRL_DOWN_MASK));
 		edit.add(find);
 
 		findNext = new JMenuItem(Common.FIND_NEXT);
 		findNext.addActionListener(this);
-		findNext.setAccelerator(KeyStroke.getKeyStroke(Common.F, InputEvent.CTRL_MASK + InputEvent.SHIFT_MASK));
+		findNext.setAccelerator(KeyStroke.getKeyStroke(Common.F, InputEvent.CTRL_DOWN_MASK + InputEvent.SHIFT_DOWN_MASK));
 		edit.add(findNext);
 
 		replace = new JMenuItem(Common.REPLACE);
 		replace.addActionListener(this);
-		replace.setAccelerator(KeyStroke.getKeyStroke(Common.H, InputEvent.CTRL_MASK));
+		replace.setAccelerator(KeyStroke.getKeyStroke(Common.H, InputEvent.CTRL_DOWN_MASK));
 		edit.add(replace);
 
 		line = new JSeparator();
@@ -220,12 +208,12 @@ public class MainUI extends NotepadUI {
 
 		selectAll = new JMenuItem(Common.SELECT_ALL);
 		selectAll.addActionListener(this);
-		selectAll.setAccelerator(KeyStroke.getKeyStroke(Common.A, InputEvent.CTRL_MASK));
+		selectAll.setAccelerator(KeyStroke.getKeyStroke(Common.A, InputEvent.CTRL_DOWN_MASK));
 		edit.add(selectAll);
 
 		timeDate = new JMenuItem(Common.TIME_DATE);
 		timeDate.addActionListener(this);
-		timeDate.setAccelerator(KeyStroke.getKeyStroke(Common.T, InputEvent.CTRL_MASK));
+		timeDate.setAccelerator(KeyStroke.getKeyStroke(Common.T, InputEvent.CTRL_DOWN_MASK));
 		edit.add(timeDate);
 		
 		menuBar.add(edit);
@@ -270,7 +258,7 @@ public class MainUI extends NotepadUI {
 
 		wordWrap = new JMenuItem(Common.WORD_WRAP);
 		wordWrap.addActionListener(this);
-		wordWrap.setAccelerator(KeyStroke.getKeyStroke(Common.W, InputEvent.CTRL_MASK));
+		wordWrap.setAccelerator(KeyStroke.getKeyStroke(Common.W, InputEvent.CTRL_DOWN_MASK));
 		format.add(wordWrap);
 		
 		resetFont = new JMenuItem(Common.RESET_FONT);
@@ -314,25 +302,10 @@ public class MainUI extends NotepadUI {
 		homePage = new JMenuItem(Common.NOTEPAD_HOME_PAGE);
 		homePage.addActionListener(this);
 		viewHelp.add(homePage);
-		
-		skinPage = new JMenuItem(Common.NOTEPAD_SKINS);
-		skinPage.addActionListener(this);
-		viewHelp.add(skinPage);
 
-		source = new JMenu(Common.SOURCE);
+		source = new JMenuItem(Common.SOURCE);
+		source.addActionListener(this);
 		viewHelp.add(source);
-		
-		sourceCode = new JMenuItem(Common.SOURCE_CODE);
-		sourceCode.addActionListener(this);
-		source.add(sourceCode);
-		
-		sourceCodeDownload = new JMenuItem(Common.SOURCE_CODE_DOWNLOAD);
-		sourceCodeDownload.addActionListener(this);
-		source.add(sourceCodeDownload);
-		
-		api = new JMenuItem(Common.NOTEPAD_API);
-		api.addActionListener(this);
-		viewHelp.add(api);
 
 		line = new JSeparator();
 		help.add(line);
@@ -368,8 +341,8 @@ public class MainUI extends NotepadUI {
 	
 	private void initTextArea() {
 		textArea = new JTextArea(Common.EMPTY);
-		textArea.setLineWrap(true);
-		lineWrap = true;
+		textArea.setLineWrap(lineWrap);
+		//lineWrap = true;
 		textAreaFont = new Font(FontManagerUI.FONT_TYPE, fontStyleNum, FontManagerUI.FONT_SIZE);
 		textArea.setFont(textAreaFont);
 		
@@ -377,14 +350,9 @@ public class MainUI extends NotepadUI {
 		
 		initUndoManager();
 		// add Undoable edit listener
-		textArea.getDocument().addUndoableEditListener(new UndoableEditListener() {
-			public void undoableEditHappened(UndoableEditEvent e) {
-				undoManager.addEdit(e.getEdit());
-			}
-		});
+		textArea.getDocument().addUndoableEditListener(e -> undoManager.addEdit(e.getEdit()));
 		// add caret listener
-		textArea.addCaretListener(new CaretListener() {
-			public void caretUpdate(CaretEvent e) {
+		textArea.addCaretListener(e -> {
 				if (null != savedText && null != textArea.getText()) {
 					if (savedText.equals(textArea.getText())) {
 						setSaved(true);
@@ -394,7 +362,6 @@ public class MainUI extends NotepadUI {
 				}
 				textArea.setFocusable(true);
 				setDisabledMenuAtCreating(true);
-			}
 		});
 		// add mouse motion listener
 		textArea.addMouseMotionListener(new MouseMotionListener() {
@@ -543,18 +510,9 @@ public class MainUI extends NotepadUI {
 		if (e.getSource() == homePage) {
 			//log.debug(Common.NOTEPAD_HOME_PAGE);
 			NotepadUtil.accessURL(Common.NOTEPAD_PUBLISHED_PAGE);
-		} else if(e.getSource() == skinPage){
-			//log.debug(Common.NOTEPAD_SKINS);
-			NotepadUtil.accessURL(Common.NOTEPAD_SUBSTANCE_SKINS_PAGE);
-		}else if(e.getSource() == sourceCode){
+		}else if(e.getSource() == source){
 			//log.debug(Common.SOURCE_CODE);
-			NotepadUtil.accessURL(Common.NOTEPAD_PUBLISHED_BOOKMARK_PAGE + Common.SOURCE_CODE_BOOKMARK);
-		}else if(e.getSource() == sourceCodeDownload){
-			//log.debug(Common.SOURCE_CODE_DOWNLOAD);
-			NotepadUtil.accessURL(Common.NOTEPAD_PUBLISHED_BOOKMARK_PAGE + Common.SOURCE_CODE_DOWNLOAD_BOOKMARK);
-		}else if(e.getSource() == api){
-			//log.debug(Common.NOTEPAD_API);
-			NotepadUtil.accessURL(Common.NOTEPAD_PUBLISHED_BOOKMARK_PAGE + Common.NOTEPAD_API_BOOKMARK);
+			NotepadUtil.accessURL(Common.NOTEPAD_PUBLISHED_PAGE);
 		}else if (e.getSource() == about) {
 			setMainUIXY();
 			HelpMenuUtil help = new HelpMenuUtil(Common.EMPTY);

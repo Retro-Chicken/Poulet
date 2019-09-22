@@ -16,17 +16,17 @@ public class Common {
 	public static final String BLANK = " ";
 	public static final String QUESTION_MARK = "?";
 	public static final String POINT = ".";
-	public static final String COLOR = ":";
-	public static final String START = "*";
-	public static final String TXT = "txt";
-	public static final String TXT_FILE = START + POINT + TXT;
+	public static final String COLON = ":";
+	public static final String STAR = "*";
+	public static final String DEFAULT_FILTER_EXT = "poulet";
+	public static final String DEFAULT_FILTER = STAR + POINT + DEFAULT_FILTER_EXT;
 
-	public static final String UNTITLE = "Untitled";
-	public static final String NOTEPAD = "Poulet Interactive";
+	public static final String UNTITLED = "Untitled";
+	public static final String NOTEPAD = "Poulet";
 	public static final String NOTEPAD_NOTEPAD = BLANK + HYPHEN + BLANK + NOTEPAD;
-	public static final String TITLE = UNTITLE + NOTEPAD_NOTEPAD;
-	public static final String SYSTEM_EXIT = "System exit";
-	public static final String SYSTEM_OPEN = "System open";
+	public static final String TITLE = UNTITLED + NOTEPAD_NOTEPAD;
+	public static final String SYSTEM_EXIT = "System Exit";
+	public static final String SYSTEM_OPEN = "System Open";
 
 	public static final String FILE = "File";
 	public static final String EDIT = "Edit";
@@ -63,12 +63,11 @@ public class Common {
 	public static final String FONT_SIZE_TITLE = "Font Size";
 
 	// View
-	public static final String STATUS_BAR = "Status Bar";
 	public static final String SKIN = "Change Skin";
 
 	// Help Items
 	public static final String VIEW_HELP = "View Help";
-	public static final String ABOUT_NOTEPAD = "About NotePad";
+	public static final String ABOUT_NOTEPAD = "About Poulet";
 
 	// KeyStroke
 	public static final char A = 'A';
@@ -92,12 +91,11 @@ public class Common {
 	// notepad\src\main\resources\images
 	public static final String IMAGE_PATH = "images/";
 
-	public static final String HONGTEN_PIC = IMAGE_PATH + "hongten.png";
+	public static final String RC_LOGO = IMAGE_PATH + "rclogo.png";
 
 	// About UI
 	public static final String AUTHOR = "Author";
-	public static final String AUTHOR_NAME = "Hongten";
-	public static final String AUTHOR_DESC = "I'm " + AUTHOR_NAME;
+	public static final String AUTHOR_NAME = "Retro Chicken";
 	public static final String ITEM = "Item";
 	public static final String DESCRIPTION = "Description";
 	public static final String APPLICATION = "Application";
@@ -105,15 +103,12 @@ public class Common {
 	public static final String APPLICATION_NAME = APPLICATION + BLANK + NAME;
 	public static final String NOTEPAD_APP = NOTEPAD;
 	public static final String APPLICATION_DESCRIPTION = APPLICATION + BLANK + DESCRIPTION;
-	public static final String APPLICATION_DESCRIPTION_DETAIL = "A " + NOTEPAD;
+	public static final String APPLICATION_DESCRIPTION_DETAIL = "A CiC Language";
 	public static final String VERSION = "Version";
 	public static final String VERSION_VALUE = "1.1";
-	public static final String BLOG = "Blog";
-	public static final String HOME_PAGE = "http://www.cnblogs.com/hongten";
-	public static final String NOTEPAD_PUBLISHED_PAGE = HOME_PAGE + "/p/hongten_notepad_index.html";
-	public static final String NOTEPAD_SUBSTANCE_SKINS_PAGE = HOME_PAGE + "/p/hongten_notepad_substance_skins.html";
-	public static final String SUBSTANCE_SKINS_PAGE = NOTEPAD_SUBSTANCE_SKINS_PAGE + "#";
-	public static final String NOTEPAD_PUBLISHED_BOOKMARK_PAGE = NOTEPAD_PUBLISHED_PAGE + "#";
+	public static final String HOME_PAGE = "Home Page";
+	public static final String HOME_PAGE_URL = "http://www.github.com/retro-chicken";
+	public static final String NOTEPAD_PUBLISHED_PAGE = HOME_PAGE_URL + "/poulet";
 
 	public static final int TABLE_ROW_HEIGHT = 20;
 
@@ -124,7 +119,7 @@ public class Common {
 
 	public static final String FONT_LUCIDA_CONSOLE = "Lucida Console";
 	public static final String FONT_TYPE = "Lucida Console";
-	public static final int FONT_SIZE = 20;
+	public static final int FONT_SIZE = 14;
 	public static final int FONT_NUM = 148;
 	public static final int FONT_SIZE_NUM = 4;
 	public static final int FONT_STYLE_NUM = 0;
@@ -133,11 +128,11 @@ public class Common {
 	public static final String THIS_IS_A_SAMPLE = "This is a Sample";
 	public static final String SAMPLE = "Sample";
 
-	public static final String CURRENT_SKIN = "Current Skin" + BLANK + COLOR + BLANK;
-	public static final String DESCRIPTION_WITH_COLOR = DESCRIPTION + BLANK + COLOR + BLANK;
-	public static final String CURRENT_FONT = "Current Font" + BLANK + COLOR + BLANK;
-	public static final String CURRENT_FONT_SIZE = "Current Font Size" + BLANK + COLOR + BLANK;
-	public static final String CURRENT_FONT_STYLE = "Current Font Style" + BLANK + COLOR + BLANK;
+	public static final String CURRENT_SKIN = "Current Skin" + BLANK + COLON + BLANK;
+	public static final String DESCRIPTION_WITH_COLON = DESCRIPTION + BLANK + COLON + BLANK;
+	public static final String CURRENT_FONT = "Current Font" + BLANK + COLON + BLANK;
+	public static final String CURRENT_FONT_SIZE = "Current Font Size" + BLANK + COLON + BLANK;
+	public static final String CURRENT_FONT_STYLE = "Current Font Style" + BLANK + COLON + BLANK;
 
 	public static final String DO_YOU_WANT_TO_SAVE_CHANGES = "Do you want to save changes?";
 	public static final String WHAT_DO_YOU_WANT_TO_FIND = "Please type what do you want to find.";
@@ -154,13 +149,5 @@ public class Common {
 	public static final String GB2312 = "GB2312";
 	
 	public static final String NOTEPAD_HOME_PAGE = "Home Page";
-	public static final String NOTEPAD_SKINS = "Notepad Skins";
 	public static final String SOURCE = "Source";
-	public static final String SOURCE_CODE = SOURCE + " Code";
-	public static final String SOURCE_CODE_DOWNLOAD = SOURCE_CODE + " Download";
-	public static final String NOTEPAD_API = "Notepad API";
-	
-	public static final String SOURCE_CODE_BOOKMARK = "Source.Code";
-	public static final String SOURCE_CODE_DOWNLOAD_BOOKMARK = SOURCE_CODE_BOOKMARK + ".Download";
-	public static final String NOTEPAD_API_BOOKMARK = "Notepad.API";
 }

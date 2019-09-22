@@ -129,7 +129,7 @@ public class FileMenuUtil extends MainUI {
 
 	/**
 	 * The operation of the open<br>
-	 * When the user want to open a TXT file, this method will be called.<br>
+	 * When the user want to open a DEFAULT_FILTER_EXT file, this method will be called.<br>
 	 * 
 	 * @param mainUI
 	 * @see FileMenuUtil#open(MainUI)
@@ -138,7 +138,7 @@ public class FileMenuUtil extends MainUI {
 		String path;
 		JFileChooser chooser = new JFileChooser();
 		FileNameExtensionFilter filter;
-		filter = new FileNameExtensionFilter(Common.TXT_FILE, Common.TXT);
+		filter = new FileNameExtensionFilter(Common.DEFAULT_FILTER, Common.DEFAULT_FILTER_EXT);
 		chooser.setFileFilter(filter);
 		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 		chooser.setDialogTitle(Common.OPEN);
@@ -149,7 +149,7 @@ public class FileMenuUtil extends MainUI {
 			try {
 				BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(path), Common.GB2312));
 				StringBuffer buffer = new StringBuffer();
-				String line = null;
+				String line;
 				while ((line = reader.readLine()) != null) {
 					buffer.append(line).append(Common.NEW_LINE);
 				}
@@ -166,8 +166,8 @@ public class FileMenuUtil extends MainUI {
 	}
 
 	/**
-	 * Saving a TXT file.<br>
-	 * 1. If the user want to create a new TXT file, and type the content(empty
+	 * Saving a DEFAULT_FILTER_EXT file.<br>
+	 * 1. If the user want to create a new DEFAULT_FILTER_EXT file, and type the content(empty
 	 * is allowed) to save. In this case, a dialog will display.<br>
 	 * 2. If the user want to save a existing file. then call
 	 * <code>save()</code> method to save content.<br>
@@ -190,8 +190,8 @@ public class FileMenuUtil extends MainUI {
 				fileDialog.setVisible(true);
 				if (fileDialog.getDirectory() != null && fileDialog.getFile() != null) {
 					String fileName = fileDialog.getFile();
-					if (!Common.TXT.equalsIgnoreCase(NotepadUtil.getPostfix(fileName))) {
-						fileName = fileName + Common.POINT + Common.TXT;
+					if (!Common.DEFAULT_FILTER_EXT.equalsIgnoreCase(NotepadUtil.getPostfix(fileName))) {
+						fileName = fileName + Common.POINT + Common.DEFAULT_FILTER_EXT;
 					}
 					String path = fileDialog.getDirectory() + fileName;
 					OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(path));
@@ -259,7 +259,7 @@ public class FileMenuUtil extends MainUI {
 	}
 
 	private static void createMainUI(MainUI mainUI) {
-		mainUI.setTitle(Common.UNTITLE + Common.NOTEPAD_NOTEPAD);
+		mainUI.setTitle(Common.UNTITLED + Common.NOTEPAD_NOTEPAD);
 		textArea.setText(Common.EMPTY);
 		filePath = Common.EMPTY;
 		savedText = Common.EMPTY;
