@@ -34,7 +34,7 @@ public class HelpMenuUtil extends MainUI {
 		}
 	}
 
-	public void distoryAboutUI() {
+	public void destroyAboutUI() {
 		if (null != aboutUI) {
 			aboutUI = null;
 		}

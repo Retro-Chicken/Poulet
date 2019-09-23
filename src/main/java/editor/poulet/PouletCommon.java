@@ -7,6 +7,8 @@ public class PouletCommon {
 
     public static String RUN = "Run";
     public static String RUN_FILE = "Run File";
+    public static String RUN_ENVIRONMENT = "Environment...";
+    public static String ADD_DIRECTORY = "Add Directory";
     public static String RUNNING = "Running...";
     public static String FINISHED_IN = "Finished in";
     public static String ELAPSED_TIME_UNIT = "ms";

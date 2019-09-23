@@ -5,7 +5,6 @@ import editor.ui.MainUI;
 import editor.util.FileMenuUtil;
 
 import javax.imageio.ImageIO;
-import javax.imageio.stream.FileImageInputStream;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -14,7 +13,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -24,6 +22,9 @@ public class PouletUI extends MainUI {
 
     private JMenu run;
     private JMenuItem runFile;
+    private JMenuItem runEnvironment;
+
+    private EnvironmentUI environmentUI;
 
     public PouletUI(String title) {
         super(title);
@@ -41,6 +42,8 @@ public class PouletUI extends MainUI {
         tabs = new JTabbedPane();
         addTab(Common.UNTITLED, Common.EMPTY);
         initConsole();
+
+        environmentUI = new EnvironmentUI("Environment");
 
         JPanel consolePanel = new JPanel();
         consolePanel.setLayout(new BorderLayout());
@@ -85,6 +88,10 @@ public class PouletUI extends MainUI {
         runFile.setAccelerator(KeyStroke.getKeyStroke(Common.R, InputEvent.CTRL_DOWN_MASK));
         run.add(runFile);
 
+        runEnvironment = new JMenuItem(PouletCommon.RUN_ENVIRONMENT);
+        runEnvironment.addActionListener(this);
+        run.add(runEnvironment);
+
         menuBar.add(run, menuBar.getComponentCount() - 2);
     }
 
@@ -103,6 +110,8 @@ public class PouletUI extends MainUI {
             String contents = buffer.toString();
             console.setText(contents);
             console.append("\n\n" + PouletCommon.FINISHED_IN + " " + elapsedTime + PouletCommon.ELAPSED_TIME_UNIT);
+        } else if(e.getSource() == runEnvironment) {
+            environmentUI.display();
         }
     }
 }

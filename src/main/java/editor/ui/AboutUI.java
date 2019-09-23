@@ -61,7 +61,7 @@ public class AboutUI extends MainUI {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				AboutUI.this.setVisible(false);
-				help.distoryAboutUI();
+				help.destroyAboutUI();
 			}
 		});
 	}

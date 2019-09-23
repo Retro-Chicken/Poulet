@@ -8,10 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FileSearcher {
-    public static String findFile(String fileName, List<String> directories) {
+    public static String findFile(String fileName, List<String> directories, List<Boolean> recursive) {
         List<String> results = new ArrayList<>();
-        for(String dir : directories) {
-            results.addAll(findMatches(fileName, new File(dir)));
+        for(int i = 0; i < directories.size(); i++) {
+            boolean recur = i < recursive.size() ? recursive.get(i) : true;
+            results.addAll(findMatches(fileName, new File(directories.get(i)), recur));
         }
         if(results.size() > 0) {
             if(results.size() > 1)
@@ -21,7 +22,7 @@ public class FileSearcher {
         return null;
     }
 
-    private static List<String> findMatches(String fileName, File directory) {
+    private static List<String> findMatches(String fileName, File directory, boolean recursive) {
         try {
             if (!directory.isDirectory())
                 throw new PouletException("linked library " + directory.getCanonicalPath() + " is not a directory");
@@ -29,8 +30,8 @@ public class FileSearcher {
             List<String> result = new ArrayList<>();
             if (directory.canRead()) {
                 for (File temp : directory.listFiles()) {
-                    if (temp.isDirectory()) {
-                        result.addAll(findMatches(fileName, temp));
+                    if (temp.isDirectory() && recursive) {
+                        result.addAll(findMatches(fileName, temp, recursive));
                     } else if (fileName.equals(temp.getName()))
                         result.add(temp.getCanonicalPath());
                 }

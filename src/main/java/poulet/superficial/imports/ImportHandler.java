@@ -15,10 +15,11 @@ import java.util.stream.Collectors;
 
 public class ImportHandler {
     public static List<String> directories = new ArrayList<>();
+    public static List<Boolean> recursive = new ArrayList<>();
 
     public static Program expand(Import include) {
         String fileName = include.importName + ".poulet";
-        String pathResult = FileSearcher.findFile(fileName, directories);
+        String pathResult = FileSearcher.findFile(fileName, directories, recursive);
         if(pathResult == null)
             try {
                 List<String> linkedLibraries = new ArrayList<>();
