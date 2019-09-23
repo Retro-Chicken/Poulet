@@ -4,12 +4,17 @@ import editor.common.Common;
 import editor.ui.MainUI;
 import editor.util.FileMenuUtil;
 
+import javax.imageio.ImageIO;
+import javax.imageio.stream.FileImageInputStream;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -22,20 +27,20 @@ public class PouletUI extends MainUI {
 
     public PouletUI(String title) {
         super(title);
+        try {
+            BufferedImage rcLogo = ImageIO.read(new File("src/main/java/editor/" + PouletCommon.APP_ICON));
+            this.setIconImage(rcLogo);
+        } catch(Exception e) {
+
+        }
     }
 
     public void init() {
         initMenu();
         menuRun();
-        initTextArea();
+        tabs = new JTabbedPane();
+        addTab(Common.UNTITLED, Common.EMPTY);
         initConsole();
-
-        JPanel textPanel = new JPanel();
-        textPanel.setLayout(new BorderLayout());
-        JLabel textLabel = new JLabel("File Text", SwingConstants.LEFT);
-        textLabel.setFont(new Font(textLabel.getFont().getFontName(), 1, 12));
-        textPanel.add(textLabel, BorderLayout.NORTH);
-        textPanel.add(textAreaScroll, BorderLayout.CENTER);
 
         JPanel consolePanel = new JPanel();
         consolePanel.setLayout(new BorderLayout());
@@ -44,7 +49,7 @@ public class PouletUI extends MainUI {
         consolePanel.add(consoleLabel, BorderLayout.NORTH);
         consolePanel.add(consoleScroll, BorderLayout.CENTER);
 
-        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, textPanel, consolePanel);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, tabs, consolePanel);
         this.add(splitPane);
 
         this.setResizable(true);
@@ -92,7 +97,7 @@ public class PouletUI extends MainUI {
             PrintWriter writer = new PrintWriter(buffer);
 
             long startTime = System.currentTimeMillis();
-            PouletRunner.runString(textArea.getText(), writer);
+            PouletRunner.runString(getSelectedTextArea().getText(), writer);
             long elapsedTime = System.currentTimeMillis() - startTime;
 
             String contents = buffer.toString();

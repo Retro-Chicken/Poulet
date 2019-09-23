@@ -94,10 +94,10 @@ public class ReplaceManagerUI extends MainUI {
 	}
 
 	private void initFindWordTextField() {
-		if (null == textArea.getSelectedText() || Common.EMPTY.equals(textArea.getSelectedText().trim())) {
+		if (null == getSelectedTextArea().getSelectedText() || Common.EMPTY.equals(getSelectedTextArea().getSelectedText().trim())) {
 			findWordJTextField.setText(findWhat);
-		} else if(null != textArea.getSelectedText() && !Common.EMPTY.equals(textArea.getSelectedText().trim())){
-			findWordJTextField.setText(textArea.getSelectedText());
+		} else if(null != getSelectedTextArea().getSelectedText() && !Common.EMPTY.equals(getSelectedTextArea().getSelectedText().trim())){
+			findWordJTextField.setText(getSelectedTextArea().getSelectedText());
 		}else{
 			findWordJTextField.setText(findWhat);
 		}

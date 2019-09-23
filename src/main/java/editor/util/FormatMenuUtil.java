@@ -9,6 +9,7 @@ import editor.ui.FontSizeManagerUI;
 import editor.ui.FontStyleManagerUI;
 import editor.ui.MainUI;
 
+import javax.swing.*;
 import java.awt.Font;
 
 /**
@@ -32,10 +33,10 @@ public class FormatMenuUtil extends MainUI {
 	public static void wordWrap() {
 		//log.debug(Common.WORD_WRAP);
 		if (lineWrap) {
-			textArea.setLineWrap(false);
+			getSelectedTextArea().setLineWrap(false);
 			lineWrap = false;
 		} else {
-			textArea.setLineWrap(true);
+			getSelectedTextArea().setLineWrap(true);
 			lineWrap = true;
 		}
 	}
@@ -48,7 +49,8 @@ public class FormatMenuUtil extends MainUI {
 		FontManagerUI.FONT_SIZE = Common.FONT_SIZE;
 		FontManagerUI.FONT_STYLE = Common.FONT_STYLE_DEFAULT;
 		fontStyleNum = Common.FONT_STYLE_NUM;
-		textArea.setFont(new Font(FontManagerUI.FONT_TYPE, fontStyleNum, FontManagerUI.FONT_SIZE));
+		for(JTextArea area : getTextAreas())
+			area.setFont(new Font(FontManagerUI.FONT_TYPE, fontStyleNum, FontManagerUI.FONT_SIZE));
 		setJUI();
 	}
 

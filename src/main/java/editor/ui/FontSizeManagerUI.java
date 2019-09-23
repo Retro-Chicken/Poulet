@@ -8,12 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.GroupLayout;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JSeparator;
-import javax.swing.LayoutStyle;
+import javax.swing.*;
 
 
 /**
@@ -97,7 +92,8 @@ public class FontSizeManagerUI extends MainUI {
 		FontManagerUI.FONT_SIZE = Integer.valueOf((String) fontSizeJComboBox.getSelectedItem());
 		currentFontSizeDescJLabel.setFont(new Font(FontManagerUI.FONT_TYPE, Font.PLAIN, FontManagerUI.FONT_SIZE));
 		currentFontSizeDescJLabel.setText(Common.SAMPLE);
-		textArea.setFont(new Font(FontManagerUI.FONT_TYPE, Font.PLAIN, FontManagerUI.FONT_SIZE));
+		for(JTextArea area : getTextAreas())
+			area.setFont(new Font(FontManagerUI.FONT_TYPE, Font.PLAIN, FontManagerUI.FONT_SIZE));
 		setJUI();
 	}
 

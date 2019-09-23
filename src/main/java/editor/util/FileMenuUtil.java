@@ -13,6 +13,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -52,34 +54,51 @@ public class FileMenuUtil extends MainUI {
 	 */
 	public static void news(MainUI mainUI) {
 		//log.debug(Common.NEW);
+		/*
 		if (!Common.EMPTY.equals(filePath)) {
-			if (savedText.equals(textArea.getText())) {
+			if (savedText.equals(getSelectedTextArea().getText())) {
 				createMainUI(mainUI);
 			} else {
 				confirmSave(mainUI);
 			}
 		} else {
-			if (Common.EMPTY.equals(textArea.getText())) {
+			if (Common.EMPTY.equals(getSelectedTextArea().getText())) {
 				createMainUI(mainUI);
 			} else {
 				confirmSave(mainUI);
 			}
-		}
+		}*/
+		String name = doctorName(Common.UNTITLED);
+		addTab(name, Common.EMPTY);
+		setCurrentTab(name);
 	}
 
 	/**
 	 * @param mainUI
 	 */
-	private static void confirmSave(MainUI mainUI) {
+	private static boolean confirmSave(MainUI mainUI) {
+		return confirmSave(mainUI, getSelectedTitle());
+	}
+
+	/**
+	 * @param mainUI
+	 * @param title
+	 * @return Returns true if cancelled, false otherwise.
+	 */
+	public static boolean confirmSave(MainUI mainUI, String title) {
 		int option = JOptionPane.showConfirmDialog(mainUI, Common.DO_YOU_WANT_TO_SAVE_CHANGES, Common.NOTEPAD, JOptionPane.YES_NO_CANCEL_OPTION);
 		if (option == JOptionPane.YES_OPTION) {
-			save(mainUI);
-			createMainUI(mainUI);
+			save(mainUI, title);
+			return false;
+			//createMainUI(mainUI);
 		} else if (option == JOptionPane.NO_OPTION) {
-			createMainUI(mainUI);
+			return false;
+			//createMainUI(mainUI);
 		} else if (option == JOptionPane.CANCEL_OPTION) {
-			textArea.setFocusable(true);
+			getSelectedTextArea().setFocusable(true);
+			return true;
 		}
+		return true;
 	}
 
 	/**
@@ -100,19 +119,21 @@ public class FileMenuUtil extends MainUI {
 	 */
 	public void open(MainUI mainUI) {
 		//log.debug(Common.OPEN);
+		/*
 		if (!Common.EMPTY.equals(filePath)) {
-			if (savedText.equals(textArea.getText())) {
+			if (savedText.equals(getSelectedTextArea().getText())) {
 				openOperation(mainUI);
 			} else {
 				confirmOpen(mainUI);
 			}
 		} else {
-			if (Common.EMPTY.equals(textArea.getText())) {
+			if (Common.EMPTY.equals(getSelectedTextArea().getText())) {
 				openOperation(mainUI);
 			} else {
 				confirmOpen(mainUI);
 			}
-		}
+		}*/
+		openOperation(mainUI);
 	}
 
 	private void confirmOpen(MainUI mainUI) {
@@ -123,7 +144,7 @@ public class FileMenuUtil extends MainUI {
 		} else if (option == JOptionPane.NO_OPTION) {
 			openOperation(mainUI);
 		} else if (option == JOptionPane.CANCEL_OPTION) {
-			textArea.setFocusable(true);
+			getSelectedTextArea().setFocusable(true);
 		}
 	}
 
@@ -145,7 +166,20 @@ public class FileMenuUtil extends MainUI {
 		int ret = chooser.showOpenDialog(null);
 		if (ret == JFileChooser.APPROVE_OPTION) {
 			path = chooser.getSelectedFile().getAbsolutePath();
-			String name = chooser.getSelectedFile().getName();
+
+			if(filePaths.values().contains(path)) {
+				String exisitingName = getSelectedTitle();
+				for(String key : filePaths.keySet()) {
+					if (filePaths.get(key).equals(path)) {
+						exisitingName = key;
+						break;
+					}
+				}
+				setCurrentTab(exisitingName);
+				return;
+			}
+
+			String name = doctorName(chooser.getSelectedFile().getName());
 			try {
 				BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(path), Common.GB2312));
 				StringBuffer buffer = new StringBuffer();
@@ -154,11 +188,10 @@ public class FileMenuUtil extends MainUI {
 					buffer.append(line).append(Common.NEW_LINE);
 				}
 				reader.close();
-				textArea.setText(String.valueOf(buffer));
-				mainUI.setTitle(name + Common.NOTEPAD_NOTEPAD);
-				savedText = textArea.getText();
-				mainUI.setSaved(true);
-				filePath = path;
+				addTab(name, String.valueOf(buffer), path);
+				if(filePaths.get(getSelectedTitle()).equals(Common.EMPTY) && saveStates.get(getSelectedTitle()))
+					removeTab(getSelectedTitle());
+				setCurrentTab(name);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -176,53 +209,61 @@ public class FileMenuUtil extends MainUI {
 	 * 
 	 * @param mainUI
 	 */
+	public static void save(MainUI mainUI, String title) {
+        //log.debug(Common.SAVE);
+        String filePath = filePaths.get(title);
+        String text = getTextArea(title).getText();
+        try {
+            if (null != filePath && !Common.EMPTY.equals(filePath)) {
+                OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(filePath));
+                out.write(text);
+                out.close();
+                mainUI.setSaved(title, true);
+                savedTexts.replace(title, text);
+            } else {
+                FileDialog fileDialog = new FileDialog(mainUI, Common.SAVE, FileDialog.SAVE);
+                fileDialog.setVisible(true);
+                if (fileDialog.getDirectory() != null && fileDialog.getFile() != null) {
+                    String fileName = fileDialog.getFile();
+                    if (!Common.DEFAULT_FILTER_EXT.equalsIgnoreCase(NotepadUtil.getPostfix(fileName))) {
+                        fileName = fileName + Common.POINT + Common.DEFAULT_FILTER_EXT;
+                    }
+                    String path = fileDialog.getDirectory() + fileName;
+                    OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(path));
+                    out.write(text);
+                    out.close();
+                    mainUI.setTitle(fileName + Common.NOTEPAD_NOTEPAD);
+                    filePaths.replace(title, path);
+                    mainUI.setSaved(title, true);
+                    savedTexts.replace(title, text);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            //log.debug(e);
+        }
+    }
+
 	public static void save(MainUI mainUI) {
-		//log.debug(Common.SAVE);
-		try {
-			if (null != filePath && !Common.EMPTY.equals(filePath)) {
-				OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(filePath));
-				out.write(textArea.getText());
-				out.close();
-				mainUI.setSaved(true);
-				savedText = textArea.getText();
-			} else {
-				FileDialog fileDialog = new FileDialog(mainUI, Common.SAVE, FileDialog.SAVE);
-				fileDialog.setVisible(true);
-				if (fileDialog.getDirectory() != null && fileDialog.getFile() != null) {
-					String fileName = fileDialog.getFile();
-					if (!Common.DEFAULT_FILTER_EXT.equalsIgnoreCase(NotepadUtil.getPostfix(fileName))) {
-						fileName = fileName + Common.POINT + Common.DEFAULT_FILTER_EXT;
-					}
-					String path = fileDialog.getDirectory() + fileName;
-					OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(path));
-					out.write(textArea.getText());
-					out.close();
-					mainUI.setTitle(fileName + Common.NOTEPAD_NOTEPAD);
-					filePath = path;
-					mainUI.setSaved(true);
-					savedText = textArea.getText();
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			//log.debug(e);
-		}
+        save(mainUI, getSelectedTitle());
 	}
 
 	public static void saveAs(MainUI mainUI) {
 		//log.debug(Common.SAVE_AS);
-		String path = filePath;
-		filePath = Common.EMPTY;
+        String title = getSelectedTitle();
+		String path = filePaths.get(title);
+		filePaths.replace(title, Common.EMPTY);
 		save(mainUI);
-		if (Common.EMPTY.equals(filePath)) {
-			filePath = path;
+		if (Common.EMPTY.equals(filePaths.get(title))) {
+            filePaths.replace(title, path);
 		}
 	}
 
 	public void readProperties(MainUI mainUI) {
 		//log.debug(Common.PROPERTIES);
-		if (!Common.EMPTY.equals(filePath) && mainUI.isSaved()) {
-			File file = new File(filePath);
+        String title = getSelectedTitle();
+		if (!Common.EMPTY.equals(filePaths.get(title)) && mainUI.isSaved(title)) {
+			File file = new File(filePaths.get(title));
 			JOptionPane.showMessageDialog(FileMenuUtil.this, NotepadUtil.fileProperties(file), Common.NOTEPAD, JOptionPane.INFORMATION_MESSAGE);
 		} else {
 			confirmSave(mainUI);
@@ -231,39 +272,46 @@ public class FileMenuUtil extends MainUI {
 
 	public void exit(MainUI mainUI) {
 		//log.debug(Common.EXIT);
+        if(allSaved())
+            NotepadUtil.exit();
+        else
+            confirmExit(mainUI);
+        /*
 		if (!Common.EMPTY.equals(filePath)) {
-			if (savedText.equals(textArea.getText())) {
+			if (savedText.equals(getSelectedTextArea().getText())) {
 				NotepadUtil.exit();
 			} else {
 				confirmExit(mainUI);
 			}
 		} else {
-			if (Common.EMPTY.equals(textArea.getText())) {
+			if (Common.EMPTY.equals(getSelectedTextArea().getText())) {
 				NotepadUtil.exit();
 			} else {
 				confirmExit(mainUI);
 			}
-		}
+		}*/
 	}
 
 	private void confirmExit(MainUI mainUI) {
-		int option = JOptionPane.showConfirmDialog(FileMenuUtil.this, Common.DO_YOU_WANT_TO_SAVE_CHANGES, Common.CONFIRM_EXIT, JOptionPane.YES_NO_CANCEL_OPTION);
+		int option = JOptionPane.showConfirmDialog(FileMenuUtil.this, Common.SAVE_ALL_CHANGES, Common.CONFIRM_EXIT, JOptionPane.YES_NO_CANCEL_OPTION);
 		if (option == JOptionPane.YES_OPTION) {
-			save(mainUI);
+		    for(int i = 0; i < tabs.getTabCount(); i++)
+			    save(mainUI, tabs.getTitleAt(i));
 			NotepadUtil.exit();
 		} else if (option == JOptionPane.NO_OPTION) {
 			NotepadUtil.exit();
 		} else if (option == JOptionPane.CANCEL_OPTION) {
-			textArea.setFocusable(true);
+			getSelectedTextArea().setFocusable(true);
 		}
 	}
 
+	/*
 	private static void createMainUI(MainUI mainUI) {
 		mainUI.setTitle(Common.UNTITLED + Common.NOTEPAD_NOTEPAD);
-		textArea.setText(Common.EMPTY);
+		getSelectedTextArea().setText(Common.EMPTY);
 		filePath = Common.EMPTY;
 		savedText = Common.EMPTY;
 		mainUI.setSaved(false);
-	}
+	}*/
 
 }

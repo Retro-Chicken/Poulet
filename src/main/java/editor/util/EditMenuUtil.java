@@ -29,24 +29,25 @@ public class EditMenuUtil extends MainUI {
 
 	public static void undo() {
 		//log.debug(Common.UNDO);
-		if(undoManager.canUndo()){
-			undoManager.undo();
+		String title = getSelectedTitle();
+		if(undoManagers.get(title).canUndo()){
+			undoManagers.get(title).undo();
 		}
 	}
 
 	public static void copy() {
 		//log.debug(Common.COPY);
-		textArea.copy();
+		getSelectedTextArea().copy();
 	}
 
 	public static void paste() {
 		//log.debug(Common.PASTE);
-		textArea.paste();
+		getSelectedTextArea().paste();
 	}
 
 	public static void cut() {
 		//log.debug(Common.CUT);
-		textArea.cut();
+		getSelectedTextArea().cut();
 	}
 
 	/**
@@ -71,12 +72,12 @@ public class EditMenuUtil extends MainUI {
 		//log.debug(Common.FIND_NEXT);
 		if (Common.EMPTY.equals(findWhat)) {
 			JOptionPane.showMessageDialog(EditMenuUtil.this, Common.WHAT_DO_YOU_WANT_TO_FIND, Common.NOTEPAD, JOptionPane.INFORMATION_MESSAGE);
-		} else if (findWhat.length() > textArea.getText().length()) {
+		} else if (findWhat.length() > getSelectedTextArea().getText().length()) {
 			canNotFindKeyWord();
 		} else {
-			String content = textArea.getText();
+			String content = getSelectedTextArea().getText();
 			String temp = Common.EMPTY;
-			int position = textArea.getSelectionEnd() - findWhat.length() + 1;
+			int position = getSelectedTextArea().getSelectionEnd() - findWhat.length() + 1;
 			if (FindManagerUI.isForward) {
 				if(position > content.length() - findWhat.length()){
 					canNotFindKeyWordOperation(content.length(), content.length());
@@ -102,8 +103,8 @@ public class EditMenuUtil extends MainUI {
 					}
 				}
 			} else {// Backward
-				if(null != textArea.getSelectedText() && !Common.EMPTY.equals(textArea.getSelectedText().trim())){
-					position = textArea.getSelectionStart();
+				if(null != getSelectedTextArea().getSelectedText() && !Common.EMPTY.equals(getSelectedTextArea().getSelectedText().trim())){
+					position = getSelectedTextArea().getSelectionStart();
 				}
 				if(position < findWhat.length()){
 					canNotFindKeyWordOperation(0, 0);
@@ -143,8 +144,8 @@ public class EditMenuUtil extends MainUI {
 	}
 	
 	private void setTextAreaSelection(int start, int end){
-		textArea.setSelectionStart(start);
-		textArea.setSelectionEnd(end);
+		getSelectedTextArea().setSelectionStart(start);
+		getSelectedTextArea().setSelectionEnd(end);
 	}
 
 	/**
@@ -164,13 +165,13 @@ public class EditMenuUtil extends MainUI {
 	
 	/**
 	 * Default direction is Forward. The <code>replaceOperation</code> method can NOT be called when <br>
-	 * <code>null == textArea.getSelectedText();</code> <br>Or <br><code>Common.EMPTY.equals(textArea.getSelectedText().trim());</code><br>
+	 * <code>null == getSelectedTextArea().getSelectedText();</code> <br>Or <br><code>Common.EMPTY.equals(getSelectedTextArea().getSelectedText().trim());</code><br>
 	 */
 	public void replaceOperation(){
 		FindManagerUI.isForward = true;
 		findNext();
-		if (null != textArea.getSelectedText() && !Common.EMPTY.equals(textArea.getSelectedText().trim())) {
-			textArea.replaceRange(ReplaceManagerUI.replaceWord, textArea.getSelectionStart(), textArea.getSelectionEnd());
+		if (null != getSelectedTextArea().getSelectedText() && !Common.EMPTY.equals(getSelectedTextArea().getSelectedText().trim())) {
+			getSelectedTextArea().replaceRange(ReplaceManagerUI.replaceWord, getSelectedTextArea().getSelectionStart(), getSelectedTextArea().getSelectionEnd());
 		}
 	}
 
@@ -181,7 +182,7 @@ public class EditMenuUtil extends MainUI {
 	 */
 	public void replaceAllOperation() {
 		String replaceWord = ReplaceManagerUI.replaceWord;
-		String content = textArea.getText();
+		String content = getSelectedTextArea().getText();
 		String temp;
 		for (int i = 0; i <= content.length() - findWhat.length(); i++) {
 			temp = content.substring(i, i + findWhat.length());
@@ -201,19 +202,19 @@ public class EditMenuUtil extends MainUI {
 
 	private void replaceRangeOperation(String findWhat, String replaceWord, int i) {
 		ReplaceManagerUI.replaceCount++;
-		textArea.setSelectionStart(i);
-		textArea.setSelectionEnd(i + findWhat.length());
-		textArea.replaceRange(replaceWord, textArea.getSelectionStart(), textArea.getSelectionEnd());
+		getSelectedTextArea().setSelectionStart(i);
+		getSelectedTextArea().setSelectionEnd(i + findWhat.length());
+		getSelectedTextArea().replaceRange(replaceWord, getSelectedTextArea().getSelectionStart(), getSelectedTextArea().getSelectionEnd());
 	}
 
 	public static void selectAll() {
 		//log.debug(Common.SELECT_ALL);
-		textArea.selectAll();
+		getSelectedTextArea().selectAll();
 	}
 
 	public static void timeDate() {
 		//log.debug(Common.TIME_DATE);
-		textArea.replaceRange(NotepadUtil.getTimeDate(), textArea.getSelectionStart(), textArea.getSelectionEnd());
+		getSelectedTextArea().replaceRange(NotepadUtil.getTimeDate(), getSelectedTextArea().getSelectionStart(), getSelectedTextArea().getSelectionEnd());
 	}
 	
 	public void distoryFindManagerUI() {

@@ -8,8 +8,12 @@ import java.io.PrintWriter;
 
 public class PouletRunner {
     public static void runString(String text, PrintWriter out) {
-        poulet.superficial.ast.Program sugarProgram = SuperficialASTParser.parse(CharStreams.fromString(text));
-        Superficial superficial = new Superficial(out);
-        superficial.runProgram(sugarProgram);
+        try {
+            poulet.superficial.ast.Program sugarProgram = SuperficialASTParser.parse(CharStreams.fromString(text));
+            Superficial superficial = new Superficial(out);
+            superficial.runProgram(sugarProgram);
+        } catch(Exception e) {
+            e.printStackTrace(out);
+        }
     }
 }

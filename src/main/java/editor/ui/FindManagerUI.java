@@ -115,10 +115,10 @@ public class FindManagerUI extends MainUI {
 	private void initFindWhat() {
 		findWhatJLabel.setText(Common.FIND_WHAT);
 		
-		if (null == textArea.getSelectedText() || Common.EMPTY.equals(textArea.getSelectedText().trim())) {
+		if (null == getSelectedTextArea().getSelectedText() || Common.EMPTY.equals(getSelectedTextArea().getSelectedText().trim())) {
 			keyWordJTextField.setText(findWhat);
-		} else if(null != textArea.getSelectedText() && !Common.EMPTY.equals(textArea.getSelectedText().trim())){
-			keyWordJTextField.setText(textArea.getSelectedText());
+		} else if(null != getSelectedTextArea().getSelectedText() && !Common.EMPTY.equals(getSelectedTextArea().getSelectedText().trim())){
+			keyWordJTextField.setText(getSelectedTextArea().getSelectedText());
 		}else{
 			keyWordJTextField.setText(findWhat);
 		}

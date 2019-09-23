@@ -24,7 +24,6 @@ public class Common {
 	public static final String UNTITLED = "Untitled";
 	public static final String NOTEPAD = "Poulet";
 	public static final String NOTEPAD_NOTEPAD = BLANK + HYPHEN + BLANK + NOTEPAD;
-	public static final String TITLE = UNTITLED + NOTEPAD_NOTEPAD;
 	public static final String SYSTEM_EXIT = "System Exit";
 	public static final String SYSTEM_OPEN = "System Open";
 
@@ -136,6 +135,7 @@ public class Common {
 	public static final String CURRENT_FONT_STYLE = "Current Font Style" + BLANK + COLON + BLANK;
 
 	public static final String DO_YOU_WANT_TO_SAVE_CHANGES = "Do you want to save changes?";
+	public static final String SAVE_ALL_CHANGES = "Do you want to save all changes?";
 	public static final String WHAT_DO_YOU_WANT_TO_FIND = "Please type what do you want to find.";
 	public static final String CAN_NOT_FIND = "Cannot find ";
 	public static final String MATCHES_REPLACED = " matches replaced!";
