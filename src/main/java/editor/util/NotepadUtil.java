@@ -16,10 +16,7 @@ import java.util.Date;
  */
 public class NotepadUtil {
 
-	//static Logger log = Logger.getLogger(NotepadUtil.class);
-
 	public static void exit() {
-		//log.debug(Common.SYSTEM_EXIT);
 		System.exit(0);
 	}
 	

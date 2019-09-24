@@ -30,10 +30,6 @@
  */
 package editor.ui;
 
-import editor.client.Client;
-import editor.common.Common;
-import editor.util.FileMenuUtil;
-
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicButtonUI;
 import java.awt.*;
@@ -46,10 +42,12 @@ import java.awt.event.*;
  */
 public class ButtonTabComponent extends JPanel {
     private final JTabbedPane pane;
+    private final MainUI parent;
 
-    public ButtonTabComponent(final JTabbedPane pane) {
+    public ButtonTabComponent(final JTabbedPane pane, final MainUI parent) {
         //unset default FlowLayout' gaps
         super(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        this.parent = parent;
         if (pane == null) {
             throw new NullPointerException("TabbedPane is null");
         }
@@ -102,7 +100,7 @@ public class ButtonTabComponent extends JPanel {
             int i = pane.indexOfTabComponent(ButtonTabComponent.this);
             if (i != -1) {
                 String title = pane.getTitleAt(i);
-                MainUI.removeTab(title);
+                parent.removeTab(title);
             }
         }
 

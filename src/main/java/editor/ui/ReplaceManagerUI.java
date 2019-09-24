@@ -5,22 +5,18 @@ import editor.util.EditMenuUtil;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.swing.GroupLayout;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.LayoutStyle;
+import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
-public class ReplaceManagerUI extends MainUI {
+public class ReplaceManagerUI extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 1L;
-	
-	//static Logger log = Logger.getLogger(ReplaceManagerUI.class);
+
+	private final MainUI parent;
 
 	private JPanel bGJPanel;
 	private JButton cancelJButton;
@@ -33,30 +29,23 @@ public class ReplaceManagerUI extends MainUI {
 	private JTextField replaceToJTextField;
 	private JButton replaceJButton;
 
-	public static boolean isCaseSensitive = false;
+	private final EditMenuUtil edit;
+	public String replaceWord = Common.EMPTY;
 
-	private EditMenuUtil edit;
-	public static String replaceWord = Common.EMPTY;
-	public static int replaceCount = 0;
-
-	public ReplaceManagerUI(String title) {
+	public ReplaceManagerUI(String title, EditMenuUtil edit, MainUI parent) {
 		super(title);
+		this.parent = parent;
+		this.edit = edit;
 		initComponents();
-
-		initSelf();
+		setResizable(false);
+		setVisible(false);
 		setAlwaysOnTop(true);
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				distoryReplaceManagerUI();
+				setVisible(false);
 			}
 		});
-	}
-
-	public void initSelf() {
-		this.setVisible(true);
-		setResizable(false);
-		this.setLocation(pointX + 100, pointY + 150);
 	}
 
 	/**
@@ -65,14 +54,45 @@ public class ReplaceManagerUI extends MainUI {
 	private void initComponents() {
 		initElement();
 		initLabel();
-		initFindWordTextField();
-		initReplaceToTextField();
 		initCaseSensitiveCheckBox();
 		initFindNextButton();
 		initReplaceButton();
 		initReplaceAllButton();
-		initCancleButton();
+		initCancelButton();
 		initLayout();
+
+		findWordJTextField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                parent.findWhat = findWordJTextField.getText();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                parent.findWhat = findWordJTextField.getText();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                parent.findWhat = findWordJTextField.getText();
+            }
+        });
+		replaceToJTextField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                replaceWord = replaceToJTextField.getText();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                replaceWord = replaceToJTextField.getText();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                replaceWord = replaceToJTextField.getText();
+            }
+        });
 	}
 
 	private void initElement() {
@@ -94,12 +114,12 @@ public class ReplaceManagerUI extends MainUI {
 	}
 
 	private void initFindWordTextField() {
-		if (null == getSelectedTextArea().getSelectedText() || Common.EMPTY.equals(getSelectedTextArea().getSelectedText().trim())) {
-			findWordJTextField.setText(findWhat);
-		} else if(null != getSelectedTextArea().getSelectedText() && !Common.EMPTY.equals(getSelectedTextArea().getSelectedText().trim())){
-			findWordJTextField.setText(getSelectedTextArea().getSelectedText());
+		if (null == parent.getSelectedTextArea().getSelectedText() || Common.EMPTY.equals(parent.getSelectedTextArea().getSelectedText().trim())) {
+			findWordJTextField.setText(parent.findWhat);
+		} else if(null != parent.getSelectedTextArea().getSelectedText() && !Common.EMPTY.equals(parent.getSelectedTextArea().getSelectedText().trim())){
+			findWordJTextField.setText(parent.getSelectedTextArea().getSelectedText());
 		}else{
-			findWordJTextField.setText(findWhat);
+			findWordJTextField.setText(parent.findWhat);
 		}
 	}
 
@@ -133,7 +153,7 @@ public class ReplaceManagerUI extends MainUI {
 		replaceAllJButton.addActionListener(this);
 	}
 
-	private void initCancleButton() {
+	private void initCancelButton() {
 		cancelJButton.setText(Common.CANCEL);
 		cancelJButton.setMaximumSize(new Dimension(99, 23));
 		cancelJButton.setMinimumSize(new Dimension(99, 23));
@@ -143,27 +163,27 @@ public class ReplaceManagerUI extends MainUI {
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == findNextJButton) {
-			if(!isEmptyForFindWordJTextField()){
-				edit.findNext();
-			}else{
+			if(!isEmptyForFindWordJTextField()) {
+				edit.findNext(this);
+			} else {
 				typingFindWhat();
 			}
 		} else if (e.getSource() == replaceAllJButton) {
 			if(!isEmptyForFindWordJTextField()){
-				edit.replaceAllOperation();
-			}else{
+				edit.replaceAll(replaceWord, this);
+			} else {
 				typingFindWhat();
 			}
 		} else if (e.getSource() == replaceJButton) {
 			if(!isEmptyForFindWordJTextField()){
-				edit.replaceOperation();
+				edit.replace(replaceWord, this);
 			}else{
 				typingFindWhat();
 			}
 		} else if (e.getSource() == cancelJButton) {
-			distoryReplaceManagerUI();
+			setVisible(false);
 		} else if (e.getSource() == caseSensitiveJCheckBox) {
-			caseSensitiveSwitch();
+			FindManagerUI.isCaseSensitive = caseSensitiveJCheckBox.isSelected();
 		}
 	}
 
@@ -173,37 +193,13 @@ public class ReplaceManagerUI extends MainUI {
 	}
 	
 	private boolean isEmptyForFindWordJTextField(){
-		findWhat = findWordJTextField.getText();
+		parent.findWhat = findWordJTextField.getText();
 		replaceWord = replaceToJTextField.getText();
 		if(!Common.EMPTY.equals(findWordJTextField.getText())){
 			return false;
 		}else{
 			return true;
 		}
-	}
-
-	/**
-	 * Operation for Cancel button
-	 */
-	private void distoryReplaceManagerUI() {
-		ReplaceManagerUI.this.setVisible(false);
-		edit.distoryReplaceeManagerUI();
-	}
-
-	/**
-	 * Case Sensitive Switch
-	 */
-	private void caseSensitiveSwitch() {
-		if (null == caseSensitiveJCheckBox.getSelectedObjects()) {
-			isCaseSensitive = false;
-		} else {
-			isCaseSensitive = true;
-		}
-		//log.debug(isCaseSensitive);
-	}
-
-	public void setEditMenuUtil(EditMenuUtil editMenuUtil) {
-		this.edit = editMenuUtil;
 	}
 
 	/**
@@ -224,5 +220,13 @@ public class ReplaceManagerUI extends MainUI {
 		layout.setVerticalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(layout.createSequentialGroup().addContainerGap().addComponent(bGJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addContainerGap()));
 
 		pack();
+	}
+
+	public void display() {
+		initFindWordTextField();
+		initReplaceToTextField();
+		caseSensitiveJCheckBox.setSelected(FindManagerUI.isCaseSensitive);
+		this.setLocation(parent.pointX + 100, parent.pointY + 150);
+		setVisible(true);
 	}
 }

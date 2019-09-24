@@ -1,5 +1,7 @@
 package editor.poulet;
 
+import editor.ui.MainUI;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -12,10 +14,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static editor.ui.MainUI.pointX;
-import static editor.ui.MainUI.pointY;
-
 public class EnvironmentUI extends JFrame implements ActionListener {
+    private final MainUI parent;
+
     private JTable environment;
 
     private JButton remove;
@@ -24,13 +25,13 @@ public class EnvironmentUI extends JFrame implements ActionListener {
     private JButton add;
     private JButton apply;
 
-    public EnvironmentUI(String title) {
+    public EnvironmentUI(String title, MainUI parent) {
         super(title);
+        this.parent = parent;
 
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-        //updateEnvironment();
         environment = new JTable() {
             private static final long serialVersionUID = 1L;
 
@@ -119,7 +120,7 @@ public class EnvironmentUI extends JFrame implements ActionListener {
         remove.setEnabled(false);
         apply.setEnabled(false);
         reset.setEnabled(false);
-        this.setLocation(pointX + 100, pointY + 150);
+        this.setLocation(parent.pointX + 100, parent.pointY + 150);
         this.setVisible(true);
     }
 

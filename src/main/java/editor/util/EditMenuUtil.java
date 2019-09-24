@@ -6,227 +6,138 @@ package editor.util;
 import editor.common.Common;
 import editor.ui.FindManagerUI;
 import editor.ui.MainUI;
-import editor.ui.ReplaceManagerUI;
 
-import javax.swing.JOptionPane;
+import javax.swing.*;
+import java.awt.*;
+import java.util.regex.Pattern;
 
 /**
  * @author Hongten
  * @created Nov 19, 2014
  */
-public class EditMenuUtil extends MainUI {
+public class EditMenuUtil {
+	private final MainUI parent;
 	
-	private static final long serialVersionUID = 1L;
-	
-	//static Logger log = Logger.getLogger(EditMenuUtil.class);
-
-	private static FindManagerUI findManagerUI;
-	private static ReplaceManagerUI replaceeManagerUI;
-	
-	public EditMenuUtil(String title) {
-		super(title);
+	public EditMenuUtil(MainUI parent) {
+		this.parent = parent;
 	}
 
-	public static void undo() {
-		//log.debug(Common.UNDO);
-		String title = getSelectedTitle();
-		if(undoManagers.get(title).canUndo()){
-			undoManagers.get(title).undo();
+	public void undo() {
+		String title = parent.getSelectedTitle();
+		if(parent.undoManagers.get(title).canUndo()){
+			parent.undoManagers.get(title).undo();
 		}
 	}
 
-	public static void copy() {
-		//log.debug(Common.COPY);
-		getSelectedTextArea().copy();
+	public void copy() {
+		parent.getSelectedTextArea().copy();
 	}
 
-	public static void paste() {
-		//log.debug(Common.PASTE);
-		getSelectedTextArea().paste();
+	public void paste() {
+		parent.getSelectedTextArea().paste();
 	}
 
-	public static void cut() {
-		//log.debug(Common.CUT);
-		getSelectedTextArea().cut();
-	}
-
-	/**
-	 * Showing the <code>FindManagerUI</code> window.
-	 */
-	public void find() {
-		//log.debug(Common.FIND);
-		if (null == findManagerUI) {
-			findManagerUI = new FindManagerUI(Common.FIND);
-			findManagerUI.setEditMenuUtil(EditMenuUtil.this);
-		} else {
-			findManagerUI.setVisible(true);
-			findManagerUI.setFocusable(true);
-		}
+	public void cut() {
+		parent.getSelectedTextArea().cut();
 	}
 
 	/**
 	 * The directory : isForward(true : Forward and false : Backward)<br>
 	 * The Case Sensitive : isCaseSensitive(true : Case Sensitive and false : Not Case Sensitive)</br>
 	 */
-	public void findNext() {
-		//log.debug(Common.FIND_NEXT);
-		if (Common.EMPTY.equals(findWhat)) {
-			JOptionPane.showMessageDialog(EditMenuUtil.this, Common.WHAT_DO_YOU_WANT_TO_FIND, Common.NOTEPAD, JOptionPane.INFORMATION_MESSAGE);
-		} else if (findWhat.length() > getSelectedTextArea().getText().length()) {
-			canNotFindKeyWord();
+	public void findNext(Component notificationParent) {
+		String findWhat = parent.findWhat;
+        Pattern findPattern = Pattern.compile(parent.findWhat, FindManagerUI.isCaseSensitive ? Pattern.LITERAL : Pattern.CASE_INSENSITIVE);
+        JTextArea textArea = parent.getSelectedTextArea();
+        String content = textArea.getText();
+		if(findWhat.isEmpty()) {
+			JOptionPane.showMessageDialog(parent, Common.WHAT_DO_YOU_WANT_TO_FIND, Common.NOTEPAD, JOptionPane.INFORMATION_MESSAGE);
+		} else if(!findPattern.matcher(content).find()) {
+			canNotFindKeyWord(notificationParent);
 		} else {
-			String content = getSelectedTextArea().getText();
-			String temp = Common.EMPTY;
-			int position = getSelectedTextArea().getSelectionEnd() - findWhat.length() + 1;
-			if (FindManagerUI.isForward) {
-				if(position > content.length() - findWhat.length()){
-					canNotFindKeyWordOperation(content.length(), content.length());
-				}
-				for (; position <= content.length() - findWhat.length(); position++) {
-					temp = content.substring(position, position + findWhat.length());
-					if (FindManagerUI.isCaseSensitive) {
-						if (temp.equals(findWhat)) {
-							setTextAreaSelection(position, position + findWhat.length());
-							break;
-						} else if (position >= content.length() - findWhat.length()) {
-							canNotFindKeyWordOperation(content.length(), content.length());
-							break;
-						}
-					} else {
-						if (temp.equalsIgnoreCase(findWhat)) {
-							setTextAreaSelection(position, position + findWhat.length());
-							break;
-						} else if (position >= content.length() - findWhat.length()) {
-							canNotFindKeyWordOperation(content.length(), content.length());
-							break;
-						}
-					}
-				}
-			} else {// Backward
-				if(null != getSelectedTextArea().getSelectedText() && !Common.EMPTY.equals(getSelectedTextArea().getSelectedText().trim())){
-					position = getSelectedTextArea().getSelectionStart();
-				}
-				if(position < findWhat.length()){
-					canNotFindKeyWordOperation(0, 0);
-				}
-				for (; position - findWhat.length() >= 0; position--) {
-					temp = content.substring(position - findWhat.length(), position);
-					if (FindManagerUI.isCaseSensitive) {//Case Sensitive
-						if (temp.equals(findWhat)) {
-							setTextAreaSelection(position - findWhat.length(), position);
-							break;
-						} else if (position - findWhat.length() == 0) {
-							canNotFindKeyWordOperation(0, 0);
-							break;
-						}
-					} else {
-						if (temp.equalsIgnoreCase(findWhat)) {
-							setTextAreaSelection(position - findWhat.length(), position);
-							break;
-						} else if (position - findWhat.length() == 0) {
-							canNotFindKeyWordOperation(0, 0);
-							break;
-						}
-					}
-				}
-			}
+			int start = FindManagerUI.isForward ? 0 : content.length() - findWhat.length();
+			if(textArea.getSelectedText() != null && findPattern.matcher(textArea.getSelectedText()).matches())
+                start = textArea.getSelectionStart() + (FindManagerUI.isForward ? 1 : -1);
+			start -= FindManagerUI.isForward ? 1 : -1;
+            int end;
+			do {
+                start += FindManagerUI.isForward ? 1 : -1;
+                if(start < 0) start += content.length();
+                start %= content.length();
+                end = start + findWhat.length();
+                if(end > content.length()) {
+                    if(FindManagerUI.isForward) {
+                        start = 0;
+                        end = findWhat.length();
+                    } else {
+                        end = content.length();
+                        start = end - findWhat.length();
+                    }
+                }
+            } while(!findPattern.matcher(content.substring(start, end)).matches());
+            textArea.setSelectionStart(start);
+            textArea.setSelectionEnd(end);
 		}
 	}
 
-
-	private void canNotFindKeyWordOperation(int start, int end){
-		setTextAreaSelection(start, end);
-		canNotFindKeyWord();
-	}
+    public void findNext() {
+        findNext(parent);
+    }
 	
-	private void canNotFindKeyWord() {
-		JOptionPane.showMessageDialog(this, Common.CAN_NOT_FIND + findWhat, Common.NOTEPAD, JOptionPane.INFORMATION_MESSAGE);
-	}
-	
-	private void setTextAreaSelection(int start, int end){
-		getSelectedTextArea().setSelectionStart(start);
-		getSelectedTextArea().setSelectionEnd(end);
-	}
-
-	/**
-	 * Showing the <code>ReplaceManagerUI</code> window.
-	 */
-	public void replace() {
-		//log.debug(Common.REPLACE);
-		if (null == replaceeManagerUI) {
-			replaceeManagerUI = new ReplaceManagerUI(Common.REPLACE);
-			replaceeManagerUI.setEditMenuUtil(EditMenuUtil.this);
-		} else {
-			replaceeManagerUI.setVisible(true);
-			replaceeManagerUI.setFocusable(true);
-		}
+	private void canNotFindKeyWord(Component notificationParent) {
+		JOptionPane.showMessageDialog(notificationParent, Common.CAN_NOT_FIND + parent.findWhat, Common.NOTEPAD, JOptionPane.INFORMATION_MESSAGE);
 	}
 	
 	
 	/**
-	 * Default direction is Forward. The <code>replaceOperation</code> method can NOT be called when <br>
-	 * <code>null == getSelectedTextArea().getSelectedText();</code> <br>Or <br><code>Common.EMPTY.equals(getSelectedTextArea().getSelectedText().trim());</code><br>
+	 * Default direction is Forward. The <code>replace</code> method can NOT be called when <br>
+	 * <code>null == getSelectedTextArea().getSelectedText();</code>
 	 */
-	public void replaceOperation(){
-		FindManagerUI.isForward = true;
-		findNext();
-		if (null != getSelectedTextArea().getSelectedText() && !Common.EMPTY.equals(getSelectedTextArea().getSelectedText().trim())) {
-			getSelectedTextArea().replaceRange(ReplaceManagerUI.replaceWord, getSelectedTextArea().getSelectionStart(), getSelectedTextArea().getSelectionEnd());
-		}
+	public void replace(String replace, Component notificationParent){
+	    JTextArea textArea = parent.getSelectedTextArea();
+        Pattern findPattern = Pattern.compile(parent.findWhat, FindManagerUI.isCaseSensitive ? Pattern.LITERAL : Pattern.CASE_INSENSITIVE);
+        if(!findPattern.matcher(textArea.getText()).find())
+            return;
+        if(!(textArea.getSelectedText() != null && findPattern.matcher(textArea.getSelectedText()).matches()))
+            findNext(notificationParent);
+		if (textArea.getSelectedText() != null)
+			textArea.replaceRange(replace, parent.getSelectedTextArea().getSelectionStart(), parent.getSelectedTextArea().getSelectionEnd());
 	}
+
+	public void replace(String replace) {
+	    replace(replace, parent);
+    }
 
 	/**
 	 * When user want to call Replace_All method, the application will replace all with case sensitive.<br>
 	 * A information window will display after replacing all words.<br>Finally, the application will set <br>
 	 * <code>ReplaceManagerUI.replaceCount = 0;</code>
 	 */
-	public void replaceAllOperation() {
-		String replaceWord = ReplaceManagerUI.replaceWord;
-		String content = getSelectedTextArea().getText();
-		String temp;
-		for (int i = 0; i <= content.length() - findWhat.length(); i++) {
-			temp = content.substring(i, i + findWhat.length());
-			if (ReplaceManagerUI.isCaseSensitive) {
-				if (temp.equals(findWhat)) {
-					replaceRangeOperation(findWhat, replaceWord, i);
-				}
-			} else {
-				if (temp.equalsIgnoreCase(findWhat)) {
-					replaceRangeOperation(findWhat, replaceWord, i);
-				}
-			}
-		}
-		JOptionPane.showMessageDialog(this, ReplaceManagerUI.replaceCount + Common.MATCHES_REPLACED, Common.NOTEPAD, JOptionPane.INFORMATION_MESSAGE);
-		ReplaceManagerUI.replaceCount = 0;
+	public void replaceAll(String replace, Component notificationParent) {
+	    int replaceCount = 0;
+        JTextArea textArea = parent.getSelectedTextArea();
+		String result = textArea.getText();
+        Pattern findPattern = Pattern.compile(parent.findWhat, FindManagerUI.isCaseSensitive ? Pattern.LITERAL : Pattern.CASE_INSENSITIVE);
+		if(!findPattern.matcher(result).find())
+		    return;
+		while(findPattern.matcher(result).find()) {
+            result = result.replaceFirst(findPattern.pattern(), replace);
+            replaceCount++;
+        }
+		textArea.setText(result);
+		JOptionPane.showMessageDialog(notificationParent, replaceCount + Common.MATCHES_REPLACED, Common.NOTEPAD, JOptionPane.INFORMATION_MESSAGE);
 	}
 
-	private void replaceRangeOperation(String findWhat, String replaceWord, int i) {
-		ReplaceManagerUI.replaceCount++;
-		getSelectedTextArea().setSelectionStart(i);
-		getSelectedTextArea().setSelectionEnd(i + findWhat.length());
-		getSelectedTextArea().replaceRange(replaceWord, getSelectedTextArea().getSelectionStart(), getSelectedTextArea().getSelectionEnd());
+	public void replaceAll(String replace) {
+	    replaceAll(replace, parent);
+    }
+
+	public void selectAll() {
+		parent.getSelectedTextArea().selectAll();
 	}
 
-	public static void selectAll() {
-		//log.debug(Common.SELECT_ALL);
-		getSelectedTextArea().selectAll();
-	}
-
-	public static void timeDate() {
-		//log.debug(Common.TIME_DATE);
-		getSelectedTextArea().replaceRange(NotepadUtil.getTimeDate(), getSelectedTextArea().getSelectionStart(), getSelectedTextArea().getSelectionEnd());
-	}
-	
-	public void distoryFindManagerUI() {
-		if (null != findManagerUI) {
-			findManagerUI = null;
-		}
-	}
-	
-	public void distoryReplaceeManagerUI() {
-		if (null != replaceeManagerUI) {
-			replaceeManagerUI = null;
-		}
+	public void timeDate() {
+		parent.getSelectedTextArea().replaceRange(NotepadUtil.getTimeDate(), parent.getSelectedTextArea().getSelectionStart(), parent.getSelectedTextArea().getSelectionEnd());
 	}
 
 }

@@ -3,29 +3,29 @@ package editor.ui;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import javax.swing.*;
 
 import editor.common.Common;
-import editor.util.FormatMenuUtil;
 
 /**
  * @author Hongten
  * @created Nov 20, 2014
  */
-public class FontManagerUI extends MainUI {
+public class FontManagerUI extends JFrame implements ActionListener {
 	private static final long serialVersionUID = -37011351219515242L;
+
+	private final MainUI parent;
 
 	private JLabel currentFontDescJLabel;
 	private JLabel currentFontJLabel;
-	private JLabel descJlabel;
+	private JLabel descJLabel;
 	private JSeparator line;
 	private JComboBox<String> fontJComboBox;
-	
-	private FormatMenuUtil format;
-	
+
 	GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 	String fontNames[] = ge.getAvailableFontFamilyNames();
 	
@@ -33,25 +33,19 @@ public class FontManagerUI extends MainUI {
 	public static int FONT_SIZE = Common.FONT_SIZE;
 	public static String FONT_STYLE = Common.FONT_STYLE_DEFAULT;
 	
-	public FontManagerUI(String title) {
+	public FontManagerUI(String title, MainUI parent) {
 		super(title);
+		this.parent = parent;
 		initComponents();
-
-		initSelf();
+		this.setVisible(false);
+		setResizable(false);
 		setAlwaysOnTop(true);
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				FontManagerUI.this.setVisible(false);
-				format.distoryFontManagerUI();
+				setVisible(false);
 			}
 		});
-	}
-
-	public void initSelf() {
-		this.setVisible(true);
-		setResizable(false);
-		this.setLocation(pointX + 100, pointY + 150);
 	}
 
 	private void initComponents() {
@@ -62,24 +56,24 @@ public class FontManagerUI extends MainUI {
 		int i = 0;
 		for(String name : fontNames){
 			if(FontManagerUI.FONT_TYPE.equals(name)){
-				fontNum = i;
+				parent.fontNum = i;
 			}
 			i++;
 		}
-		fontJComboBox.setSelectedIndex(fontNum);
+		fontJComboBox.setSelectedIndex(parent.fontNum);
 		fontJComboBox.addActionListener(this);
 
-		descJlabel.setText(Common.DESCRIPTION_WITH_COLON);
+		descJLabel.setText(Common.DESCRIPTION_WITH_COLON);
 
-		currentFontDescJLabel.setFont(new Font(FontManagerUI.FONT_TYPE, fontStyleNum, FontManagerUI.FONT_SIZE));
+		currentFontDescJLabel.setFont(new Font(FontManagerUI.FONT_TYPE, parent.fontStyleNum, FontManagerUI.FONT_SIZE));
 		currentFontDescJLabel.setText(Common.THIS_IS_A_SAMPLE);
-		pageGourpLayout();
+		pageGroupLayout();
 	}
 
 	private void initElement() {
 		currentFontJLabel = new JLabel();
 		fontJComboBox = new JComboBox<>();
-		descJlabel = new JLabel();
+		descJLabel = new JLabel();
 		currentFontDescJLabel = new JLabel();
 		line = new JSeparator();
 	}
@@ -92,24 +86,19 @@ public class FontManagerUI extends MainUI {
 	}
 
 	public synchronized void updateSkin() {
-		fontNum = fontJComboBox.getSelectedIndex();
-		//log.debug(fontJComboBox.getSelectedItem().toString());
+		parent.fontNum = fontJComboBox.getSelectedIndex();
 		FontManagerUI.FONT_TYPE = fontJComboBox.getSelectedItem().toString();
-		currentFontDescJLabel.setFont(new Font(FontManagerUI.FONT_TYPE, fontStyleNum, FontManagerUI.FONT_SIZE));
+		currentFontDescJLabel.setFont(new Font(FontManagerUI.FONT_TYPE, parent.fontStyleNum, FontManagerUI.FONT_SIZE));
 		currentFontDescJLabel.setText(Common.THIS_IS_A_SAMPLE);
-		for(JTextArea area : getTextAreas())
-			area.setFont(new Font(FontManagerUI.FONT_TYPE, fontStyleNum, FontManagerUI.FONT_SIZE));
-		setJUI();
-	}
-
-	public void setFormatMenuUtil(FormatMenuUtil formatMenuUtil){
-		this.format = formatMenuUtil;
+		for(JTextArea area : parent.getTextAreas())
+			area.setFont(new Font(FontManagerUI.FONT_TYPE, parent.fontStyleNum, FontManagerUI.FONT_SIZE));
+		parent.setJUI();
 	}
 	
 	/**
 	 * If not necessary, please do not change
 	 */
-	private void pageGourpLayout() {
+	private void pageGroupLayout() {
 		GroupLayout layout = new GroupLayout(getContentPane());
 		getContentPane().setLayout(layout);
 		horizontalGroupLayout(layout);
@@ -125,7 +114,7 @@ public class FontManagerUI extends MainUI {
 								layout.createParallelGroup(GroupLayout.Alignment.BASELINE).addComponent(currentFontJLabel)
 										.addComponent(fontJComboBox, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)).addGap(26, 26, 26)
 						.addComponent(line, GroupLayout.PREFERRED_SIZE, 11, GroupLayout.PREFERRED_SIZE).addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-						.addComponent(descJlabel).addGap(18, 18, 18).addComponent(currentFontDescJLabel).addContainerGap(47, Short.MAX_VALUE)));
+						.addComponent(descJLabel).addGap(18, 18, 18).addComponent(currentFontDescJLabel).addContainerGap(47, Short.MAX_VALUE)));
 	}
 
 	private void horizontalGroupLayout(GroupLayout layout) {
@@ -137,11 +126,16 @@ public class FontManagerUI extends MainUI {
 								.addGroup(
 										layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 												.addComponent(currentFontDescJLabel)
-												.addComponent(descJlabel)
+												.addComponent(descJLabel)
 												.addGroup(
 														layout.createSequentialGroup().addComponent(currentFontJLabel).addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
 																.addComponent(fontJComboBox, GroupLayout.PREFERRED_SIZE, 195, GroupLayout.PREFERRED_SIZE)))
 								.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 				.addGroup(layout.createSequentialGroup().addComponent(line, GroupLayout.PREFERRED_SIZE, 355, GroupLayout.PREFERRED_SIZE).addGap(0, 0, Short.MAX_VALUE)));
+	}
+
+	public void display() {
+		setVisible(true);
+		this.setLocation(parent.pointX + 100, parent.pointY + 150);
 	}
 }

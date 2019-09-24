@@ -5,27 +5,22 @@ import editor.util.EditMenuUtil;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import javax.swing.GroupLayout;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JTextField;
-import javax.swing.LayoutStyle;
+import javax.swing.*;
 
 
 /**
  * @author Hongten
  * @created Nov 20, 2014
  */
-public class FindManagerUI extends MainUI {
+public class FindManagerUI extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 1L;
-	//static Logger log = Logger.getLogger(FindManagerUI.class);
+
+	private final MainUI parent;
+	private final EditMenuUtil edit;
 
 	private JPanel bGJPanel;
 	private JRadioButton backwardJRadioButton;
@@ -39,26 +34,20 @@ public class FindManagerUI extends MainUI {
 	public static boolean isForward = true;
 	public static boolean isCaseSensitive = false;
 
-	private EditMenuUtil edit;
-
-	public FindManagerUI(String title) {
+	public FindManagerUI(String title, EditMenuUtil edit, MainUI parent) {
 		super(title);
+		this.parent = parent;
+		this.edit = edit;
 		initComponents();
-
-		initSelf();
+		setResizable(false);
+		setVisible(false);
 		setAlwaysOnTop(true);
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				distoryFindManagerUI();
+				setVisible(false);
 			}
 		});
-	}
-
-	public void initSelf() {
-		this.setVisible(true);
-		setResizable(false);
-		this.setLocation(pointX + 100, pointY + 150);
 	}
 
 	/**
@@ -69,7 +58,7 @@ public class FindManagerUI extends MainUI {
 		initFindWhat();
 		initCaseSensitive();
 		initFindNext();
-		initCancle();
+		initCancel();
 		initDirection();
 		initLayout();
 	}
@@ -94,7 +83,7 @@ public class FindManagerUI extends MainUI {
 		backwardJRadioButton.addActionListener(this);
 	}
 
-	private void initCancle() {
+	private void initCancel() {
 		cancelJButton.setText(Common.CANCEL);
 		cancelJButton.setMaximumSize(new Dimension(87, 23));
 		cancelJButton.setMinimumSize(new Dimension(87, 23));
@@ -115,12 +104,12 @@ public class FindManagerUI extends MainUI {
 	private void initFindWhat() {
 		findWhatJLabel.setText(Common.FIND_WHAT);
 		
-		if (null == getSelectedTextArea().getSelectedText() || Common.EMPTY.equals(getSelectedTextArea().getSelectedText().trim())) {
-			keyWordJTextField.setText(findWhat);
-		} else if(null != getSelectedTextArea().getSelectedText() && !Common.EMPTY.equals(getSelectedTextArea().getSelectedText().trim())){
-			keyWordJTextField.setText(getSelectedTextArea().getSelectedText());
+		if (null == parent.getSelectedTextArea().getSelectedText() || Common.EMPTY.equals(parent.getSelectedTextArea().getSelectedText().trim())) {
+			keyWordJTextField.setText(parent.findWhat);
+		} else if(null != parent.getSelectedTextArea().getSelectedText() && !Common.EMPTY.equals(parent.getSelectedTextArea().getSelectedText().trim())){
+			keyWordJTextField.setText(parent.getSelectedTextArea().getSelectedText());
 		}else{
-			keyWordJTextField.setText(findWhat);
+			keyWordJTextField.setText(parent.findWhat);
 		}
 	}
 
@@ -132,27 +121,19 @@ public class FindManagerUI extends MainUI {
 		} else if (e.getSource() == findNextJButton) {
 			findNextOperation();
 		} else if (e.getSource() == cancelJButton) {
-			distoryFindManagerUI();
+			setVisible(false);
 		} else if (e.getSource() == caseSensitiveJCheckBox) {
 			caseSensitiveSwitch();
 		}
 	}
 
 	private void findNextOperation() {
-		findWhat = keyWordJTextField.getText();
-		if (Common.EMPTY.equals(findWhat)) {
+		parent.findWhat = keyWordJTextField.getText();
+		if (Common.EMPTY.equals(parent.findWhat)) {
 			JOptionPane.showMessageDialog(FindManagerUI.this, Common.WHAT_DO_YOU_WANT_TO_FIND, Common.NOTEPAD, JOptionPane.INFORMATION_MESSAGE);
 			keyWordJTextField.setFocusable(true);
 		}
-		edit.findNext();
-	}
-
-	/**
-	 * Operation for Cancel button
-	 */
-	private void distoryFindManagerUI() {
-		FindManagerUI.this.setVisible(false);
-		edit.distoryFindManagerUI();
+		edit.findNext(this);
 	}
 
 	/**
@@ -164,7 +145,6 @@ public class FindManagerUI extends MainUI {
 		} else {
 			isCaseSensitive = true;
 		}
-		//log.debug(isCaseSensitive);
 	}
 
 	/**
@@ -177,12 +157,6 @@ public class FindManagerUI extends MainUI {
 		isForward = b;
 		forwardJRadioButton.setSelected(b);
 		backwardJRadioButton.setSelected(!b);
-		//log.debug(isForward);
-	}
-	
-
-	public void setEditMenuUtil(EditMenuUtil editMenuUtil) {
-		this.edit = editMenuUtil;
 	}
 
 	/**
@@ -199,5 +173,10 @@ public class FindManagerUI extends MainUI {
 		layout.setHorizontalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(layout.createSequentialGroup().addContainerGap().addComponent(bGJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addContainerGap()));
 		layout.setVerticalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addGroup(layout.createSequentialGroup().addContainerGap().addComponent(bGJPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addContainerGap()));
 		pack();
+	}
+
+	public void display() {
+		this.setLocation(parent.pointX + 100, parent.pointY + 150);
+		this.setVisible(true);
 	}
 }

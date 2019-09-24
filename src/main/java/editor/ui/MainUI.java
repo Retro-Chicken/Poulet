@@ -3,7 +3,6 @@
  */
 package editor.ui;
 
-import editor.client.Client;
 import editor.common.Common;
 import editor.util.*;
 
@@ -32,45 +31,55 @@ public class MainUI extends NotepadUI {
 
 	private static final long serialVersionUID = 1L;
 
-	protected static JMenuBar menuBar;
-	protected static JSeparator line;
+	protected JMenuBar menuBar;
+	protected JSeparator line;
 	// Menus
-	protected static JMenu file, edit, format, view, help, viewHelp;
+	protected JMenu file, edit, format, view, help, viewHelp;
 	// PopupMenu
-	protected static JPopupMenu textAreaPopupMenu;
+	protected JPopupMenu textAreaPopupMenu;
 	// File Items
-	protected static JMenuItem news, open, save, saveAs, properties, exit;
+	protected JMenuItem news, open, save, saveAs, properties, exit;
+	protected FileMenuUtil fileUtil;
 	// Edit Items
-	protected static JMenuItem undo, copy, paste, cut, find, findNext, replace, selectAll, timeDate;
+	protected JMenuItem undo, copy, paste, cut, find, findNext, replace, selectAll, timeDate;
+	protected FindManagerUI findManagerUI;
+	protected ReplaceManagerUI replaceManagerUI;
+	protected EditMenuUtil editUtil;
 	// PopupMenu
-	protected static JMenuItem popUndo, popCopy, popPaste, popCut, popSelectAll, popTimeDate;
+	protected JMenuItem popUndo, popCopy, popPaste, popCut, popSelectAll, popTimeDate;
 	// Format Items
-	protected static JMenuItem wordWrap, resetFont, font, fontSize, fontStyle;
+	protected JMenuItem wordWrap, resetFont, font, fontSize, fontStyle;
+	protected FontManagerUI fontManagerUI;
+	protected FontSizeManagerUI fontSizeManagerUI;
+	protected FontStyleManagerUI fontStyleManagerUI;
+	protected FormatMenuUtil formatUtil;
 	// View Items
-	protected static JMenuItem skin, toggleLineNumber;
+	protected JMenuItem skin, toggleLineNumber;
+	protected SkinManagerUI skinManagerUI;
 	// Help Items
-	protected static JMenuItem about, homePage, source;
+	protected JMenuItem about, homePage, source;
+	protected AboutUI aboutUI;
 	// textArea
-	public static JTabbedPane tabs;
+	public JTabbedPane tabs;
 
 	// File specific data indexed by tab name
-	public static Map<String, String> filePaths = new HashMap<>();
-	public static Map<String, Boolean> saveStates = new HashMap<>();
-	public static Map<String, String> savedTexts = new HashMap<>();
-	protected static Map<String, UndoManager> undoManagers = new HashMap<>();
-	protected static Map<String, TextLineNumber> lineNumberComponents = new HashMap<>();
+	public Map<String, String> filePaths = new HashMap<>();
+	public Map<String, Boolean> saveStates = new HashMap<>();
+	public Map<String, String> savedTexts = new HashMap<>();
+	public Map<String, UndoManager> undoManagers = new HashMap<>();
+	protected Map<String, TextLineNumber> lineNumberComponents = new HashMap<>();
 
-	public static boolean lineWrap = Common.DEFAULT_WORD_WRAP;
-	public static boolean lineNumbers = Common.DEFAULT_LINE_NUMBERS;
+	public boolean lineWrap = Common.DEFAULT_WORD_WRAP;
+	public boolean lineNumbers = Common.DEFAULT_LINE_NUMBERS;
 
 	// Default position is (0, 0)
-	public static int pointX = 0;
-	public static int pointY = 0;
+	public int pointX = 0;
+	public int pointY = 0;
 
-	public static int fontNum = Common.FONT_NUM;
-	public static int fontSizeNum = Common.FONT_SIZE_NUM;
-	public static int fontStyleNum = Common.FONT_STYLE_NUM;
-	public static String findWhat = Common.EMPTY;
+	public int fontNum = Common.FONT_NUM;
+	public int fontSizeNum = Common.FONT_SIZE_NUM;
+	public int fontStyleNum = Common.FONT_STYLE_NUM;
+	public String findWhat = Common.EMPTY;
 
 	protected void setMainUIXY() {
 		pointX = getMainUIX();
@@ -91,9 +100,10 @@ public class MainUI extends NotepadUI {
 	}
 
 	public void init() {
-		initMenu();
+		initTextAreaPopupMenu();
 		tabs = new JTabbedPane();
 		addTab(Common.UNTITLED, Common.EMPTY);
+		initMenu();
 		this.add(tabs);
 
 		this.setResizable(true);
@@ -101,19 +111,18 @@ public class MainUI extends NotepadUI {
 		this.setVisible(true);
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
-				FileMenuUtil file = new FileMenuUtil(Common.EMPTY);
-				file.exit(MainUI.this);
+				fileUtil.exit();
 			}
 		});
 		
 		setMainUIXY();
 	}
 
-	public static void addTab(String title, String text) {
+	public void addTab(String title, String text) {
 		addTab(title, text, Common.EMPTY);
 	}
 
-	public static void addTab(String title, String text, String fileName) {
+	public void addTab(String title, String text, String fileName) {
 		filePaths.put(title, fileName);
 		JTextArea contents = createTextArea(title, text);
 		JScrollPane scrollPane = new JScrollPane(contents);
@@ -122,7 +131,7 @@ public class MainUI extends NotepadUI {
 			scrollPane.setRowHeaderView(tln);
 		lineNumberComponents.put(title, tln);
 		tabs.add(title, scrollPane);
-		tabs.setTabComponentAt(tabs.indexOfTab(title), new ButtonTabComponent(tabs));
+		tabs.setTabComponentAt(tabs.indexOfTab(title), new ButtonTabComponent(tabs, this));
 	}
 
 	protected void initMenu() {
@@ -133,7 +142,6 @@ public class MainUI extends NotepadUI {
 		menuView();
 		menuHelp();
 		setJMenuBar(menuBar);
-		initTextAreaPopupMenu();
 		setDisabledMenuAtCreating(false);
 	}
 
@@ -173,6 +181,8 @@ public class MainUI extends NotepadUI {
 		exit = new JMenuItem(Common.EXIT);
 		exit.addActionListener(this);
 		file.add(exit);
+
+		fileUtil = new FileMenuUtil(this);
 
 		menuBar.add(file);
 	}
@@ -233,8 +243,12 @@ public class MainUI extends NotepadUI {
 		timeDate.addActionListener(this);
 		timeDate.setAccelerator(KeyStroke.getKeyStroke(Common.T, InputEvent.CTRL_DOWN_MASK));
 		edit.add(timeDate);
-		
+
 		menuBar.add(edit);
+
+		editUtil = new EditMenuUtil(this);
+		findManagerUI = new FindManagerUI("Find", editUtil, this);
+		replaceManagerUI = new ReplaceManagerUI(Common.REPLACE, editUtil,this);
 	}
 
 	protected void initTextAreaPopupMenu() {
@@ -299,6 +313,12 @@ public class MainUI extends NotepadUI {
 		format.add(fontStyle);
 
 		menuBar.add(format);
+
+		formatUtil = new FormatMenuUtil(this);
+
+		fontManagerUI = new FontManagerUI(Common.FONT, this);
+		fontSizeManagerUI = new FontSizeManagerUI(Common.FONT_SIZE_TITLE, this);
+		fontStyleManagerUI = new FontStyleManagerUI(Common.FONT_STYLE, this);
 	}
 
 	protected void menuView() {
@@ -312,7 +332,11 @@ public class MainUI extends NotepadUI {
 		toggleLineNumber.addActionListener(this);
 		view.add(toggleLineNumber);
 
+		aboutUI = new AboutUI(Common.ABOUT_NOTEPAD, this);
+
 		menuBar.add(view);
+
+		skinManagerUI = new SkinManagerUI(Common.SKIN, this);
 	}
 
 	protected void menuHelp() {
@@ -339,12 +363,7 @@ public class MainUI extends NotepadUI {
 		menuBar.add(help);
 	}
 
-	/*
-	private static void initUndoManager(){
-		undoManager = new UndoManager();
-	}*/
-
-	private static void setDisabledMenuAtCreating(boolean b){
+	private void setDisabledMenuAtCreating(boolean b){
 		undo.setEnabled(b);
 		popUndo.setEnabled(b);
 		cut.setEnabled(b);
@@ -355,7 +374,7 @@ public class MainUI extends NotepadUI {
 		findNext.setEnabled(b);
 	}
 
-	protected static void setDisabledMenuAtSelecting(boolean b){
+	protected void setDisabledMenuAtSelecting(boolean b){
 		cut.setEnabled(b);
 		popCut.setEnabled(b);
 		copy.setEnabled(b);
@@ -366,7 +385,7 @@ public class MainUI extends NotepadUI {
 		return createTextArea(Common.UNTITLED, Common.EMPTY);
 	}
 
-	public static JTextArea createTextArea(String title, String string) {
+	public JTextArea createTextArea(String title, String string) {
 		JTextArea result = new JTextArea(string);
 		result.setLineWrap(lineWrap);
 		//lineWrap = true;
@@ -430,7 +449,7 @@ public class MainUI extends NotepadUI {
 		return result;
 	}
 
-	protected static void isSelectedText() {
+	protected void isSelectedText() {
 		getSelectedTextArea().setFocusable(true);
 		String selectText = getSelectedTextArea().getSelectedText();
 		if(null != selectText){
@@ -440,23 +459,23 @@ public class MainUI extends NotepadUI {
 		}
 	}
 
-	public static void setCurrentTab(String title) {
+	public void setCurrentTab(String title) {
 		tabs.setSelectedIndex(tabs.indexOfTab(title));
 	}
 
-	public static String getSelectedTitle() {
+	public String getSelectedTitle() {
 		return tabs.getTitleAt(tabs.getSelectedIndex());
 	}
 
-	public static JTextArea getTextArea(String title) {
+	public JTextArea getTextArea(String title) {
 		return (JTextArea) ((JScrollPane) tabs.getComponentAt(tabs.indexOfTab(title))).getViewport().getView();
 	}
 
-	public static JTextArea getSelectedTextArea() {
+	public JTextArea getSelectedTextArea() {
 		return (JTextArea) ((JScrollPane) tabs.getSelectedComponent()).getViewport().getView();
 	}
 
-	public static List<JTextArea> getTextAreas() {
+	public List<JTextArea> getTextAreas() {
 		List<JTextArea> result = new ArrayList<>();
 		for(int i = 0; i < tabs.getTabCount(); i++)
 			result.add((JTextArea) ((JScrollPane) tabs.getComponentAt(i)).getViewport().getView());
@@ -473,88 +492,71 @@ public class MainUI extends NotepadUI {
 
 	protected void actionForFileItem(ActionEvent e) {
 		if (e.getSource() == news) {
-			FileMenuUtil.news(MainUI.this);
+			fileUtil.newFile();
 		} else if (e.getSource() == open) {
-			FileMenuUtil file = new FileMenuUtil(Common.EMPTY);
-			file.open(MainUI.this);
+			fileUtil.open();
 		} else if (e.getSource() == save) {
-			FileMenuUtil.save(MainUI.this);
+			fileUtil.save();
 		} else if (e.getSource() == saveAs) {
-			FileMenuUtil.saveAs(MainUI.this);
+			fileUtil.saveAs();
 		} else if (e.getSource() == properties) {
-			FileMenuUtil file = new FileMenuUtil(Common.EMPTY);
-			file.readProperties(MainUI.this);
+			fileUtil.readProperties();
 		} else if (e.getSource() == exit) {
-			FileMenuUtil file = new FileMenuUtil(Common.EMPTY);
-			file.exit(MainUI.this);
+			fileUtil.exit();
 		}
 	}
 
 	protected void actionForEditItem(ActionEvent e) {
 		if (e.getSource() == undo) {
-			EditMenuUtil.undo();
+			editUtil.undo();
 		} else if (e.getSource() == popUndo) {
-			EditMenuUtil.undo();
+			editUtil.undo();
 		} else if (e.getSource() == copy) {
-			EditMenuUtil.copy();
+			editUtil.copy();
 		} else if (e.getSource() == popCopy) {
-			EditMenuUtil.copy();
+			editUtil.copy();
 		} else if (e.getSource() == paste) {
-			EditMenuUtil.paste();
+			editUtil.paste();
 		} else if (e.getSource() == popPaste) {
-			EditMenuUtil.paste();
+			editUtil.paste();
 		} else if (e.getSource() == cut) {
-			EditMenuUtil.cut();
+			editUtil.cut();
 		} else if (e.getSource() == popCut) {
-			EditMenuUtil.cut();
+			editUtil.cut();
 		} else if (e.getSource() == find) {
-			setMainUIXY();
-			EditMenuUtil edit = new EditMenuUtil(Common.EMPTY);
-			edit.find();
+			findManagerUI.display();
 		} else if (e.getSource() == findNext) {
-			EditMenuUtil edit = new EditMenuUtil(Common.EMPTY);
-			edit.findNext();
+			editUtil.findNext();
 		} else if (e.getSource() == replace) {
-			setMainUIXY();
-			EditMenuUtil edit = new EditMenuUtil(Common.EMPTY);
-			edit.replace();
+			replaceManagerUI.display();
 		} else if (e.getSource() == selectAll) {
-			EditMenuUtil.selectAll();
+			editUtil.selectAll();
 		} else if (e.getSource() == popSelectAll) {
-			EditMenuUtil.selectAll();
+			editUtil.selectAll();
 		} else if (e.getSource() == timeDate) {
-			EditMenuUtil.timeDate();
+			editUtil.timeDate();
 		}else if (e.getSource() == popTimeDate) {
-			EditMenuUtil.timeDate();
+			editUtil.timeDate();
 		}
 	}
 
 	protected void actionForFormatItem(ActionEvent e) {
 		if (e.getSource() == wordWrap) {
-			FormatMenuUtil.wordWrap();
+			formatUtil.wordWrap();
 		} else if(e.getSource() == resetFont){
-			FormatMenuUtil format = new FormatMenuUtil(Common.EMPTY);
-			format.resetFont(MainUI.this);
+			formatUtil.resetFont();
 		}else if (e.getSource() == font) {
-			setMainUIXY();
-			FormatMenuUtil format = new FormatMenuUtil(Common.EMPTY);
-			format.font(MainUI.this);
+			fontManagerUI.display();
 		} else if (e.getSource() == fontSize) {
-			setMainUIXY();
-			FormatMenuUtil format = new FormatMenuUtil(Common.EMPTY);
-			format.fontSize(MainUI.this);
+			fontSizeManagerUI.display();
 		}else if(e.getSource() == fontStyle){
-			setMainUIXY();
-			FormatMenuUtil format = new FormatMenuUtil(Common.EMPTY);
-			format.fontStyle(MainUI.this);
+			fontStyleManagerUI.display();
 		}
 	}
 
 	protected void actionForViewItem(ActionEvent e) {
 		if (e.getSource() == skin) {
-			setMainUIXY();
-			ViewMenuUtil view = new ViewMenuUtil(Common.EMPTY);
-			view.skin(MainUI.this);
+			skinManagerUI.display();
 		} else if(e.getSource() == toggleLineNumber) {
 			lineNumbers = !lineNumbers;
 			for(String title : lineNumberComponents.keySet()) {
@@ -567,15 +569,11 @@ public class MainUI extends NotepadUI {
 
 	protected void actionForHelpItem(ActionEvent e) {
 		if (e.getSource() == homePage) {
-			//log.debug(Common.NOTEPAD_HOME_PAGE);
 			NotepadUtil.accessURL(Common.NOTEPAD_PUBLISHED_PAGE);
 		}else if(e.getSource() == source){
-			//log.debug(Common.SOURCE_CODE);
 			NotepadUtil.accessURL(Common.NOTEPAD_PUBLISHED_PAGE);
 		}else if (e.getSource() == about) {
-			setMainUIXY();
-			HelpMenuUtil help = new HelpMenuUtil(Common.EMPTY);
-			help.about(MainUI.this);
+			aboutUI.display();
 		}
 	}
 
@@ -587,11 +585,11 @@ public class MainUI extends NotepadUI {
 		return saveStates.get(title);
 	}
 
-	public static void setSaved(String title, boolean newVal) {
+	public void setSaved(String title, boolean newVal) {
 		saveStates.replace(title, newVal);
 	}
 
-	public static String doctorName(String name) {
+	public String doctorName(String name) {
 		List<String> tabNames = new ArrayList<>();
 		for(int i = 0; i < tabs.getTabCount(); i++)
 			tabNames.add(tabs.getTitleAt(i));
@@ -603,16 +601,16 @@ public class MainUI extends NotepadUI {
 		return name + "(" + count + ")";
 	}
 
-	public static void removeTab(String title) {
-		if(!MainUI.saveStates.get(title))
-			if(FileMenuUtil.confirmSave(Client.MAIN_UI, title))
+	public void removeTab(String title) {
+		if(!saveStates.get(title))
+			if(fileUtil.confirmSave(title))
 				return;
 		tabs.remove(tabs.indexOfTab(title));
-		MainUI.saveStates.remove(title);
-		MainUI.savedTexts.remove(title);
-		MainUI.filePaths.remove(title);
-		MainUI.undoManagers.remove(title);
-		MainUI.lineNumberComponents.remove(title);
+		saveStates.remove(title);
+		savedTexts.remove(title);
+		filePaths.remove(title);
+		undoManagers.remove(title);
+		lineNumberComponents.remove(title);
 		if(tabs.getTabCount() == 0)
 			addTab(Common.UNTITLED, Common.EMPTY);
 	}

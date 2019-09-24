@@ -1,30 +1,26 @@
 package editor.ui;
 
 import editor.common.Common;
-import editor.util.ViewMenuUtil;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Arrays;
 
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.GroupLayout;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.LayoutStyle;
+import javax.swing.*;
 
 /**
  * @author Hongten
  * @created Nov 20, 2014
  */
-public class SkinManagerUI extends MainUI {
+public class SkinManagerUI extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 1L;
+
+	private final MainUI parent;
 
 	private JLabel currentSkinJLabel;
 	private JComboBox<String> sinkJComboBox;
-
-	private ViewMenuUtil view;
 
 	public String[] skins = {
 			"Autumn",
@@ -50,25 +46,19 @@ public class SkinManagerUI extends MainUI {
 			"Sahara"
 	};
 
-	public SkinManagerUI(String title) {
+	public SkinManagerUI(String title, MainUI parent) {
 		super(title);
+		this.parent = parent;
 		initComponents();
-
-		initSelf();
+		this.setVisible(false);
+		setResizable(false);
 		setAlwaysOnTop(true);
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				SkinManagerUI.this.setVisible(false);
-				view.distorySkinManagerUI();
+				setVisible(false);
 			}
 		});
-	}
-
-	public void initSelf() {
-		this.setVisible(true);
-		setResizable(false);
-		this.setLocation(pointX + 100, pointY + 150);
 	}
 
 	private void initComponents() {
@@ -78,7 +68,7 @@ public class SkinManagerUI extends MainUI {
 		currentSkinJLabel.setText(Common.CURRENT_SKIN);
 
 		sinkJComboBox.setModel(new DefaultComboBoxModel<>(skins));
-		sinkJComboBox.setSelectedIndex(skinNum - 1);
+		sinkJComboBox.setSelectedIndex(parent.skinNum - 1);
 		sinkJComboBox.addActionListener(this);
 
 		pageGroupLayout();
@@ -92,12 +82,8 @@ public class SkinManagerUI extends MainUI {
 	}
 
 	public synchronized void updateSkin() {
-		skinNum = Arrays.asList(skins).indexOf(sinkJComboBox.getSelectedItem()) + 1;
-		setJUI();
-	}
-
-	public void setViewMenuUtil(ViewMenuUtil viewMenuUtil) {
-		this.view = viewMenuUtil;
+		parent.skinNum = Arrays.asList(skins).indexOf(sinkJComboBox.getSelectedItem()) + 1;
+		parent.setJUI();
 	}
 
 	/**
@@ -136,5 +122,9 @@ public class SkinManagerUI extends MainUI {
 		);
 
 		pack();
+	}
+
+	public void display() {
+		this.setLocation(parent.pointX + 100, parent.pointY + 150);
 	}
 }

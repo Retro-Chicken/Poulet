@@ -2,7 +2,6 @@ package editor.poulet;
 
 import editor.common.Common;
 import editor.ui.MainUI;
-import editor.util.FileMenuUtil;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -37,13 +36,14 @@ public class PouletUI extends MainUI {
     }
 
     public void init() {
-        initMenu();
-        menuRun();
+        initTextAreaPopupMenu();
         tabs = new JTabbedPane();
         addTab(Common.UNTITLED, Common.EMPTY);
+        initMenu();
+        menuRun();
         initConsole();
 
-        environmentUI = new EnvironmentUI("Environment");
+        environmentUI = new EnvironmentUI("Environment", this);
 
         JPanel consolePanel = new JPanel();
         consolePanel.setLayout(new BorderLayout());
@@ -63,8 +63,7 @@ public class PouletUI extends MainUI {
 
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
-                FileMenuUtil file = new FileMenuUtil(Common.EMPTY);
-                file.exit(PouletUI.this);
+                fileUtil.exit();
             }
         });
 

@@ -1,25 +1,13 @@
 package editor.ui;
 
 import java.awt.Cursor;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 
-import javax.swing.GroupLayout;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 import editor.common.Common;
-import editor.util.HelpMenuUtil;
 import editor.util.NotepadUtil;
-//import org.apache.log4j.Logger;
 
 /**
  * Location : MainUI --> Help --> About Notepad<br>
@@ -39,37 +27,31 @@ import editor.util.NotepadUtil;
  * @author Hongten
  * @created Nov 20, 2014
  */
-public class AboutUI extends MainUI {
+public class AboutUI extends JFrame {
 	
 	private static final long serialVersionUID = 1L;
-	
-	//static Logger log = Logger.getLogger(AboutUI.class);
+
+	private final MainUI parent;
 
 	private JButton aboutButton;
 	private JTable aboutUITable;
 	private JPanel mainPanel;
 	private JScrollPane rightScrollPane;
-	
-	private HelpMenuUtil help;
 
-	public AboutUI(String title) {
+	public AboutUI(String title, MainUI parent) {
 		super(title);
+		this.parent = parent;
 		initComponents();
-		initSelf();
+		setResizable(false);
+		setVisible(false);
 		setAlwaysOnTop(true);
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				AboutUI.this.setVisible(false);
-				help.destroyAboutUI();
 			}
 		});
-	}
-
-	public void initSelf() {
-		this.setVisible(true);
-		setResizable(false);
-		this.setLocation(pointX + 100, pointY + 150);
+		pack();
 	}
 
 	private void initComponents() {
@@ -154,10 +136,6 @@ public class AboutUI extends MainUI {
 		rightScrollPane = new JScrollPane();
 		aboutUITable = new JTable();
 	}
-	
-	public void setHelpMenuUtil(HelpMenuUtil helpMenuUtil){
-		this.help = helpMenuUtil;
-	}
 
 	/**
 	 * If not necessary, please do not change
@@ -207,7 +185,10 @@ public class AboutUI extends MainUI {
 						.addContainerGap()
 				)
 		);
+	}
 
-		pack();
+	public void display() {
+		this.setLocation(parent.pointX + 100, parent.pointY + 150);
+		this.setVisible(true);
 	}
 }

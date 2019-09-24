@@ -138,7 +138,7 @@ public class Common {
 
 	public static final String DO_YOU_WANT_TO_SAVE_CHANGES = "Do you want to save changes?";
 	public static final String SAVE_ALL_CHANGES = "Do you want to save all changes?";
-	public static final String WHAT_DO_YOU_WANT_TO_FIND = "Please type what do you want to find.";
+	public static final String WHAT_DO_YOU_WANT_TO_FIND = "Please type what you want to find.";
 	public static final String CAN_NOT_FIND = "Cannot find ";
 	public static final String MATCHES_REPLACED = " matches replaced!";
 
