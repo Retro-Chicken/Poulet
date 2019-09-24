@@ -13,7 +13,7 @@ public class PouletRunner {
             Superficial superficial = new Superficial(out);
             superficial.runProgram(sugarProgram);
         } catch(Exception e) {
-            e.printStackTrace(out);
+            out.println(e.toString());
         }
     }
 }

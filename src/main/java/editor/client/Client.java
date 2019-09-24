@@ -4,8 +4,6 @@
 package editor.client;
 
 import editor.common.Common;
-import editor.poulet.EnvironmentUI;
-import editor.poulet.EnvironmentUtil;
 import editor.poulet.PouletUI;
 import editor.ui.MainUI;
 

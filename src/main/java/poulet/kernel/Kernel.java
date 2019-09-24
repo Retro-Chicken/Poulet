@@ -29,8 +29,8 @@ public class Kernel {
             try {
                 handleTopLevel(topLevel);
             } catch (PouletException e) {
-                e.printStackTrace();
-                System.err.println("\n on line: " + topLevel);
+                out.println(e.toString());
+                out.println("on line: " + topLevel);
             }
         }
     }

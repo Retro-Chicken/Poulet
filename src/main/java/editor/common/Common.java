@@ -8,6 +8,7 @@ public class Common {
 	// Default configurations
 	public static final int DEFAULT_SKIN_NUM = 4;
 	public static final boolean DEFAULT_WORD_WRAP = false;
+	public static final boolean DEFAULT_LINE_NUMBERS = true;
 
 
 	public static final String HYPHEN = "-";
@@ -63,6 +64,7 @@ public class Common {
 
 	// View
 	public static final String SKIN = "Change Skin";
+	public static final String LINE_NUMBERS = "Line Numbers";
 
 	// Help Items
 	public static final String VIEW_HELP = "View Help";

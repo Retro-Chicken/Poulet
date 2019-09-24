@@ -47,25 +47,26 @@ public class MainUI extends NotepadUI {
 	// Format Items
 	protected static JMenuItem wordWrap, resetFont, font, fontSize, fontStyle;
 	// View Items
-	protected static JMenuItem skin;
+	protected static JMenuItem skin, toggleLineNumber;
 	// Help Items
 	protected static JMenuItem about, homePage, source;
 	// textArea
 	public static JTabbedPane tabs;
 
-	//protected static UndoManager undoManager;
-
+	// File specific data indexed by tab name
 	public static Map<String, String> filePaths = new HashMap<>();
 	public static Map<String, Boolean> saveStates = new HashMap<>();
 	public static Map<String, String> savedTexts = new HashMap<>();
 	protected static Map<String, UndoManager> undoManagers = new HashMap<>();
-	//public static String filePath = Common.EMPTY;
-	//protected static boolean saved = false;
+	protected static Map<String, TextLineNumber> lineNumberComponents = new HashMap<>();
+
 	public static boolean lineWrap = Common.DEFAULT_WORD_WRAP;
+	public static boolean lineNumbers = Common.DEFAULT_LINE_NUMBERS;
+
 	// Default position is (0, 0)
 	public static int pointX = 0;
 	public static int pointY = 0;
-	//public static String savedText = Common.EMPTY;
+
 	public static int fontNum = Common.FONT_NUM;
 	public static int fontSizeNum = Common.FONT_SIZE_NUM;
 	public static int fontStyleNum = Common.FONT_STYLE_NUM;
@@ -116,6 +117,10 @@ public class MainUI extends NotepadUI {
 		filePaths.put(title, fileName);
 		JTextArea contents = createTextArea(title, text);
 		JScrollPane scrollPane = new JScrollPane(contents);
+		TextLineNumber tln = new TextLineNumber(contents);
+		if(lineNumbers)
+			scrollPane.setRowHeaderView(tln);
+		lineNumberComponents.put(title, tln);
 		tabs.add(title, scrollPane);
 		tabs.setTabComponentAt(tabs.indexOfTab(title), new ButtonTabComponent(tabs));
 	}
@@ -302,6 +307,10 @@ public class MainUI extends NotepadUI {
 		skin = new JMenuItem(Common.SKIN);
 		skin.addActionListener(this);
 		view.add(skin);
+
+		toggleLineNumber = new JMenuItem(Common.LINE_NUMBERS);
+		toggleLineNumber.addActionListener(this);
+		view.add(toggleLineNumber);
 
 		menuBar.add(view);
 	}
@@ -546,6 +555,13 @@ public class MainUI extends NotepadUI {
 			setMainUIXY();
 			ViewMenuUtil view = new ViewMenuUtil(Common.EMPTY);
 			view.skin(MainUI.this);
+		} else if(e.getSource() == toggleLineNumber) {
+			lineNumbers = !lineNumbers;
+			for(String title : lineNumberComponents.keySet()) {
+				((JScrollPane) tabs.getComponentAt(tabs.indexOfTab(title))).setRowHeaderView(
+						lineNumbers ? lineNumberComponents.get(title) : null
+				);
+			}
 		}
 	}
 
@@ -596,6 +612,7 @@ public class MainUI extends NotepadUI {
 		MainUI.savedTexts.remove(title);
 		MainUI.filePaths.remove(title);
 		MainUI.undoManagers.remove(title);
+		MainUI.lineNumberComponents.remove(title);
 		if(tabs.getTabCount() == 0)
 			addTab(Common.UNTITLED, Common.EMPTY);
 	}

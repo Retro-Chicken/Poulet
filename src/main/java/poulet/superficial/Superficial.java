@@ -32,8 +32,9 @@ public class Superficial {
                     kernel.handleTopLevel(Desugar.desugar((TopLevel) node));
                 }
             } catch (PouletException e) {
-                e.printStackTrace();
-                System.err.println("\n on line: " + node);
+                out.println(e.toString());
+                out.println("on line: " + node);
+                return;
             }
         }
     }
