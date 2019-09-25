@@ -6,7 +6,19 @@ import poulet.parser.SuperficialNode;
 import poulet.superficial.ast.Program;
 import poulet.superficial.ast.expressions.*;
 
+import java.io.PrintWriter;
+
 public class Superficial {
+    private final PrintWriter out;
+
+    public Superficial() {
+        this(new PrintWriter(System.out));
+    }
+
+    public Superficial(PrintWriter out) {
+        this.out = out;
+    }
+
     public void runProgram(Program program) {
         Kernel kernel = new Kernel();
         program = program.makeSymbolsUnique();
@@ -20,8 +32,9 @@ public class Superficial {
                     kernel.handleTopLevel(Desugar.desugar((TopLevel) node));
                 }
             } catch (PouletException e) {
-                e.printStackTrace();
-                System.err.println("\n on line: " + node);
+                out.println(e.toString());
+                out.println("on line: " + node);
+                return;
             }
         }
     }
@@ -36,10 +49,10 @@ public class Superficial {
             }
         } else if (command.action == Command.Action.DEDUCE) {
             Expression term = command.arguments.get(0);
-            System.out.println(term + " : " + kernel.reduce(kernel.deduceType(Desugar.desugar(term))));
+            out.println(term + " : " + kernel.reduce(kernel.deduceType(Desugar.desugar(term))));
         } else if (command.action == Command.Action.REDUCE) {
             Expression term = command.arguments.get(0);
-            System.out.println(term + " ▹ " + kernel.reduce(Desugar.desugar(term)));
+            out.println(term + " ▹ " + kernel.reduce(Desugar.desugar(term)));
         }
     }
 }
