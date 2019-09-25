@@ -93,7 +93,7 @@ public class Common {
 	// notepad\src\main\resources\images
 	public static final String IMAGE_PATH = "images/";
 
-	public static final String RC_LOGO = IMAGE_PATH + "rclogo.png";
+	public static final String RC_LOGO = IMAGE_PATH + "pouletlogo.png";
 
 	// About UI
 	public static final String AUTHOR = "Author";

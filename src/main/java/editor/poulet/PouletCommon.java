@@ -13,5 +13,5 @@ public class PouletCommon {
     public static String FINISHED_IN = "Finished in";
     public static String ELAPSED_TIME_UNIT = "ms";
 
-    public static String APP_ICON = "images/lambda.png";
+    public static String APP_ICON = "images/pouletapplogo.png";
 }

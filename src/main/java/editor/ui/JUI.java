@@ -8,7 +8,6 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-//import org.apache.log4j.Logger;
 import editor.common.Common;
 import org.jvnet.substance.SubstanceLookAndFeel;
 import org.jvnet.substance.border.StandardBorderPainter;

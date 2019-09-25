@@ -1,8 +1,11 @@
 package editor.ui;
 
-import java.awt.Cursor;
+import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
@@ -33,7 +36,7 @@ public class AboutUI extends JFrame {
 
 	private final MainUI parent;
 
-	private JButton aboutButton;
+	private JLabel logo;
 	private JTable aboutUITable;
 	private JPanel mainPanel;
 	private JScrollPane rightScrollPane;
@@ -62,8 +65,15 @@ public class AboutUI extends JFrame {
 	}
 
 	private void initAboutButton() {
-		aboutButton.setIcon(new ImageIcon("src/main/java/editor/" + Common.RC_LOGO));
-		aboutButton.setToolTipText(Common.ABOUT_NOTEPAD);
+		try {
+			BufferedImage logoBImage = ImageIO.read(new File("src/main/java/editor/" + Common.RC_LOGO));
+			int width = 200;
+			int height = width * logoBImage.getHeight()/logoBImage.getWidth();
+			ImageIcon logoImage = new ImageIcon("src/main/java/editor/" + Common.RC_LOGO);
+			logoImage = new ImageIcon(logoImage.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
+			logo.setIcon(logoImage);
+			logo.setToolTipText(Common.ABOUT_NOTEPAD);
+		} catch(Exception e) {}
 	}
 
 	private void initAboutUITable() {
@@ -132,7 +142,7 @@ public class AboutUI extends JFrame {
 
 	private void initElement() {
 		mainPanel = new JPanel();
-		aboutButton = new JButton();
+		logo = new JLabel();
 		rightScrollPane = new JScrollPane();
 		aboutUITable = new JTable();
 	}
@@ -147,7 +157,7 @@ public class AboutUI extends JFrame {
 				mainPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
 				.addGroup(
 						mainPanelLayout.createSequentialGroup().addContainerGap()
-						.addComponent(aboutButton)
+						.addComponent(logo)
 						.addGap(18, 18, 18)
 						.addComponent(rightScrollPane, GroupLayout.PREFERRED_SIZE, 243, GroupLayout.PREFERRED_SIZE)
 						.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -160,7 +170,7 @@ public class AboutUI extends JFrame {
 						.addGroup(
 								mainPanelLayout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
 								.addComponent(rightScrollPane, GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-								.addComponent(aboutButton, GroupLayout.PREFERRED_SIZE, 256, GroupLayout.PREFERRED_SIZE)
+								.addComponent(logo, GroupLayout.PREFERRED_SIZE, 256, GroupLayout.PREFERRED_SIZE)
 						).addGap(0, 0, Short.MAX_VALUE)
 				)
 		);
