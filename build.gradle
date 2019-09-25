@@ -15,8 +15,16 @@ repositories {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     antlr("org.antlr:antlr4:4.7.2")
+    compile fileTree(dir: 'libs', include: '**/*.jar')
 }
 
 generateGrammarSource {
     arguments += ["-visitor"]
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'editor.client.Client'
+    }
+    from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
 }
