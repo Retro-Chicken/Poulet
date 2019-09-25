@@ -14,13 +14,14 @@ public class StringUtil {
         return indent + s.replaceAll("\n", "\n" + indent);
     }
 
-    public static <K extends Comparable, V> String mapToStringWithNewlines(Map<K, V> map) {
+    @SuppressWarnings("unchecked")
+    public static <K extends Comparable<? super K>> String mapToStringWithNewlines(Map<K, ?> map) {
         List<String> items = new ArrayList<>();
         List<K> sortedKeys = new ArrayList<>(map.keySet());
         Collections.sort(sortedKeys);
 
         for (K key : sortedKeys) {
-            V value = map.get(key);
+            Object value = map.get(key);
             String item = "" + key + "=";
             if (value instanceof Map) {
                 Map innerMap = (Map) value;
@@ -32,7 +33,7 @@ public class StringUtil {
             items.add(item);
         }
 
-        String itemsString = items.stream().collect(Collectors.joining(",\n"));
+        String itemsString = String.join("\n", items);
 
         return "{\n" + indent(itemsString, 2) + "\n}";
     }

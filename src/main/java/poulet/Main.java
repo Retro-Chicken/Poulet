@@ -1,43 +1,27 @@
 package poulet;
 
 import org.antlr.v4.runtime.CharStreams;
-import poulet.ast.*;
-import poulet.interpreter.ImportHandler;
-import poulet.interpreter.Interpreter;
-import poulet.parser.ASTParser;
+import poulet.kernel.Kernel;
+import poulet.parser.KernelASTParser;
+import poulet.parser.SuperficialASTParser;
+import poulet.superficial.Superficial;
+import poulet.superficial.imports.ImportHandler;
 
-import java.io.File;
-import java.io.PrintWriter;
-import java.util.*;
+import java.io.IOException;
 
 public class Main {
-    public static void main(String[] args) throws Exception {
-        if (args.length == 0)
-            args = new String[]{"test/scratch.poulet", "poulet_std"};
+    public static void main(String[] args) throws IOException {
+        args = new String[]{"samples/scratch.poulet", "samples/hott/chapter2.poulet"};
 
-        // Get imports
-        String fileName = new File(args[0]).getCanonicalPath();
-        Map<File, Boolean> directories = new HashMap<>();
-        boolean recursive = false;
-        for (int i = 1; i < args.length; i++)
-            if (args[i].equals("-r"))
-                recursive = true;
-            else
-                directories.put(new File(args[i]), recursive);
+        System.out.println("Testing Kernel on " + args[0] + "...");
+        poulet.kernel.ast.Program kernelProgram = KernelASTParser.parse(CharStreams.fromFileName(args[0]));
+        Kernel kernel = new Kernel();
+        kernel.runProgram(kernelProgram);
 
-        Program program = ASTParser.parse(CharStreams.fromFileName(fileName));
-        //System.out.println("parsed = \n" + program);
-        program = ImportHandler.includeImports(program, directories, fileName);
-
-        PrintWriter printWriter = new PrintWriter(System.out);
-
-        try {
-            Interpreter.run(program, printWriter);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            printWriter.flush();
-            printWriter.close();
-        }
+        System.out.println("Testing Superficial on " + args[1] + "...");
+        ImportHandler.directories.add("samples/");
+        poulet.superficial.ast.Program sugarProgram = SuperficialASTParser.parse(CharStreams.fromFileName(args[1]));
+        Superficial superficial = new Superficial();
+        superficial.runProgram(sugarProgram);
     }
 }

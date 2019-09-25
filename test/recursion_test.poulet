@@ -1,7 +1,0 @@
-true:_:=\a:_->\b:_->a
-false:_:=\a:_->\b:_->b
-iszero:_:=\n:_->n(\x:_->false, true)
-zero:_:=\abstraction:_->\x:_->x
-succ:_:=\n:_->\abstraction:_->\x:_->abstraction(n(abstraction, x))
-pred:_:=\n:_->\abstraction:_->\x:_->n(\g:_->\h:_->(h(g(abstraction))), \u:_->x, \u:_->u)
-_:_:=iszero(pred(pred(pred(succ(succ(succ(zero)))))))
