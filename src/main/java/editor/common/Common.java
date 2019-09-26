@@ -90,10 +90,7 @@ public class Common {
 	public static final char R = 'R';
 	public static final char SPACE = ' ';
 
-	// notepad\src\main\resources\images
-	public static final String IMAGE_PATH = "images/";
-
-	public static final String RC_LOGO = IMAGE_PATH + "pouletlogo.png";
+	public static final String RC_LOGO = "pouletlogo.png";
 
 	// About UI
 	public static final String AUTHOR = "Author";

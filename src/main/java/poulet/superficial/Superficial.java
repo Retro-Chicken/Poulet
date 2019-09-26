@@ -52,7 +52,7 @@ public class Superficial {
             out.println(term + " : " + kernel.reduce(kernel.deduceType(Desugar.desugar(term))));
         } else if (command.action == Command.Action.REDUCE) {
             Expression term = command.arguments.get(0);
-            out.println(term + " ▹ " + kernel.reduce(Desugar.desugar(term)));
+            out.println(term + " \u25b9 " + kernel.reduce(Desugar.desugar(term)));
         }
     }
 }

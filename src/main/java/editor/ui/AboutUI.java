@@ -3,7 +3,6 @@ package editor.ui;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -66,10 +65,10 @@ public class AboutUI extends JFrame {
 
 	private void initAboutButton() {
 		try {
-			BufferedImage logoBImage = ImageIO.read(new File("src/main/java/editor/" + Common.RC_LOGO));
+			BufferedImage logoBImage = ImageIO.read(this.getClass().getClassLoader().getResourceAsStream(Common.RC_LOGO));
 			int width = 200;
 			int height = width * logoBImage.getHeight()/logoBImage.getWidth();
-			ImageIcon logoImage = new ImageIcon("src/main/java/editor/" + Common.RC_LOGO);
+			ImageIcon logoImage = new ImageIcon(this.getClass().getClassLoader().getResource(Common.RC_LOGO));
 			logoImage = new ImageIcon(logoImage.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH));
 			logo.setIcon(logoImage);
 			logo.setToolTipText(Common.ABOUT_NOTEPAD);

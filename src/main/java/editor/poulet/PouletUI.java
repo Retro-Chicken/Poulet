@@ -11,7 +11,6 @@ import java.awt.event.InputEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -28,7 +27,7 @@ public class PouletUI extends MainUI {
     public PouletUI(String title) {
         super(title);
         try {
-            BufferedImage rcLogo = ImageIO.read(new File("src/main/java/editor/" + PouletCommon.APP_ICON));
+            BufferedImage rcLogo = ImageIO.read(this.getClass().getClassLoader().getResourceAsStream(PouletCommon.APP_ICON));
             this.setIconImage(rcLogo);
         } catch(Exception e) {
 
