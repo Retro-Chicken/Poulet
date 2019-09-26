@@ -63,7 +63,7 @@ public class Kernel {
             out.println(term + " : " + reduce(deduceType(term)));
         } else if (command.action == Command.Action.REDUCE) {
             Expression term = command.arguments.get(0);
-            out.println(term + " ▹ " + reduce(term));
+            out.println(term + " \u25b9 " + reduce(term));
         }
     }
 
