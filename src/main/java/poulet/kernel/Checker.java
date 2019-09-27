@@ -42,7 +42,7 @@ class Checker {
     }
 
     static Expression deduceType(Expression term, LocalContext context) {
-        return term.accept(new ExpressionVisitor<>() {
+        return Reducer.reduce(term.accept(new ExpressionVisitor<>() {
             @Override
             public Expression visit(Abstraction abstraction) {
                 Expression abstractionType = abstraction.argumentType;
@@ -242,7 +242,7 @@ class Checker {
                     throw new PouletException("unknown identifier " + var);
                 }
             }
-        });
+        }), context);
     }
 
     // match _ as m(a_1, ..., a_n) in P { ... } gives us \a_1 -> ... -> \a_n -> \m -> P

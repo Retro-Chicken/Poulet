@@ -10,3 +10,11 @@ eq_sym : {A : Type1} {x : A} {y : A} Eq[A](x, y) -> Eq[A](y, x)
         x, y, p
     )
 
+// Lemma 2.1.2
+eq_trans : {A : Type1} {x : A} {y : A} {z : A} Eq[A](x, y) -> Eq[A](y, z) -> Eq[A](x, z)
+	:= \A : Type1 -> \x : A -> \y : A -> \z : A -> \p1 : Eq[A](x, y) -> \p2 : Eq[A](y, z) ->
+	path_ind(
+		A,
+		\x : A -> \y : A -> \q : Eq[A](x, y) -> ({z : A} Eq[A](y, z) -> Eq[A](x, z)),
+		\x : A -> \z : A -> \q : Eq[A](x, z) -> q
+	)(x, y, p1, z, p2)

@@ -195,7 +195,7 @@ class Reducer {
                 if (definition == null) {
                     return expression;
                 } else {
-                    applicationDecomposition.function = definition;
+                    applicationDecomposition.function = definition.makeSymbolsUnique();
                     quantifierDecomposition.body = applicationDecomposition.expression();
                     return quantifierDecomposition.expression();
                 }
