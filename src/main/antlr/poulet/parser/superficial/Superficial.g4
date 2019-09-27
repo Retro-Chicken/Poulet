@@ -50,9 +50,9 @@ inductive_type : typeName=symbol '[' ((parameters+=expression ',')* parameters+=
 
 variable : name=symbol ;
 
-abstraction : '\\' name=symbol ':' type=expression '->' body=expression ;
+abstraction : '\\' (names+=symbol ',')* names+=symbol ':' type=expression '->' body=expression ;
 
-pi_type : '{' name=symbol ':' type=expression '}' body=expression ;
+pi_type : '{' (names+=symbol ',')* names+=symbol ':' type=expression '}' body=expression ;
 
 constructor : name=symbol ':' type=expression ;
 

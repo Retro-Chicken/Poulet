@@ -145,7 +145,24 @@ public class SuperficialASTParser extends SuperficialBaseVisitor<SuperficialNode
 
     @Override
     public Prod visitPi_type(SuperficialParser.Pi_typeContext ctx) {
-        return new Prod(this.visitSymbol(ctx.name), this.visitExpression(ctx.type), this.visitExpression(ctx.body));
+        List<Symbol> symbols = ctx.names.stream().map(this::visitSymbol).collect(Collectors.toList());
+        Expression type = this.visitExpression(ctx.type);
+        Expression body = this.visitExpression(ctx.body);
+        Prod prod = new Prod(
+                symbols.get(symbols.size() - 1),
+                type,
+                body
+        );
+
+        for (int i = symbols.size() - 2; i >= 0; i--) {
+            prod = new Prod(
+                    symbols.get(i),
+                    type,
+                    prod
+            );
+        }
+
+        return prod;
     }
 
     @Override
@@ -249,7 +266,24 @@ public class SuperficialASTParser extends SuperficialBaseVisitor<SuperficialNode
 
     @Override
     public Abstraction visitAbstraction(SuperficialParser.AbstractionContext ctx) {
-        return new Abstraction(this.visitSymbol(ctx.name), this.visitExpression(ctx.type), this.visitExpression(ctx.body));
+        List<Symbol> symbols = ctx.names.stream().map(this::visitSymbol).collect(Collectors.toList());
+        Expression type = this.visitExpression(ctx.type);
+        Expression body = this.visitExpression(ctx.body);
+        Abstraction abstraction = new Abstraction(
+                symbols.get(symbols.size() - 1),
+                type,
+                body
+        );
+
+        for (int i = symbols.size() - 2; i >= 0; i--) {
+            abstraction = new Abstraction(
+                    symbols.get(i),
+                    type,
+                    abstraction
+            );
+        }
+
+        return abstraction;
     }
 
     @Override
