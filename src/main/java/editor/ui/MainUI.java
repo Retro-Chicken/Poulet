@@ -48,7 +48,8 @@ public class MainUI extends NotepadUI {
 	// PopupMenu
 	protected JMenuItem popUndo, popCopy, popPaste, popCut, popSelectAll, popTimeDate;
 	// Format Items
-	protected JMenuItem wordWrap, resetFont, font, fontSize, fontStyle;
+	protected JMenuItem wordWrap, tabFormat, resetFont, font, fontSize, fontStyle;
+	protected TabsUI tabsUI;
 	protected FontManagerUI fontManagerUI;
 	protected FontSizeManagerUI fontSizeManagerUI;
 	protected FontStyleManagerUI fontStyleManagerUI;
@@ -76,10 +77,15 @@ public class MainUI extends NotepadUI {
 	public int pointX = 0;
 	public int pointY = 0;
 
+	// Font info
 	public int fontNum = Common.FONT_NUM;
 	public int fontSizeNum = Common.FONT_SIZE_NUM;
 	public int fontStyleNum = Common.FONT_STYLE_NUM;
 	public String findWhat = Common.EMPTY;
+
+	// Tab info
+	public boolean useTabs = false;
+	public int tabSpaces = 4;
 
 	protected void setMainUIXY() {
 		pointX = getMainUIX();
@@ -292,6 +298,10 @@ public class MainUI extends NotepadUI {
 		wordWrap.addActionListener(this);
 		wordWrap.setAccelerator(KeyStroke.getKeyStroke(Common.W, InputEvent.CTRL_DOWN_MASK));
 		format.add(wordWrap);
+
+		tabFormat = new JMenuItem("Tabbing...");
+		tabFormat.addActionListener(this);
+		format.add(tabFormat);
 		
 		resetFont = new JMenuItem(Common.RESET_FONT);
 		resetFont.addActionListener(this);
@@ -316,6 +326,7 @@ public class MainUI extends NotepadUI {
 
 		formatUtil = new FormatMenuUtil(this);
 
+		tabsUI = new TabsUI("Tabbing", this);
 		fontManagerUI = new FontManagerUI(Common.FONT, this);
 		fontSizeManagerUI = new FontSizeManagerUI(Common.FONT_SIZE_TITLE, this);
 		fontStyleManagerUI = new FontStyleManagerUI(Common.FONT_STYLE, this);
@@ -388,6 +399,7 @@ public class MainUI extends NotepadUI {
 	public JTextArea createTextArea(String title, String string) {
 		JTextArea result = new JTextArea(string);
 		result.setLineWrap(lineWrap);
+		result.setTabSize(tabSpaces);
 		//lineWrap = true;
 		Font resultFont = new Font(FontManagerUI.FONT_TYPE, fontStyleNum, FontManagerUI.FONT_SIZE);
 		result.setFont(resultFont);
@@ -543,6 +555,8 @@ public class MainUI extends NotepadUI {
 	protected void actionForFormatItem(ActionEvent e) {
 		if (e.getSource() == wordWrap) {
 			formatUtil.wordWrap();
+		} else if(e.getSource() == tabFormat) {
+			tabsUI.display();
 		} else if(e.getSource() == resetFont){
 			formatUtil.resetFont();
 		}else if (e.getSource() == font) {

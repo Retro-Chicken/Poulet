@@ -9,6 +9,8 @@ import java.io.PrintWriter;
 public class PouletRunner {
     public static void runString(String text, PrintWriter out) {
         try {
+            poulet.kernel.ast.UniqueSymbol.refresh();
+            poulet.superficial.ast.expressions.UniqueSymbol.refresh();
             poulet.superficial.ast.Program sugarProgram = SuperficialASTParser.parse(CharStreams.fromString(text));
             Superficial superficial = new Superficial(out);
             superficial.runProgram(sugarProgram);

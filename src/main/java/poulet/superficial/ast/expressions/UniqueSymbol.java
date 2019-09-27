@@ -33,4 +33,8 @@ public class UniqueSymbol extends Symbol {
     public poulet.kernel.ast.UniqueSymbol project() {
         return new poulet.kernel.ast.UniqueSymbol(symbol, id);
     }
+
+    public static void refresh() {
+        nextId = 0;
+    }
 }

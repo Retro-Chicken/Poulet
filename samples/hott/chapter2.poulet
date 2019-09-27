@@ -1,16 +1,12 @@
 open chapter1
 
-n0 : nat[] := nat[].Z
-n1 : nat[] := nat[].S(n0)
+// Lemma 2.1.1
+eq_sym : {A : Type1} {x : A} {y : A} Eq[A](x, y) -> Eq[A](y, x)
+    := \A : Type1 -> \x : A -> \y : A -> \p : Eq[A](x, y) ->
+    path_ind(
+        A,
+        \x1 : A -> \y1 : A -> \p1 : Eq[A](x1, y1) -> Eq[A](y1, x1),
+        \x1 : A -> Eq[A].refl(x1),
+        x, y, p
+    )
 
-#assert pr1(nat[], nat[], pair[nat[], nat[]].mk(n0, n1)) ~ n0
-
-#assert let x := n0 in x ~ n0
-#assert (\y : nat[] -> x)(n1) where x := n0 ~ n0
-
-#reduce let x := n0 in x
-
-theorem1 : nat[] -> nat[] -> nat[] := Proof {
-    f : nat[] -> nat[] := \n : nat[] -> n,
-    \m : nat[] -> f
-}
