@@ -299,7 +299,7 @@ public class MainUI extends NotepadUI {
 		wordWrap.setAccelerator(KeyStroke.getKeyStroke(Common.W, InputEvent.CTRL_DOWN_MASK));
 		format.add(wordWrap);
 
-		tabFormat = new JMenuItem("Tabs");
+		tabFormat = new JMenuItem("Tabbing...");
 		tabFormat.addActionListener(this);
 		format.add(tabFormat);
 		
