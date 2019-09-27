@@ -38,4 +38,8 @@ public class UniqueSymbol extends Symbol {
     Symbol rename(String symbol) {
         return new UniqueSymbol(symbol, id);
     }
+
+    public static void refresh() {
+        nextId = 0;
+    }
 }

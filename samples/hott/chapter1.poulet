@@ -1,50 +1,66 @@
 Section chapter1 {
+    // Dependent product types
     type sigma (A : Type1) (B : A -> Type1) : Type1 {
         mk : {a : A} B(a) -> sigma[A, B]
     }
 
+    // Projection of first component of dependent product types
     spr1 : {A : Type1} {B : A -> Type1} sigma[A, B] -> A
         := \A : Type1 -> \B : (A -> Type1) -> \s : sigma[A, B] ->
             match s as _() in A {
                 mk(a, b) => a
             }
 
+    // Projection of second component of dependent product types
     spr2 : {A : Type1} {B : A -> Type1} {s : sigma[A, B]} B(spr1(A, B, s))
         := \A : Type1 -> \B : (A -> Type1) -> \s : sigma[A, B] ->
             match s as m() in B(spr1(A, B, m)) {
                 mk(a, b) => b
             }
 
+    // Non-dependent product type
     type pair (A : Type1) (B : Type1) : Type1 {
         mk : A -> B -> pair[A, B]
     }
 
+    // Projection of first component of non-dependent product type
     pr1 : {A : Type1} {B : Type1} pair[A, B] -> A
         := \A : Type1 -> \B : Type1 -> \p : pair[A, B] ->
         match p as _() in A {
             mk(a,b) => a
         }
 
+    // Projection of second component of non-dependent product type
     pr2 : {A : Type1} {B : Type1} pair[A, B] -> B
         := \A : Type1 -> \B : Type1 -> \p : pair[A, B] ->
         match p as _() in B {
             mk(a,b) => b
         }
 
+    // Coproduct type
+    type coprod (A : Type1) (B : Type1) : Type1 {
+        inl : A -> coprod[A, B]
+        inr : B -> coprod[A, B]
+    }
+    
+    // Boolean type
     type bool : Type1 {
         true : bool[]
         false : bool[]
     }
 
+    // Natural number type
     type nat : Type1 {
         Z : nat[]
         S : nat[] -> nat[]
     }
 
+    // HoTT equality type
     type Eq (A : Type1) : A -> A -> Type1 {
         refl : {x : A} Eq[A](x, x)
     }
 
+    // Path induction (just a fancy wrapper for the match statement)
     path_ind : {A : Type1} {C : {x : A} {y : A} Eq[A](x, y) -> Type1} {c : {x : A} C(x, x, Eq[A].refl(x))} ({x : A} {y : A} {p : Eq[A](x, y)} C(x, y, p))
         := \A : Type1 -> \C : ({x : A} {y : A} Eq[A](x, y) -> Type1) -> \c : ({x : A} C(x, x, Eq[A].refl(x))) -> \x : A -> \y : A -> \p : Eq[A](x, y) ->
         match p as p0(x0, y0) in C(x0, y0, p0) {
